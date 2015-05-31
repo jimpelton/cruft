@@ -7,7 +7,7 @@
 namespace bd {
 
 // static
-RenderLoop * Context::m_concon = nullptr;
+RenderLoop * Context::m_loop = nullptr;
 
 // static
 Context* Context::InitializeContext(RenderLoop *cc)
@@ -29,33 +29,39 @@ Context* Context::InitializeContext(RenderLoop *cc)
 Context::Context(RenderLoop *cc)
     : m_isInit{ false }
 {
-    m_concon = cc;
+    m_loop = cc;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
 Context::~Context()
 {
-    delete m_concon;
-    m_concon = nullptr;
+    if (m_loop) delete m_loop;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
 void Context::startLoop()
 {
+
     gl_log("Context initializing renderloop.");
-    m_concon->initialize(*this);
+    m_loop->initialize(*this);
 
     gl_log("Starting render loop.");
-    m_concon->renderLoop();
+    do {
+        m_loop->render();
+        swapBuffers();
+        pollEvents();
+    } while (! windowShouldClose());
+
+    gl_log("Renderloop exited.");
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
 RenderLoop & Context::renderLoop()
 { 
-    return *m_concon; 
+    return *m_loop;
 }
 
 

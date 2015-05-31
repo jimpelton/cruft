@@ -93,6 +93,11 @@ void GlfwContext::pollEvents()
     glfwPollEvents();
 }
 
+bool GlfwContext::windowShouldClose() const
+{
+    return  glfwWindowShouldClose(m_window) == GL_TRUE;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 GLFWwindow* GlfwContext::window() const 
@@ -116,8 +121,6 @@ void GlfwContext::glfw_error_callback(int error, const char *description)
 ///////////////////////////////////////////////////////////////////////////////
 void GlfwContext::glfw_cursorpos_callback(GLFWwindow *win, double x, double y)
 {
-    /*if (m_cursor_pos_cbfunc != nullptr)
-    (*m_cursor_pos_cbfunc)(x, y);*/
     renderLoop().cursorpos_callback(x, y);
 }
 
@@ -125,8 +128,6 @@ void GlfwContext::glfw_cursorpos_callback(GLFWwindow *win, double x, double y)
 ///////////////////////////////////////////////////////////////////////////////
 void GlfwContext::glfw_window_size_callback(GLFWwindow *win, int w, int h)
 {
-    /*if (m_window_size_cbfunc != nullptr)
-    (*m_window_size_cbfunc)(w, h);*/
     renderLoop().window_size_callback(w, h);
 }
 
@@ -134,8 +135,6 @@ void GlfwContext::glfw_window_size_callback(GLFWwindow *win, int w, int h)
 ///////////////////////////////////////////////////////////////////////////////
 void GlfwContext::glfw_keyboard_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
-    /*if (m_keyboard_cbfunc != nullptr)
-    (*m_keyboard_cbfunc)(key, scancode, action, mods);*/
     renderLoop().keyboard_callback(key, scancode, action, mods);
 }
 
@@ -143,8 +142,6 @@ void GlfwContext::glfw_keyboard_callback(GLFWwindow *window, int key, int scanco
 ///////////////////////////////////////////////////////////////////////////////
 void GlfwContext::glfw_scrollwheel_callback(GLFWwindow *window, double xoff, double yoff)
 {
-    /*if (m_scroll_wheel_cbfunc != nullptr)
-    (*m_scroll_wheel_cbfunc)(xoff, yoff);*/
     renderLoop().scrollwheel_callback(xoff, yoff);
 }
 

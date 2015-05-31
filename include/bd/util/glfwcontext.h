@@ -16,7 +16,8 @@ namespace bd {
 //typedef void (*ScrollWheelCallback)(double xoff, double yoff);
 //typedef void (*KeyboardCallback)(int key, int scancode, int action, int mods);
 
-class GlfwContext : public Context {
+class GlfwContext : public Context
+{
 public:
 
     explicit GlfwContext(RenderLoop *);
@@ -28,9 +29,13 @@ public:
 
     void pollEvents() override;
 
+    bool windowShouldClose() const override;
+
     GLFWwindow* window() const;
 
 private:
+
+
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -52,7 +57,7 @@ private:
     ///////////////////////////////////////////////////////////////////////////////
     GLFWwindow *m_window;
     
-};
+}; // GlfwContext
 } // namespace bd
 
 #endif // glfwcontext_h__
