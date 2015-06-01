@@ -39,9 +39,9 @@ bool GlfwContext::init(int width, int height)
 
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
     // number of samples to use for multi sampling
-    glfwWindowHint(GLFW_SAMPLES, 4);
+//    glfwWindowHint(GLFW_SAMPLES, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     m_window = glfwCreateWindow(width, height, "Minimal", NULL, NULL);
@@ -68,9 +68,6 @@ bool GlfwContext::init(int width, int height)
 
     subscribe_debug_callbacks();
 
-    gl_check(glEnable(GL_DEPTH_TEST));
-    gl_check(glDepthFunc(GL_LESS));
-    gl_check(glClearColor(0.15f, 0.15f, 0.15f, 0.0f));
 
     gl_log("GLFWContext initialized...");
 
