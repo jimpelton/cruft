@@ -3,7 +3,7 @@
 
 #include <bd/util/texture.h>
 
-#include <glm/glm.fwd>
+#include <glm/fwd.hpp>
 
 #include <string>
 #include <map>
