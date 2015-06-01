@@ -19,6 +19,8 @@ const char* gl_to_string(GLenum e)
     case GL_TEXTURE_ALPHA_SIZE:            ret = "GL_TEXTURE_ALPHA_SIZE";            break;
     case GL_TEXTURE_COMPRESSED:            ret = "GL_TEXTURE_COMPRESSED";            break;
     case GL_TEXTURE_COMPRESSED_IMAGE_SIZE: ret = "GL_TEXTURE_COMPRESSED_IMAGE_SIZE"; break;
+    case GL_VERTEX_SHADER:                 ret = "GL_VERTEX_SHADER";                 break;
+    case GL_FRAGMENT_SHADER:               ret = "GL_FRAGMENT_SHADER";               break;
     default:                               ret = "unknown";                          break;
     }
 

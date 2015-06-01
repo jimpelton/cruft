@@ -34,6 +34,8 @@ public:
      */
     unsigned int loadFromString(const std::string &shaderString);
 
+    ShaderType type() const;
+    const char* typeString() const;
     unsigned int id() const { return m_id; }
 
     bool isBuilt() const { return id() != 0; }
@@ -62,11 +64,19 @@ public:
 
     virtual ~ShaderProgram();
 
-    /** 
+
+    unsigned int addStage(Shader *);
+
+
+    unsigned int addStage(const std::string &shaderPath, bd::ShaderType);
+
+
+    /**
       * \brief Link frag and vert shaders if already provided (via constructor).
       * \return The non-zero gl identifier for the program, 0 on error.
       */
     unsigned int linkProgram();
+
 
     /** 
       * \brief Link provided frag and vertex shaders.
@@ -101,14 +111,19 @@ public:
     void bind();
     void unbind();
 
-    /** \brief True if both shaders have been built, false otherwise. */
-    bool checkBuilt();
+    unsigned int programId() const;
+
 
 private:
     ///////////////////////////////////////////////////////////////////////////////
     // Private Members
     ///////////////////////////////////////////////////////////////////////////////
-    
+
+    /** \brief True if both shaders have been built, false otherwise. */
+    bool checkBuilt();
+
+    void createNewProgram();
+
     /** \brief Map uniform name to location. */
     using ParamTable = std::map<const char*, unsigned int >;
     
@@ -118,11 +133,10 @@ private:
     ////////////////////////////////////////////////////////////////////////////////
     // Member Data
     ////////////////////////////////////////////////////////////////////////////////
-    //TODO: use std::unique_ptr to manage Shader*'s.
-    Shader *m_vert;
-    Shader *m_frag;
+    std::vector<Shader *> m_stages;
     unsigned int m_programId; ///< The opengl shader program id
     ParamTable m_params;  ///< Uniform locations
+
 //    TextureTable m_textures;  ///< Texture sampler locatons
 
 };
