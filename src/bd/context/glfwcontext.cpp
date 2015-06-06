@@ -2,8 +2,8 @@
 #include <GL/glew.h>
 
 #include <bd/log/gl_log.h>
-#include <bd/util/glfwcontext.h>
-#include <stdio.h>
+#include <bd/context/glfwcontext.h>
+//#include <stdio.h>
 
 
 namespace bd {

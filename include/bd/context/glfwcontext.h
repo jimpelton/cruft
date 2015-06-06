@@ -2,8 +2,8 @@
 #define glfwcontext_h__
 
 
-#include <bd/util/context.h>
-#include <bd/util/renderloop.h>
+#include <bd/context/context.h>
+#include <bd/context/renderloop.h>
 
 #include <GLFW/glfw3.h>
 

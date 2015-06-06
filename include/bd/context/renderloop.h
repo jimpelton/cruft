@@ -1,7 +1,7 @@
 #ifndef contextcontroller_h__
 #define contextcontroller_h__
 
-#include <bd/util/context.h>
+#include <bd/context/context.h>
 #include <bd/scene/view.h>
 
 namespace bd {

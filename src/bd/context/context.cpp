@@ -1,7 +1,7 @@
 
 #include <bd/log/gl_log.h>
-#include <bd/util/context.h>
-#include <bd/util/glfwcontext.h>
+#include <bd/context/context.h>
+#include <bd/context/glfwcontext.h>
 
 
 namespace bd {

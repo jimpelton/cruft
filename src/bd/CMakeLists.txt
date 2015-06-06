@@ -8,6 +8,7 @@ add_subdirectory(log)
 #add_subdirectory(shader)
 add_subdirectory(util)
 add_subdirectory(scene)
+add_subdirectory(context)
 
 
 #set(bd_HEADERS
@@ -19,6 +20,7 @@ add_subdirectory(scene)
 #    )
 
 set(bd_SOURCES
+	"${context_SOURCES}"
     "${file_SOURCES}"
     "${graphics_SOURCES}"
     "${log_SOURCES}"
