@@ -1,6 +1,6 @@
 
 #include <bd/log/gl_log.h>
-#include <bd/graphics/axis.h>
+#include <bd/geo/axis.h>
 #include <GL/glew.h>
 
 namespace bd {

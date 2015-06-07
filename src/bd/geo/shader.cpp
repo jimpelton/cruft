@@ -1,6 +1,6 @@
 #include <GL/glew.h>
 
-#include <bd/graphics/shader.h>
+#include <bd/geo/shader.h>
 #include <bd/log/gl_log.h>
 #include <bd/util/gl_strings.h>
 

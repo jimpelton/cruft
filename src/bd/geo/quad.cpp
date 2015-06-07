@@ -1,4 +1,4 @@
-#include <bd/graphics/quad.h>
+#include <bd/geo/quad.h>
 #include <bd/log/gl_log.h>
 
 #include <array>

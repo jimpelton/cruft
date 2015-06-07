@@ -1,6 +1,6 @@
 #include <GL/glew.h>
 
-#include <bd/graphics/BBox.h>
+#include <bd/geo/BBox.h>
 #include <bd/log/gl_log.h>
 
 #include <array>

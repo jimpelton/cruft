@@ -3,7 +3,7 @@
 #
 
 add_subdirectory(file)
-add_subdirectory(graphics)
+add_subdirectory(geo)
 add_subdirectory(log)
 #add_subdirectory(shader)
 add_subdirectory(util)
@@ -22,7 +22,7 @@ add_subdirectory(context)
 set(bd_SOURCES
 	"${context_SOURCES}"
     "${file_SOURCES}"
-    "${graphics_SOURCES}"
+    "${geo_SOURCES}"
     "${log_SOURCES}"
     "${scene_SOURCES}"
     "${util_SOURCES}"

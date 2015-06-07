@@ -3,8 +3,8 @@
 
 #include <bd/log/gl_log.h>
 #include <bd/scene/renderstate.h>
-#include <bd/graphics/shader.h>
-#include <bd/graphics/vertexarrayobject.h>
+#include <bd/geo/shader.h>
+#include <bd/geo/vertexarrayobject.h>
 #include <iostream>
 
 namespace bd {

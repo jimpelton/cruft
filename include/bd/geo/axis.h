@@ -3,7 +3,7 @@
 
 
 #include <bd/scene/transformable.h>
-#include <bd/graphics/drawable.h>
+#include <bd/geo/drawable.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>

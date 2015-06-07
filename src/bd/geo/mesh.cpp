@@ -1,4 +1,4 @@
-#include <bd/graphics/mesh.h>
+#include <bd/geo/mesh.h>
 
 namespace bd {
 
