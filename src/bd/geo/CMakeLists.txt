@@ -8,8 +8,6 @@ set(geo_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/mesh.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/quad.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/vertexarrayobject.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/shader.cpp"
-#    "${CMAKE_CURRENT_SOURCE_DIR}/texture.cpp"
     PARENT_SCOPE
     )
 

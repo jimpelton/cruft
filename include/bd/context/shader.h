@@ -1,7 +1,7 @@
 #ifndef shader_h__
 #define shader_h__
 
-#include <bd/util/texture.h>
+#include <bd/context/texture.h>
 
 #include <glm/fwd.hpp>
 
