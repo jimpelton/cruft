@@ -2,13 +2,13 @@
 # shared/src/bd
 #
 
+add_subdirectory(context)
 add_subdirectory(file)
 add_subdirectory(geo)
+add_subdirectory(graphics)
 add_subdirectory(log)
-#add_subdirectory(shader)
-add_subdirectory(util)
 add_subdirectory(scene)
-add_subdirectory(context)
+add_subdirectory(util)
 
 
 #set(bd_HEADERS
@@ -23,6 +23,7 @@ set(bd_SOURCES
 	"${context_SOURCES}"
     "${file_SOURCES}"
     "${geo_SOURCES}"
+    "${graphics_SOURCES}"
     "${log_SOURCES}"
     "${scene_SOURCES}"
     "${util_SOURCES}"

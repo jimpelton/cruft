@@ -7,7 +7,6 @@ set(geo_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/BBox.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/mesh.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/quad.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/vertexarrayobject.cpp"
     PARENT_SCOPE
     )
 

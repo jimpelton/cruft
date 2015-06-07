@@ -1,7 +1,7 @@
 #ifndef texture_h__
 #define texture_h__
 
-#include <bd/context/shader.h>
+#include <bd/graphics/shader.h>
 
 #include <string>
 #include <cstdlib>

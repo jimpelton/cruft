@@ -1,4 +1,4 @@
-#include <bd/context/texture.h>
+#include <bd/graphics/texture.h>
 #include <bd/util/gl_strings.h>
 #include <bd/log/gl_log.h>
 

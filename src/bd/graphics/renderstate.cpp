@@ -1,12 +1,12 @@
 
 #include <GL/glew.h>
 
-#include <bd/context/renderstate.h>
+#include <bd/graphics/renderstate.h>
 
 #include <bd/log/gl_log.h>
-#include <bd/context/shader.h>
+#include <bd/graphics/shader.h>
 
-#include <bd/geo/vertexarrayobject.h>
+#include <bd/graphics/vertexarrayobject.h>
 
 
 namespace bd {

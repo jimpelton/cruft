@@ -1,6 +1,6 @@
 #include <GL/glew.h>
 
-#include <bd/geo/vertexarrayobject.h>
+#include <bd/graphics/vertexarrayobject.h>
 #include <bd/log/gl_log.h>
 
 namespace bd
