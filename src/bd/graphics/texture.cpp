@@ -1,5 +1,6 @@
 #include <bd/graphics/texture.h>
 #include <bd/util/gl_strings.h>
+#include <bd/util/ordinal.h>
 #include <bd/log/gl_log.h>
 
 #include <GL/glew.h>
@@ -11,27 +12,23 @@
 
 namespace {
 
-static const std::array<GLenum, 4> texfmt = { GL_RED, GL_RG, GL_RGB, GL_RGBA };
-static const std::array<GLenum, 3> textype = { GL_TEXTURE_1D, GL_TEXTURE_2D, GL_TEXTURE_3D };
-
-
-
-
-
-template <typename T>
-unsigned int ordinal(T t)
+static const std::array<GLenum, 4> gl_format =
 {
-    return static_cast<unsigned int>(t);
-}
+    GL_RED,  GL_RG,  GL_RGB,  GL_RGBA
+};
 
-}
+static const std::array<GLenum, 3> gl_target =
+{
+    GL_TEXTURE_1D, GL_TEXTURE_2D, GL_TEXTURE_3D
+};
+
+} // namespace
 
 Texture::Texture()
     : m_id{ 0 }
     , m_samplerUniform{ 0 }
     , m_unit{ 0 }
     , m_type{ Target::Tex3D  }
-//    , m_sampler{ Sampler::Volume }
 {
 }
 
@@ -39,17 +36,11 @@ Texture::~Texture()
 {
 }
 
-//void Texture::bind()
-//{
-//    glActiveTexture(GL_TEXTURE0+m_unit);
-//    glBindTexture(textype[static_cast<unsigned int>(m_type)], m_id);
-//    glUniform1i(m_samplerUniform,  m_unit);
-//}
 
 void Texture::bind(unsigned int unit)
 {
     glActiveTexture(GL_TEXTURE0+unit);
-    glBindTexture(textype[static_cast<unsigned int>(m_type)], m_id);
+    glBindTexture(gl_target[bd::ordinal<Target>(m_type)], m_id);
     glUniform1i(m_samplerUniform, unit);
 }
 
@@ -59,14 +50,13 @@ unsigned int Texture::genGLTex1d(float *img, Format ity, Format ety, size_t w)
     gl_check(glGenTextures(1, &texId));
     gl_check(glBindTexture(GL_TEXTURE_1D, texId));
 
-    using uint = unsigned int;
     gl_check(glTexImage1D(
         GL_TEXTURE_1D,
         0,
-        texfmt.at(static_cast<uint>(ity)),
+        gl_format[bd::ordinal<Format>(ity)],
         w,
         0,
-        texfmt.at(static_cast<uint>(ety)),
+        gl_format[bd::ordinal<Format>(ety)],
         GL_FLOAT,
         (void*)img
     ));
@@ -90,14 +80,13 @@ unsigned int Texture::genGLTex2d(float* img, Format ity, Format ety,
     gl_check(glGenTextures(1, &texId));
     gl_check(glBindTexture(GL_TEXTURE_2D, texId));
 
-    using uint = unsigned int;
     gl_check(glTexImage2D(
         GL_TEXTURE_2D,
         0,
-        texfmt.at(static_cast<uint>(ity)),
+        gl_format[bd::ordinal<Format>(ity)],
         w, h,
         0,
-        texfmt.at(static_cast<uint>(ety)),
+        gl_format[bd::ordinal<Format>(ety)],
         GL_FLOAT,
         img));
 
@@ -122,14 +111,13 @@ unsigned int Texture::genGLTex3d(float* img, Format ity,
     gl_check(glGenTextures(1, &texId));
     gl_check(glBindTexture(GL_TEXTURE_3D, texId));
 
-    using uint = unsigned int;
     gl_check(glTexImage3D(
         GL_TEXTURE_3D,
         0,
-        texfmt.at(static_cast<uint>(ity)),
+        gl_format[bd::ordinal<Format>(ity)],
         w, h, d,
         0,
-        texfmt.at(static_cast<uint>(ety)),
+        gl_format[bd::ordinal<Format>(ety)],
         GL_FLOAT,
         img));
      
@@ -152,9 +140,9 @@ std::string Texture::to_string() const
 {
     std::stringstream ss;
     GLenum tt;
-    tt = textype[ordinal<Target>(m_type)];
+    tt = gl_target[bd::ordinal<Target>(m_type)];
 
-    std::array<GLenum, 8> thingies2{
+    static const std::array<GLenum, 8> thingies2{
         GL_TEXTURE_WIDTH,
         GL_TEXTURE_HEIGHT,
         GL_TEXTURE_RED_SIZE,

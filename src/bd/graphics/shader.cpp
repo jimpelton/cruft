@@ -1,8 +1,9 @@
-#include <GL/glew.h>
-
 #include <bd/graphics/shader.h>
-#include <bd/log/gl_log.h>
 #include <bd/util/gl_strings.h>
+#include <bd/util/ordinal.h>
+#include <bd/log/gl_log.h>
+
+#include <GL/glew.h>
 
 #include <glm/gtc/type_ptr.hpp>
 
@@ -14,11 +15,49 @@
 namespace bd {
 
 namespace {
-const std::array<GLenum, 2> shTypes
+const std::array<GLenum, 2> gl_target
 {
     GL_VERTEX_SHADER, GL_FRAGMENT_SHADER
 };
 }
+
+
+//////////////////////////////////////////////////////////////////////////
+//     Compiler  Implementation
+//////////////////////////////////////////////////////////////////////////
+
+
+unsigned int Compiler::compile(bd::ShaderType ty, const char *shader)
+{
+    GLenum gl_type  = gl_target[ordinal<ShaderType>(ty)];
+    GLuint shaderId = gl_check(glCreateShader(gl_type));
+
+    gl_log("Created shader, type=%s, id=%d", bd::gl_to_string(gl_type), shaderId);
+    gl_check(glShaderSource(shaderId, 1, &shader, nullptr));
+
+    gl_check(glCompileShader(shaderId));
+
+    // Check for errors.
+    GLint result = GL_FALSE;
+    int infoLogLength;
+
+    gl_check(glGetShaderiv(shaderId, GL_COMPILE_STATUS, &result));
+    gl_check(glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &infoLogLength));
+
+    if (infoLogLength > 1) {
+        std::vector<char> msg(infoLogLength + 1);
+        gl_check(glGetShaderInfoLog(shaderId, infoLogLength, nullptr, &msg[0]));
+        gl_log("%s", &msg[0]);
+    }
+
+    return shaderId;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//     Shader  Implementation
+//////////////////////////////////////////////////////////////////////////
+
 
 ///////////////////////////////////////////////////////////////////////////////
 Shader::Shader(ShaderType t)
@@ -57,40 +96,21 @@ unsigned int Shader::loadFromString(const std::string &shaderString)
 ///////////////////////////////////////////////////////////////////////////////
 unsigned int Shader::compileShader(const char *shader)
 {
-
-    GLenum gl_type = shTypes.at(static_cast<int>(m_type));
-    GLuint shaderId = gl_check(glCreateShader(gl_type));
-
-    gl_log("Created shader, type=%s, id=%d", bd::gl_to_string(gl_type), shaderId);
-    gl_check(glShaderSource(shaderId, 1, &shader, nullptr));
-
-    gl_check(glCompileShader(shaderId));
-
-    // Check for errors.
-    GLint result = GL_FALSE;
-    int infoLogLength;
-
-    gl_check(glGetShaderiv(shaderId, GL_COMPILE_STATUS, &result));
-    gl_check(glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &infoLogLength));
-
-    if (infoLogLength > 1) {
-        std::vector<char> msg(infoLogLength + 1);
-        gl_check(glGetShaderInfoLog(shaderId, infoLogLength, nullptr, &msg[0]));
-        gl_log("%s", &msg[0]);
-    }
-
-
-    return m_id = shaderId;
+    return m_id = Compiler::compile(m_type, shader);
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
 ShaderType Shader::type() const
 {
     return m_type;
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
 const char* Shader::typeString() const
 {
-    return bd::gl_to_string(shTypes[static_cast<unsigned>(m_type)]);
+    return bd::gl_to_string(gl_target[static_cast<unsigned>(m_type)]);
 }
 
 
@@ -125,7 +145,7 @@ ShaderProgram::~ShaderProgram()
 unsigned int ShaderProgram::addStage(Shader *stage)
 {
     m_stages.push_back(stage);
-    gl_log("Added shader %s", gl_to_string(shTypes[static_cast<unsigned>(stage->type())]));
+    gl_log("Added shader %s", gl_to_string(gl_target[static_cast<unsigned>(stage->type())]));
     return stage->id();
 }
 

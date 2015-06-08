@@ -17,6 +17,15 @@ enum class ShaderType
     Fragment
 };
 
+class Compiler
+{
+public:
+    //////////////////////////////////////////////////////////////////////////
+    /// \brief Create and compile a shader of \c ty type.
+    //////////////////////////////////////////////////////////////////////////
+    static unsigned int compile(bd::ShaderType ty, const char *shader);
+};
+
 class Shader
 {
 public:
@@ -28,6 +37,7 @@ public:
     /// \return The non-zero gl identifier of the compiled shader, 0 on error.
     //////////////////////////////////////////////////////////////////////////
     unsigned int loadFromFile(const std::string &filepath);
+
 
    ///////////////////////////////////////////////////////////////////////////////
    /// \brief Compile the shader in given string.
