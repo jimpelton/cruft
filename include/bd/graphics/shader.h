@@ -17,13 +17,30 @@ enum class ShaderType
     Fragment
 };
 
+//////////////////////////////////////////////////////////////////////////
+/// \brief A static class with convenience method(s) to compile a shader
+/// without having to use the Shader class.
+//////////////////////////////////////////////////////////////////////////
 class Compiler
 {
+private:
+    Compiler(){}
 public:
+    ~Compiler(){}
+
     //////////////////////////////////////////////////////////////////////////
     /// \brief Create and compile a shader of \c ty type.
     //////////////////////////////////////////////////////////////////////////
     static unsigned int compile(bd::ShaderType ty, const char *shader);
+
+
+    //////////////////////////////////////////////////////////////////////////
+    /// \brief Validate a shader program.
+    /// \note Returns true if glGetProgramiv returns true when called with
+    ///       GL_VALIDATE_STATUS.
+    /// \return true if program will run with current OpenGL state.
+    //////////////////////////////////////////////////////////////////////////
+    static bool validateProgram(unsigned int id);
 };
 
 class Shader

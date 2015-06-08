@@ -38,7 +38,7 @@ unsigned int Compiler::compile(bd::ShaderType ty, const char *shader)
     gl_check(glCompileShader(shaderId));
 
     // Check for errors.
-    GLint result = GL_FALSE;
+    GLint result { GL_FALSE };
     int infoLogLength;
 
     gl_check(glGetShaderiv(shaderId, GL_COMPILE_STATUS, &result));
@@ -51,6 +51,24 @@ unsigned int Compiler::compile(bd::ShaderType ty, const char *shader)
     }
 
     return shaderId;
+}
+
+bool Compiler::validateProgram(unsigned int id)
+{
+    GLint val { GL_FALSE };
+    glValidateProgram(id);
+    glGetProgramiv(id, GL_VALIDATE_STATUS, &val);
+
+	int logLength { 0 };
+	glGetProgramiv(id, GL_INFO_LOG_LENGTH, &logLength);
+	if(logLength > 0)
+	{
+		std::vector<char> msg(logLength);
+		glGetProgramInfoLog(id, logLength, NULL, &msg[0]);
+		gl_log("%s", &msg[0]);
+	}
+
+    return val == GL_TRUE;
 }
 
 
