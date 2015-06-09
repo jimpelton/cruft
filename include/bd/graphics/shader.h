@@ -201,4 +201,4 @@ private:
 
 } // namespace bd
 
-#endif /* shader_h__ */
+#endif  // !shader_h__

@@ -82,4 +82,4 @@ private:
 std::ostream& operator<<(std::ostream &os, const Texture &t);
 
 
-#endif
+#endif // ! texture_h__

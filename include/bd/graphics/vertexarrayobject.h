@@ -151,4 +151,5 @@ private:
 };
 
 } // namespace bd
-#endif // vertexarrayobject_h__
+
+#endif // !vertexarrayobject_h__

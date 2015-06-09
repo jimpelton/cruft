@@ -60,5 +60,5 @@ private:
 }; // GlfwContext
 } // namespace bd
 
-#endif // glfwcontext_h__
+#endif // !glfwcontext_h__
 

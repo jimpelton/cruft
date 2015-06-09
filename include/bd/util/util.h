@@ -27,4 +27,4 @@ std::unique_ptr<float []> readVolumeData(const std::string &dtype,
 
 } // namespace bd
 
-#endif
+#endif // !util_h__

@@ -14,17 +14,17 @@ find_package(GLFW REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(GLM REQUIRED)
 
-if (UNIX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0 -std=c++14 -Wall -fdiagnostics-color=auto")
-endif (UNIX)
-
-###########################################################################
-
 # Windows requires a few extra definitions.
 if (WIN32)
     add_definitions(-DGLEW_STATIC)
     add_definitions(-DNOMINMAX)
 endif (WIN32)
+
+if (UNIX)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -fdiagnostics-color=auto")
+endif (UNIX)
+
+###########################################################################
 
 if (UNIX)
     include_directories("${OPENGL_INCLUDE_DIR}")
@@ -42,7 +42,8 @@ add_definitions(-DBD_DEBUG)
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-add_subdirectory(src/bd)
+add_subdirectory("include/bd")
+add_subdirectory("src/bd")
 
 # bd_SOURCES and bd_HEADERS are created in subdirectories and passed up
 # to this cmake scope--kinda dirty i think.

@@ -1,5 +1,5 @@
-#ifndef translation_h__
-#define translation_h__
+#ifndef transform_h__ 
+#define transform_h__
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -83,4 +83,4 @@ private:
 };
 
 } // namespace bd
-#endif // translation_h__
+#endif // !transform_h__

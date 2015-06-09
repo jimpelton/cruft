@@ -1,5 +1,5 @@
-#ifndef contextcontroller_h__
-#define contextcontroller_h__
+#ifndef renderloop_h__
+#define renderloop_h__
 
 #include <bd/context/context.h>
 #include <bd/graphics/view.h>
@@ -37,4 +37,4 @@ private:
 
 }  // namespace bd 
 
-#endif
+#endif // !renderloop_h__
