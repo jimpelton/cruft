@@ -7,6 +7,7 @@ add_subdirectory(graphics)
 add_subdirectory(log)
 add_subdirectory(scene)
 add_subdirectory(util)
+add_subdirectory(volume)
 
 
 
@@ -19,5 +20,6 @@ set(bd_HEADERS
     "${log_HEADERS}"
     "${scene_HEADERS}"
     "${util_HEADERS}"
+    "${volume_HEADERS}"
     PARENT_SCOPE
     )
