@@ -12,7 +12,7 @@ namespace bd
 
 struct DatFileData
 {
-    DatFileData() : rX{ 0 }, rY{ 0 }, rZ{ 0 }, volumeFileName{ "" },
+    DatFileData() : rX{ 0 }, rY{ 0 }, rZ{ 0 }, volumeFileName( "" ),
         dataType{ bd::DataType::Float }
     { }
 
