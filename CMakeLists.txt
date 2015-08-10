@@ -48,5 +48,6 @@ add_subdirectory("src/bd")
 # bd_SOURCES and bd_HEADERS are created in subdirectories and passed up
 # to this cmake scope--kinda dirty i think.
 add_library(crufterly STATIC "${bd_SOURCES}" "${bd_HEADERS}" )
+add_subdirectory("test")
 
 
