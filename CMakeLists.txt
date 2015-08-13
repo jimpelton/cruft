@@ -50,4 +50,6 @@ add_subdirectory("src/bd")
 add_library(crufterly STATIC "${bd_SOURCES}" "${bd_HEADERS}" )
 add_subdirectory("test")
 
-
+install(TARGETS crufterly ARCHIVE DESTINATION lib/static)
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/bd/" 
+    DESTINATION "include/bd" FILES_MATCHING PATTERN "*.h") 
