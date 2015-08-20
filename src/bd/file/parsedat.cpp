@@ -15,15 +15,6 @@ namespace bd { namespace {
 
     using SplitPair = std::pair<std::string, std::string>;
 
-//    std::vector<std::string> starts {
-//        "objectfilename",
-//        "resolution",
-//        "slicethickness",
-//        "format",
-//        "objectmodel"
-//    };
-
-
     SplitPair splitAroundColon(const std::string &line);
 
     std::string trim(const std::string &s, const std::string &delims);
@@ -69,7 +60,7 @@ namespace bd { namespace {
 
         //if (c+1 < s.length())
         ss.erase(ss.find_last_not_of(delims) + 1);
-        std::cout << "Trimmed: " << ss << std::endl;
+//        std::cout << "Trimmed: " << ss << std::endl;
 //        } catch (std::out_of_range &e) {
 //            std::cerr << "out of range: " << e.what() << std::endl;
 //            throw e;
@@ -115,15 +106,15 @@ namespace bd { namespace {
         std::string::size_type space { s.find_first_of(" ")};
         if (space == std::string::npos) { return; }
 
-        d.rX = ( unsigned int ) stoi(s.substr(0, space));
+        d.rX = static_cast<unsigned int >(stoi(s.substr(0, space)));
 
         std::string::size_type oldSpace = space;
         space = s.find_first_of(" ", oldSpace+1);
-        d.rY = ( unsigned int ) stoi(s.substr(oldSpace+1, space));
+        d.rY = static_cast<unsigned int >(stoi(s.substr(oldSpace+1, space)));
 
         oldSpace = space;
         space = s.find_first_of(" ", oldSpace+1);
-        d.rZ = ( unsigned int ) stoi(s.substr(oldSpace+1, space));
+        d.rZ = static_cast<unsigned int >(stoi(s.substr(oldSpace+1, space)));
 
     }
 
@@ -141,12 +132,10 @@ namespace bd { namespace {
     toLowerCase(const std::string &s)
     {
         if (s.empty()) return "";
-        std::cout << "toLowerCase: before: " << s << std::endl;
         std::string ss;
         ss.resize(s.length());
 
         std::transform(s.begin(), s.end(), ss.begin(), ::tolower);
-        std::cout << "toLowerCase: after: " << ss << std::endl;
         return ss;
     }
 
