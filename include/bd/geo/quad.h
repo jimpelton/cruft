@@ -20,9 +20,9 @@ public:
     static const std::array<glm::vec3, 4> texcoords_yz;
     static const std::array<glm::vec3, 4> texcoords_xz;
 
-    static const std::array<unsigned short, 4> elements;
+    static const std::array<unsigned short, 4> elements; ///< Element array indexes for triangle strip.
 
-    static const std::array<glm::vec3, 4> colors;
+    static const std::array<glm::vec3, 4> colors; ///< Vertex colors.
 
     static const unsigned int vert_element_size = 4; ///< number of elements in single vertex
 
