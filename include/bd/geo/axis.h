@@ -1,5 +1,5 @@
-#ifndef axis_h__
-#define axis_h__
+#ifndef bd_axis_h__
+#define bd_axis_h__
 
 
 #include <bd/scene/transformable.h>
@@ -12,7 +12,7 @@
 
 namespace bd {
 
-class Axis : public Transformable, public IDrawable
+class CoordinateAxis : public Transformable, public IDrawable
 {
 public:
     static const std::array<glm::vec4, 6> verts;
@@ -20,13 +20,13 @@ public:
     static const std::array<unsigned short, 6> elements;
     static const unsigned int vert_element_size = 4;
 
-    Axis();
-//    Axis(const glm::vec3 &center, const glm::vec3 &dims);
-    ~Axis() { }
+    CoordinateAxis();
+//    CoordinateAxis(const glm::vec3 &center, const glm::vec3 &dims);
+    ~CoordinateAxis() { }
 
     virtual void draw() override;
 
 };
 } // namespace bd
 
-#endif // !axis_h__
+#endif // !bd_axis_h__
