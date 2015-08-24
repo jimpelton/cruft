@@ -30,6 +30,9 @@ if (UNIX)
     include_directories("${OPENGL_INCLUDE_DIR}")
 endif(UNIX)
 
+set(CRUFT_RESOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/res")
+message(INFO "Cruft resource directory: ${CRUFT_RESOURCE_DIR}")
+
 include_directories("${GLEW_INCLUDE_DIR}")
 include_directories("${GLM_INCLUDE_DIR}")
 include_directories("${GLFW_INCLUDE_DIRS}")
@@ -48,6 +51,7 @@ add_subdirectory("src/bd")
 # bd_SOURCES and bd_HEADERS are created in subdirectories and passed up
 # to this cmake scope--kinda dirty i think.
 add_library(crufterly STATIC "${bd_SOURCES}" "${bd_HEADERS}" )
+target_link_libraries(crufterly "${GLEW_LIBRARIES}" "${OPENGL_LIBRARIES}" "${GLFW_LIBRARIES}")
 add_subdirectory("test")
 
 install(TARGETS crufterly ARCHIVE DESTINATION lib/static)

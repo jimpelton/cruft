@@ -8,7 +8,7 @@
 
 //#include <iostream>
 
-#define RES_FOLDER "./res"
+//#define RES_FOLDER "./res"
 
 TEST_CASE("parseDat parses", "[file][parsedat]")
 {
