@@ -1,6 +1,6 @@
 
 #
-# <root>/test/
+# <root>/test/CMakeLists.txt
 #
 
 cmake_minimum_required(VERSION 2.8)

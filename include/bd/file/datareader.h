@@ -5,8 +5,9 @@
 
 #include <limits>
 #include <fstream>
-#include <cstdint>
 #include <memory>
+#include <cmath>
+#include <cstdint>
 
 namespace bd {
 
@@ -219,7 +220,7 @@ DataReader<ExternTy, InternTy>::shiftAmt
 ) {
     InternTy amt = InternTy();
     if (m_min < 0.0f) {
-        amt = fabs(m_min);
+        amt = std::fabs(m_min);
         m_max += amt;
         m_min = 0.0f;
     }

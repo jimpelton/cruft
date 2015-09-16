@@ -2,6 +2,8 @@
 #include <bd/file/datareader.h>
 #include <bd/file/datatypes.h>
 
+#include <glm/glm.hpp>
+
 namespace bd {
 
 void hsvToRgb(float h, float s, float v, glm::vec3 &rgb)
@@ -75,9 +77,9 @@ void hsvToRgb(float h, float s, float v, glm::vec3 &rgb)
 
 
 ///////////////////////////////////////////////////////////////////////////////
-size_t to1D(size_t x, size_t y, size_t z, size_t maxX, size_t maxY)
+size_t to1D(size_t col, size_t row, size_t slab, size_t maxCols, size_t maxRows)
 {
-    return x + maxX * (y + maxY * z);
+    return col + maxCols * (row + maxRows * slab);
 }
 
 

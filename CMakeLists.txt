@@ -1,5 +1,5 @@
 #
-# <root>/shared/
+# <root>/CMakeLists.txt
 #
 
 cmake_minimum_required(VERSION 2.8)
@@ -16,12 +16,12 @@ find_package(GLM REQUIRED)
 
 # Windows requires a few extra definitions.
 if (WIN32)
-    add_definitions(-DGLEW_STATIC)
-    add_definitions(-DNOMINMAX)
+    add_definitions(-DGLEW_STATIC)  #Link statically to Glew
+    add_definitions(-DNOMINMAX)     #Disable the overrides of std::min/max in Windows.h
 endif (WIN32)
 
 if (UNIX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -fdiagnostics-color=auto")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wno-missing-braces -fdiagnostics-color=auto")
 endif (UNIX)
 
 ###########################################################################
@@ -30,8 +30,9 @@ if (UNIX)
     include_directories("${OPENGL_INCLUDE_DIR}")
 endif(UNIX)
 
+# Resource directory is for test code only.
 set(CRUFT_RESOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/res")
-message(INFO "Cruft resource directory: ${CRUFT_RESOURCE_DIR}")
+message("Cruft resource directory: ${CRUFT_RESOURCE_DIR}")
 
 include_directories("${GLEW_INCLUDE_DIR}")
 include_directories("${GLM_INCLUDE_DIR}")
