@@ -55,6 +55,8 @@ add_library(crufterly STATIC "${bd_SOURCES}" "${bd_HEADERS}" )
 target_link_libraries(crufterly "${GLEW_LIBRARIES}" "${OPENGL_LIBRARIES}" "${GLFW_LIBRARIES}")
 add_subdirectory("test")
 
-install(TARGETS crufterly ARCHIVE DESTINATION lib/static)
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/bd/" 
-    DESTINATION "include/bd" FILES_MATCHING PATTERN "*.h") 
+install(TARGETS crufterly ARCHIVE
+        DESTINATION "lib/crufterly/static/${CMAKE_BUILD_TYPE}/")
+
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/bd/"
+        DESTINATION "include/crufterly/bd" FILES_MATCHING PATTERN "*.h")
