@@ -155,7 +155,7 @@ ShaderProgram::ShaderProgram(Shader *vert, Shader *frag)
 ShaderProgram::~ShaderProgram()
 {
     //TODO: cleanup opengl shaders ... glDelete?
-    gl_log_err("I might be a memory leak. Who cares! This be academia, foo!");
+    gl_log_err("I might be a memory/resource leak (no cleanup in shader destructor).");
 }
 
 
