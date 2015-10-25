@@ -13,25 +13,29 @@ namespace bd {
 /// The  context will call initialize() just before the renderLoop()
 /// method is called.
 //////////////////////////////////////////////////////////////////////////
-class RenderLoop
-{
+class RenderLoop {
 public:
-    RenderLoop() { }
-    virtual ~RenderLoop() { }
+  RenderLoop() { }
 
-    virtual void initialize(Context &) = 0;
-    virtual void render() = 0;
+  virtual ~RenderLoop() { }
 
-    virtual void keyboard_callback(int key, int scancode, int action, int mods){}
-    virtual void window_size_callback(int width, int height) { }
-    virtual void cursorpos_callback(double x, double y) { }
-    virtual void scrollwheel_callback(double xoff, double yoff) { }
+  virtual void initialize(Context &) = 0;
+
+  virtual void render() = 0;
+
+  virtual void keyboard_callback(int key, int scancode, int action, int mods) { }
+
+  virtual void window_size_callback(int width, int height) { }
+
+  virtual void cursorpos_callback(double x, double y) { }
+
+  virtual void scrollwheel_callback(double xoff, double yoff) { }
 
 protected:
-    View& view() { return m_view; }
+  View &view() { return m_view; }
 
 private:
-    View m_view; ///< Contains proj and view mats.
+  View m_view; ///< Contains proj and view mats.
 
 };
 
