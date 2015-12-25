@@ -9,14 +9,14 @@ namespace bd {
 class BlockCollection {
 public:
   BlockCollection();
-
+  //BlockCollection(const glm::u64vec3 volumeVoxelDimensions);
+  BlockCollection(const BlockCollection &);
   ~BlockCollection();
 
   /////////////////////////////////////////////////////////////////////////////////
-  /// \brief Set/get this block's dimensions in voxels
+  /// \brief Set/get this BlockCollection's dimensions in voxels
   /////////////////////////////////////////////////////////////////////////////////
   void blockDims(const glm::u64vec3 &dims);
-
   glm::u64vec3 blockDims();
 
 
@@ -24,9 +24,8 @@ public:
   /// \brief Set/get the volume's dimensions in voxels
   /////////////////////////////////////////////////////////////////////////////////
   glm::u64vec3 volDims();
-
   void volDims(const glm::u64vec3 &voldims);
-  //TODO: move volDims() out of block class (yeah...probably make a volume abstr).
+  //TODO: move volDims() out of block class (yeah...probably need to make a class representing a volume).
 
 
   /////////////////////////////////////////////////////////////////////////////////
@@ -45,7 +44,7 @@ public:
   /// \param tmax[in] max average block value to filter against.
   /// \param sampler[in] The sampler location of the block texture sampler.
   ///////////////////////////////////////////////////////////////////////////////
-  //TODO: filterblocks takes Functor.
+  //TODO: filterblocks takes Functor for thresholding.
   void filterBlocks(const float *data, unsigned int sampler, float tmin = 0.0f,
                     float tmax = 1.0f);
 

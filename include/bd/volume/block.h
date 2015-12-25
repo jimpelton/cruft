@@ -31,10 +31,11 @@ public:
   /// \brief Create block (i,j,k) with specified dims and world origin.
   /// \param[in] ijk The block ID (and position with in the grid of blocks).
   /// \param[in] dims The dimensions in data points of this block.
-  /// \param[in] origin Origin of this block in world coords (or whatever coords you want...maybe...sigh...whatevs).
+  /// \param[in] lowerLeft Lower left corner of this block in world coords
+  ///            (or whatever coords you want...maybe...sigh...whatevs).
   ///////////////////////////////////////////////////////////////////////////////
   Block(const glm::u64vec3 &ijk, const glm::vec3 &dims,
-        const glm::vec3 &origin);
+        const glm::vec3 &lowerLeft);
 
   virtual ~Block();
 

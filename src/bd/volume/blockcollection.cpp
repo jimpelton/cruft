@@ -59,9 +59,9 @@ void BlockCollection::initBlocks(glm::u64vec3 nb, glm::u64vec3 vd) {
          wld_dims.x, wld_dims.y, wld_dims.z);
 
   // Loop through all our blocks (identified by <bx,by,bz>) and populate block fields.
-  for (auto bz = 0ul; bz < nb.z; ++bz)
-  for (auto by = 0ul; by < nb.y; ++by)
-  for (auto bx = 0ul; bx < nb.x; ++bx) {
+  for (auto bz = 0ull; bz < nb.z; ++bz)
+  for (auto by = 0ull; by < nb.y; ++by)
+  for (auto bx = 0ull; bx < nb.x; ++bx) {
     // i,j,k block identifier
     glm::u64vec3 blkId{bx, by, bz};
     // lower left corner in world coordinates
@@ -97,7 +97,7 @@ void BlockCollection::fillBlockData(glm::u64vec3 ijk, const float *in_data,
 ///////////////////////////////////////////////////////////////////////////////
 void BlockCollection::filterBlocks(const float *data, unsigned int sampler,
                                    float tmin, float tmax) {
-  gl_log("Filtering blocks for empty space and creating GL textures.");
+
   size_t blkPoints{bd::vecCompMult(m_blockDims)};
 
   float *image = new float[blkPoints];

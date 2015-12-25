@@ -26,11 +26,13 @@ namespace bd {
 
 ///////////////////////////////////////////////////////////////////////////////
 Block::Block(const glm::u64vec3 &ijk, const glm::vec3 &dims,
-             const glm::vec3 &origin)
+             const glm::vec3 &lowerLeft)
     : m_ijk{ijk}, m_empty{false}, m_avg{0.0f}, m_tex{} {
+
   transform().scale(dims);
-  transform().origin(origin);
+  transform().origin(lowerLeft);
   update();
+
 }
 
 
