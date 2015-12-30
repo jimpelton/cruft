@@ -80,7 +80,7 @@ void Block::avg(float a) {
   m_avg = a;
 }
 
-Texture &Block::texture() {
+bd::Texture& Block::texture() {
   return m_tex;
 }
 

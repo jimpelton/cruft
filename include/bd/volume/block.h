@@ -59,7 +59,7 @@ public:
 
 
   /// \brief Get the texture assoc'd with this block.
-  Texture &texture();
+  bd::Texture& texture();
 
 
   /// \brief String rep. of this blockeroo.
