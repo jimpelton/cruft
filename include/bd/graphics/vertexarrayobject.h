@@ -11,7 +11,7 @@
 namespace bd {
 
 class VertexArrayObject {
-public:
+ public:
 
   ///////////////////////////////////////////////////////////////////////////////
   // Ctor/Dtor
@@ -63,7 +63,7 @@ public:
   ///
   /// \returns The gl id of the vertex buffer object created.
   ///////////////////////////////////////////////////////////////////////////////
-  unsigned int addVbo(const std::vector <glm::vec3> &verts,
+  unsigned int addVbo(const std::vector<glm::vec3> &verts,
                       unsigned int attr_idx);
 
 
@@ -74,7 +74,7 @@ public:
   ///
   /// \returns The gl id of the vertex buffer object created.
   ///////////////////////////////////////////////////////////////////////////////
-  unsigned int addVbo(const std::vector <glm::vec4> &verts,
+  unsigned int addVbo(const std::vector<glm::vec4> &verts,
                       unsigned int attr_idx);
 
 
@@ -113,7 +113,7 @@ public:
   ///////////////////////////////////////////////////////////////////////////////
   void unbind();
 
-private:
+ private:
   ///////////////////////////////////////////////////////////////////////////////
   // Private Members
   ///////////////////////////////////////////////////////////////////////////////
@@ -126,8 +126,6 @@ private:
   // index buffer object helper
   unsigned int gen_ibo(const unsigned short *indices, size_t length);
 
-  // issue log message if not equal
-  void checkEqualVertexCount(size_t, unsigned int);
 
   ///////////////////////////////////////////////////////////////////////////////
   // Private Data
