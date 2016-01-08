@@ -7,10 +7,9 @@
 namespace bd {
 
 class BlockCollection {
-public:
+ public:
   BlockCollection();
   //BlockCollection(const glm::u64vec3 volumeVoxelDimensions);
-  BlockCollection(const BlockCollection &);
   ~BlockCollection();
 
   /////////////////////////////////////////////////////////////////////////////////
@@ -45,15 +44,16 @@ public:
   /// \param sampler[in] The sampler location of the block texture sampler.
   ///////////////////////////////////////////////////////////////////////////////
   //TODO: filterblocks takes Functor for thresholding.
-  void filterBlocks(const float *data, unsigned int sampler, float tmin = 0.0f,
-                    float tmax = 1.0f);
+  void filterBlocks(const float *data, /*unsigned int sampler,*/
+                    float tmin = 0.0f, float tmax = 1.0f);
 
 
   const std::vector<Block> &blocks();
 
   const std::vector<Block *> &nonEmptyBlocks();
 
-private:
+ private:
+
   /////////////////////////////////////////////////////////////////////////////////
   /// \brief Fills \c out_blockData with part of \c in_data corresponding to block (i,j,k).
   /// \param ijk[in]     ijk coords of the block whos data to get.
@@ -65,6 +65,7 @@ private:
   ///////////////////////////////////////////////////////////////////////////////
   void fillBlockData(glm::u64vec3 ijk, const float *in_data,
                      float *out_blockData);
+
 
   static glm::u64vec3 m_blockDims; ///< Dimensions of a block in something.
   static glm::u64vec3 m_volDims;   ///< Volume dimensions (# data points).
