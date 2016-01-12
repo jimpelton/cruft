@@ -15,11 +15,11 @@
 namespace bd {
 
 namespace {
-const std::array<GLenum, 2> gl_target
-    {
-        GL_VERTEX_SHADER, GL_FRAGMENT_SHADER
-    };
-}
+
+const std::array<GLenum, 2> gl_target{ GL_VERTEX_SHADER,
+                                       GL_FRAGMENT_SHADER };
+
+} // namespace
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -28,7 +28,7 @@ const std::array<GLenum, 2> gl_target
 
 
 unsigned int Compiler::compile(bd::ShaderType ty, const char *shader) {
-  GLenum gl_type = gl_target[ordinal<ShaderType>(ty)];
+  GLenum gl_type{ gl_target[ordinal<ShaderType>(ty)] };
   GLuint shaderId = gl_check(glCreateShader(gl_type));
 
   gl_log("Created shader, type=%s, id=%d", bd::gl_to_string(gl_type), shaderId);
@@ -37,7 +37,7 @@ unsigned int Compiler::compile(bd::ShaderType ty, const char *shader) {
   gl_check(glCompileShader(shaderId));
 
   // Check for errors.
-  GLint result{GL_FALSE};
+  GLint result{ GL_FALSE };
   int infoLogLength;
 
   gl_check(glGetShaderiv(shaderId, GL_COMPILE_STATUS, &result));
@@ -53,11 +53,11 @@ unsigned int Compiler::compile(bd::ShaderType ty, const char *shader) {
 }
 
 bool Compiler::validateProgram(unsigned int id) {
-  GLint val{GL_FALSE};
+  GLint val{ GL_FALSE };
   glValidateProgram(id);
   glGetProgramiv(id, GL_VALIDATE_STATUS, &val);
 
-  int logLength{0};
+  int logLength{ 0 };
   glGetProgramiv(id, GL_INFO_LOG_LENGTH, &logLength);
   if (logLength > 0) {
     std::vector<char> msg(logLength);
@@ -95,8 +95,8 @@ unsigned int Shader::loadFromFile(const std::string &filepath) {
   std::stringstream shaderCode;
   shaderCode << file.rdbuf();
 
-  std::string code = shaderCode.str();
-  const char *ptrCode = code.c_str();
+  std::string code{ shaderCode.str() };
+  const char *ptrCode{ code.c_str() };
   file.close();
 
   return compileShader(ptrCode);
@@ -111,7 +111,7 @@ unsigned int Shader::loadFromString(const std::string &shaderString) {
 
 ///////////////////////////////////////////////////////////////////////////////
 unsigned int Shader::compileShader(const char *shader) {
-  return m_id = Compiler::compile(m_type, shader);
+  return  Compiler::compile(m_type, shader);
 }
 
 
@@ -123,7 +123,7 @@ ShaderType Shader::type() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 const char *Shader::typeString() const {
-  return bd::gl_to_string(gl_target[static_cast<unsigned>(m_type)]);
+  return gl_to_string(gl_target[static_cast<unsigned>(m_type)]);
 }
 
 
@@ -155,15 +155,18 @@ ShaderProgram::~ShaderProgram() {
 ///////////////////////////////////////////////////////////////////////////////
 unsigned int ShaderProgram::addStage(Shader *stage) {
   m_stages.push_back(stage);
-  gl_log("Added shader %s",
-         gl_to_string(gl_target[static_cast<unsigned>(stage->type())]));
-  return stage->id();
+  unsigned int id = stage->id();
+  gl_log("Added shader %s with id=%d",
+         gl_to_string(gl_target[static_cast<unsigned>(stage->type())]),
+         id);
+
+  return id;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
 unsigned int ShaderProgram::addStage(const std::string &path, ShaderType ty) {
-  Shader *sh = new Shader(ty);
+  Shader *sh{ new Shader(ty) };
   sh->loadFromFile(path);
   return addStage(sh);
 }
@@ -182,8 +185,7 @@ unsigned int ShaderProgram::linkProgram() {
 
   if (m_programId) {
     gl_log("Relinking shader program id=%d", m_programId);
-  }
-  else {
+  } else {
     createNewProgram();
     if (m_programId==0) return 0;
     gl_log("Linking shader program id=%d", m_programId);
@@ -192,8 +194,8 @@ unsigned int ShaderProgram::linkProgram() {
   gl_check(glLinkProgram(m_programId));
 
   // Check the program
-  int InfoLogLength = 0;
-  GLint result = GL_FALSE;
+  int InfoLogLength{ 0 };
+  GLint result{ GL_FALSE };
 
   gl_check(glGetProgramiv(m_programId, GL_LINK_STATUS, &result));
   gl_check(glGetProgramiv(m_programId, GL_INFO_LOG_LENGTH, &InfoLogLength));
@@ -219,10 +221,10 @@ unsigned int ShaderProgram::linkProgram(Shader *vert, Shader *frag) {
 
 unsigned int ShaderProgram::linkProgram(const std::string &vertPath,
                                         const std::string &fragPath) {
-  Shader *vert = new Shader(ShaderType::Vertex);
+  Shader *vert{ new Shader(ShaderType::Vertex) };
   vert->loadFromFile(vertPath);
 
-  Shader *frag = new Shader(ShaderType::Fragment);
+  Shader *frag{ new Shader(ShaderType::Fragment) };
   frag->loadFromFile(fragPath);
 
   return linkProgram(vert, frag);
@@ -266,7 +268,7 @@ void ShaderProgram::setUniform(const char *param, float val) {
 
 ///////////////////////////////////////////////////////////////////////////////
 unsigned int ShaderProgram::getUniformLocation(const char *param) {
-  unsigned int rval = 0;
+  unsigned int rval{ 0 };
   ParamTable::iterator found = m_params.find(param);
   if (found!=m_params.end()) {
     rval = (*found).second;
@@ -319,7 +321,8 @@ void ShaderProgram::createNewProgram() {
   GLuint programId = gl_check(glCreateProgram());
   if (programId==0) {
     gl_log_err(
-        "Unable to create shader program with glCreateProgram(). Returned id was 0.");
+        "Unable to create shader program with glCreateProgram(). "
+            "Returned id was 0.");
     return;
   }
 
@@ -335,19 +338,21 @@ void ShaderProgram::createNewProgram() {
 ///////////////////////////////////////////////////////////////////////////////
 bool ShaderProgram::checkBuilt() {
   bool rval = true;
-  auto it = m_stages.begin();
-  while (rval && it!=m_stages.end()) {
-    gl_log("Check shader: %s, id=%d", (*it)->typeString(), (*it)->id());
-    rval = (*it)->isBuilt();
-    ++it;
+  auto shader = m_stages.begin();
+  while (rval && shader!=m_stages.end()) {
+    rval = (*shader)->isBuilt();
+    gl_log("Checking if shader is built: %s, id=%d, is built=%s",
+           (*shader)->typeString(),
+           (*shader)->id(),
+           rval ? "true" : "false");
+    ++shader;
   }
 
   if (!rval) {
-    gl_log_err(
-        "While linking shader program %d, I found that at least one shader "
-            "(id=%d) was not built, cannot link program.",
+    gl_log_err("While linking shader program %d, I found that at least "
+                   "one shader (id=%d) was not built, cannot link program.",
         m_programId,
-        (*it)->id());
+        (*shader)->id());
   }
 
   return rval;
