@@ -75,8 +75,10 @@ bool Compiler::validateProgram(unsigned int id) {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-Shader::Shader(ShaderType t)
-    : m_type(t), m_id(0) {
+Shader::Shader(ShaderType t, const char *name)
+    : BDObj()
+    , m_type(t)
+    , m_id(0) {
 }
 
 Shader::~Shader() {
@@ -111,7 +113,7 @@ unsigned int Shader::loadFromString(const std::string &shaderString) {
 
 ///////////////////////////////////////////////////////////////////////////////
 unsigned int Shader::compileShader(const char *shader) {
-  return  Compiler::compile(m_type, shader);
+  return Compiler::compile(m_type, shader);
 }
 
 
@@ -122,8 +124,12 @@ ShaderType Shader::type() const {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-const char *Shader::typeString() const {
-  return gl_to_string(gl_target[static_cast<unsigned>(m_type)]);
+const char* Shader::typeString() const {
+  return gl_to_string(gl_target[ordinal(m_type)]);
+}
+
+std::string Shader::to_string() const {
+  return BDObj::to_string() + typeString();
 }
 
 

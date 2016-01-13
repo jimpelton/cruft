@@ -10,18 +10,28 @@ namespace bd {
 
 class BDObj
 {
-private:
-    static unsigned int counter;
+ private:
+  static unsigned int counter;
 
-public:
-    BDObj();
-    BDObj(const std::string&);
-    virtual ~BDObj();
-    void id(const std::string &);
-    virtual std::string to_string() const;
+ public:
+  BDObj();
+  BDObj(const std::string&);
+  virtual ~BDObj();
 
-private:
-    std::string ID;
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// \brief Set the human readable name of this BDObj.
+  ////////////////////////////////////////////////////////////////////////////////
+  void name(const std::string &);
+
+  ////////////////////////////////////////////////////////////////////////////////
+  /// \brief Return a string representation of this BDObj. The base class to_string()
+  ///        just returns the name.
+  ////////////////////////////////////////////////////////////////////////////////
+  virtual std::string to_string() const;
+
+ private:
+  std::string m_name;
 
 };
 

@@ -2,6 +2,7 @@
 #define shader_h__
 
 #include <bd/graphics/texture.h>
+#include <bd/util/bdobj.h>
 
 #include <glm/fwd.hpp>
 
@@ -41,9 +42,9 @@ class Compiler {
   static bool validateProgram(unsigned int id);
 };
 
-class Shader {
+class Shader : public BDObj {
  public:
-  Shader(ShaderType t);
+  Shader(ShaderType t, const char *name = "no-name");
   ~Shader();
 
   //////////////////////////////////////////////////////////////////////////
@@ -81,6 +82,8 @@ class Shader {
   /// \brief True if shader has been compiled, false otherwise.
   //////////////////////////////////////////////////////////////////////////
   bool isBuilt() const { return id()!=0; }
+
+  virtual std::string to_string() const override;
 
  private:
   unsigned int compileShader(const char *shader);
