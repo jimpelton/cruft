@@ -44,7 +44,7 @@ class Compiler {
 
 class Shader : public BDObj {
  public:
-  Shader(ShaderType t, const char *name = "no-name");
+  Shader(ShaderType t, const std::string &name = "no-name");
   ~Shader();
 
   //////////////////////////////////////////////////////////////////////////
@@ -179,15 +179,13 @@ class ShaderProgram {
   void createNewProgram();
 
   /// \brief Map uniform name to location.
-  using ParamTable = std::map<const char *, unsigned int>;
+  using ParamTable = std::map<const char *, int>;
 
 //    using TextureTable = std::map<unsigned int, const bd::Texture* >;
 
   std::vector<Shader *> m_stages;
   unsigned int m_programId; ///< The opengl shader program id
   ParamTable m_params;      ///< Uniform locations
-
-//    TextureTable m_textures;  ///< Texture sampler locatons
 
 };
 

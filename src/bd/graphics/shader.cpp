@@ -28,28 +28,34 @@ const std::array<GLenum, 2> gl_target{ GL_VERTEX_SHADER,
 
 
 unsigned int Compiler::compile(bd::ShaderType ty, const char *shader) {
+
   GLenum gl_type{ gl_target[ordinal<ShaderType>(ty)] };
   GLuint shaderId = gl_check(glCreateShader(gl_type));
 
-  gl_log("Created shader, type=%s, id=%d", bd::gl_to_string(gl_type), shaderId);
+  gl_log("glCreateShader for type=%s returned id=%d",
+         bd::gl_to_string(gl_type), shaderId);
+
   gl_check(glShaderSource(shaderId, 1, &shader, nullptr));
 
   gl_check(glCompileShader(shaderId));
 
+  validateProgram(shaderId);
+
   // Check for errors.
-  GLint result{ GL_FALSE };
-  int infoLogLength;
-
-  gl_check(glGetShaderiv(shaderId, GL_COMPILE_STATUS, &result));
-  gl_check(glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &infoLogLength));
-
-  if (infoLogLength > 1) {
-    std::vector<char> msg(infoLogLength + 1);
-    gl_check(glGetShaderInfoLog(shaderId, infoLogLength, nullptr, &msg[0]));
-    gl_log("%s", &msg[0]);
-  }
+//  GLint result{ GL_FALSE };
+//  int infoLogLength;
+//
+//  gl_check(glGetShaderiv(shaderId, GL_COMPILE_STATUS, &result));
+//  gl_check(glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &infoLogLength));
+//
+//  if (infoLogLength > 1) {
+//    std::vector<char> msg(infoLogLength + 1);
+//    gl_check(glGetShaderInfoLog(shaderId, infoLogLength, nullptr, &msg[0]));
+//    gl_log("%s", &msg[0]);
+//  }
 
   return shaderId;
+
 }
 
 bool Compiler::validateProgram(unsigned int id) {
@@ -75,8 +81,8 @@ bool Compiler::validateProgram(unsigned int id) {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-Shader::Shader(ShaderType t, const char *name)
-    : BDObj()
+Shader::Shader(ShaderType t, const std::string &name)
+    : BDObj(name)
     , m_type(t)
     , m_id(0) {
 }
@@ -129,7 +135,7 @@ const char* Shader::typeString() const {
 }
 
 std::string Shader::to_string() const {
-  return BDObj::to_string() + typeString();
+  return BDObj::to_string() + " " + typeString();
 }
 
 
@@ -162,9 +168,9 @@ ShaderProgram::~ShaderProgram() {
 unsigned int ShaderProgram::addStage(Shader *stage) {
   m_stages.push_back(stage);
   unsigned int id = stage->id();
-  gl_log("Added shader %s with id=%d",
-         gl_to_string(gl_target[static_cast<unsigned>(stage->type())]),
-         id);
+  gl_log("Added shader %s", stage->to_string()); // with id=%d",
+//         gl_to_string(gl_target[static_cast<unsigned>(stage->type())]),
+//         id);
 
   return id;
 }
@@ -180,8 +186,10 @@ unsigned int ShaderProgram::addStage(const std::string &path, ShaderType ty) {
 
 ///////////////////////////////////////////////////////////////////////////////
 unsigned int ShaderProgram::linkProgram() {
-  if (!checkBuilt())
+  if (!checkBuilt()) {
+    // this ShaderProgram has already been built.
     return 0;
+  }
 
   if (m_stages.empty()) {
     gl_log_err("When linking program, there were no shaders to link! Cannot "
@@ -227,10 +235,10 @@ unsigned int ShaderProgram::linkProgram(Shader *vert, Shader *frag) {
 
 unsigned int ShaderProgram::linkProgram(const std::string &vertPath,
                                         const std::string &fragPath) {
-  Shader *vert{ new Shader(ShaderType::Vertex) };
+  Shader *vert{ new Shader(ShaderType::Vertex, vertPath.c_str()) };
   vert->loadFromFile(vertPath);
 
-  Shader *frag{ new Shader(ShaderType::Fragment) };
+  Shader *frag{ new Shader(ShaderType::Fragment, fragPath.c_str()) };
   frag->loadFromFile(fragPath);
 
   return linkProgram(vert, frag);
@@ -274,7 +282,7 @@ void ShaderProgram::setUniform(const char *param, float val) {
 
 ///////////////////////////////////////////////////////////////////////////////
 unsigned int ShaderProgram::getUniformLocation(const char *param) {
-  unsigned int rval{ 0 };
+  int rval{ 0 };
   ParamTable::iterator found = m_params.find(param);
   if (found!=m_params.end()) {
     rval = (*found).second;
