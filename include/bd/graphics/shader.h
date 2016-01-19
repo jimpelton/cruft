@@ -21,6 +21,7 @@ enum class ShaderType {
 /// \brief A static class with convenience method(s) to compile a shader
 /// without having to use the Shader class.
 //////////////////////////////////////////////////////////////////////////
+class Shader;
 class Compiler {
  private:
   Compiler() { }
@@ -28,10 +29,13 @@ class Compiler {
  public:
   ~Compiler() { }
 
+
   //////////////////////////////////////////////////////////////////////////
   /// \brief Create and compile a shader of \c ty type.
   //////////////////////////////////////////////////////////////////////////
-  static unsigned int compile(bd::ShaderType ty, const char *shader);
+  //TODO: Move compile(Shader&, const char*) to Shader class.
+  static bool compile(Shader& shader, const char *code);
+
 
   //////////////////////////////////////////////////////////////////////////
   /// \brief Validate a shader program.
@@ -39,7 +43,9 @@ class Compiler {
   ///       GL_VALIDATE_STATUS.
   /// \return true if program will run with current OpenGL state.
   //////////////////////////////////////////////////////////////////////////
-  static bool validateProgram(unsigned int id);
+  //TODO: Move validateProgram(uint) to ShaderProgram class.
+//  static bool validateProgram(unsigned int id);
+
 };
 
 class Shader : public BDObj {
@@ -47,19 +53,21 @@ class Shader : public BDObj {
   Shader(ShaderType t, const std::string &name = "no-name");
   ~Shader();
 
+  unsigned int create();
+
   //////////////////////////////////////////////////////////////////////////
   /// \brief Compile the shader in given file.
   /// \param A string containing the path to the file containing the shader.
   /// \return The non-zero gl identifier of the compiled shader, 0 on error.
   //////////////////////////////////////////////////////////////////////////
-  unsigned int loadFromFile(const std::string &filepath);
+  void loadFromFile(const std::string &filepath);
 
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Compile the shader in given string.
   ///  \param A string containing the path to the file containing the shader.
   ///  \return The non-zero gl identifier of the compiled shader, 0 on error.
   ///////////////////////////////////////////////////////////////////////////////
-  unsigned int loadFromString(const std::string &shaderString);
+  void loadFromString(const std::string &shaderString);
 
   //////////////////////////////////////////////////////////////////////////
   /// \brief Get the type of this Shader.
@@ -86,7 +94,7 @@ class Shader : public BDObj {
   virtual std::string to_string() const override;
 
  private:
-  unsigned int compileShader(const char *shader);
+//  unsigned int compileShader(const char *shader);
 
   ShaderType m_type;  ///< bd type of this Shader
   unsigned int m_id;  ///< OpenGL id of this shader.
@@ -109,18 +117,13 @@ class ShaderProgram {
 
   virtual ~ShaderProgram();
 
-  //////////////////////////////////////////////////////////////////////////
-  /// \brief Add the given Shader object as a stage in this program.
-  /// \returns I don't know.
-  //////////////////////////////////////////////////////////////////////////
-  unsigned int addStage(Shader *);
 
   //////////////////////////////////////////////////////////////////////////
   /// \brief Add the Shader in the file at \c shaderPath as a stage in
   /// this program.
   /// \returns I can't remember.
   //////////////////////////////////////////////////////////////////////////
-  unsigned int addStage(const std::string &shaderPath, bd::ShaderType);
+//  unsigned int addStage(const std::string &shaderPath, bd::ShaderType);
 
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Link frag and vert shaders if already provided (via constructor).
@@ -172,11 +175,20 @@ class ShaderProgram {
   // Private Members
   ///////////////////////////////////////////////////////////////////////////////
 
+  //////////////////////////////////////////////////////////////////////////
+  /// \brief Add the given Shader object as a stage in this program.
+  /// \returns I don't know.
+  //////////////////////////////////////////////////////////////////////////
+  unsigned int addStage(Shader *);
+
+
   /// \brief True if both shaders have been built, false otherwise.
   bool checkBuilt();
 
+
   /// \brief Creates a new program with the GL, attaches shader stages.
-  void createNewProgram();
+  unsigned int createNewProgram();
+
 
   /// \brief Map uniform name to location.
   using ParamTable = std::map<const char *, int>;
