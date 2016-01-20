@@ -39,7 +39,7 @@ void Texture::bind() const {
 
 void Texture::bind(unsigned int unit) const {
   glActiveTexture(GL_TEXTURE0 + unit);
-  glBindTexture(gl_target[bd::ordinal<Target>(m_type)], m_id);
+  glBindTexture(gl_target[ordinal<Target>(m_type)], m_id);
 //  glUniform1i(m_samplerUniform, unit);
 }
 
@@ -52,10 +52,10 @@ unsigned int Texture::genGLTex1d(float *img, Format ity, Format ety, size_t w) {
   gl_check(glTexImage1D(
       GL_TEXTURE_1D,
       0,
-      gl_format[bd::ordinal<Format>(ity)],
+      gl_format[ordinal<Format>(ity)],
       w,
       0,
-      gl_format[bd::ordinal<Format>(ety)],
+      gl_format[ordinal<Format>(ety)],
       GL_FLOAT,
       (void *) img
   ));
@@ -81,10 +81,10 @@ unsigned int Texture::genGLTex2d(float *img, Format ity, Format ety,
   gl_check(glTexImage2D(
       GL_TEXTURE_2D,
       0,
-      gl_format[bd::ordinal<Format>(ity)],
+      gl_format[ordinal<Format>(ity)],
       w, h,
       0,
-      gl_format[bd::ordinal<Format>(ety)],
+      gl_format[ordinal<Format>(ety)],
       GL_FLOAT,
       img));
 
@@ -111,10 +111,10 @@ unsigned int Texture::genGLTex3d(float *img, Format ity,
   gl_check(glTexImage3D(
       GL_TEXTURE_3D,
       0,
-      gl_format[bd::ordinal<Format>(ity)],
+      gl_format[ordinal<Format>(ity)],
       w, h, d,
       0,
-      gl_format[bd::ordinal<Format>(ety)],
+      gl_format[ordinal<Format>(ety)],
       GL_FLOAT,
       img));
 

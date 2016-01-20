@@ -265,28 +265,32 @@ unsigned int ShaderProgram::linkProgram(const std::string &vertPath,
 ///////////////////////////////////////////////////////////////////////////////
 void ShaderProgram::setUniform(const char *param, const glm::mat4 &val) {
   unsigned int loc = getUniformLocation(param);
-  gl_check(glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(val)));
+//  gl_check(glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(val)));
+  gl_check(glProgramUniformMatrix4fv(m_programId, loc, 1, GL_FALSE, glm::value_ptr(val)));
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
 void ShaderProgram::setUniform(const char *param, const glm::vec4 &val) {
   unsigned int loc = getUniformLocation(param);
-  gl_check(glUniform4fv(loc, 1, glm::value_ptr(val)));
+//  gl_check(glUniform4fv(loc, 1, glm::value_ptr(val)));
+  gl_check(glProgramUniform4fv(m_programId, loc, 1, glm::value_ptr(val)));
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
 void ShaderProgram::setUniform(const char *param, const glm::vec3 &val) {
   unsigned int loc = getUniformLocation(param);
-  gl_check(glUniform3fv(loc, 1, glm::value_ptr(val)));
+//  gl_check(glUniform3fv(m_programId, loc, 1, glm::value_ptr(val)));
+  gl_check(glProgramUniform3fv(m_programId, loc, 1, glm::value_ptr(val)));
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
 void ShaderProgram::setUniform(const char *param, float val) {
   unsigned int loc = getUniformLocation(param);
-  gl_check(glUniform1f(loc, val));
+//  gl_check(glUniform1f(m_programId, loc, val));
+  gl_check(glProgramUniform1f(m_programId, loc, val));
 }
 
 
@@ -393,7 +397,7 @@ bool ShaderProgram::checkBuilt() {
   bool rval = true;
   auto shader = m_stages.begin();
 
-  while (rval && shader!=m_stages.end()) {
+  while (rval && shader != m_stages.end()) {
     rval = (*shader)->isBuilt();
     gl_log("Checking if shader %s is built: is built=%s",
            (*shader)->to_string().c_str(),
@@ -401,7 +405,7 @@ bool ShaderProgram::checkBuilt() {
     ++shader;
   }
 
-  if (!rval) {
+  if (!rval && shader != m_stages.end()) {
     gl_log_err("While linking shader program %d, I found "
                    "that shader %s was not built, cannot link program.",
                m_programId,
