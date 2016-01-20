@@ -156,6 +156,7 @@ class ShaderProgram {
   void setUniform(const char *param, float val);
 //    void setUniform(const std::string &param, const Texture &tex);
 
+  void setUniform(const char *param, int val);
 
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Get the id of the spec'd param.

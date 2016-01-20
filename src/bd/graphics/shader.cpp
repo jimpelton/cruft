@@ -301,6 +301,11 @@ void ShaderProgram::setUniform(const char *param, float val) {
 //    m_textures[loc] = &tex;
 //}
 
+void ShaderProgram::setUniform(const char *param, int val) {
+  unsigned int loc = getUniformLocation(param);
+//  gl_check(glUniform1f(m_programId, loc, val));
+  gl_check(glProgramUniform1i(m_programId, loc, val));
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 unsigned int ShaderProgram::getUniformLocation(const char *param) {
