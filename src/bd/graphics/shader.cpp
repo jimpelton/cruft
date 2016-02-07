@@ -55,22 +55,7 @@ bool Compiler::compile(Shader &shader, const char *code) {
 }
 
 
-//////////////////////////////////////////////////////////////////////////
-//bool Compiler::validateProgram(unsigned int id) {
-//  GLint val{ GL_FALSE };
-//  gl_check(glValidateProgram(id));
-//  gl_check(glGetProgramiv(id, GL_VALIDATE_STATUS, &val));
-//
-//  int logLength{ 0 };
-//  gl_check(glGetProgramiv(id, GL_INFO_LOG_LENGTH, &logLength));
-//  if (logLength > 0) {
-//    std::vector<char> msg(logLength);
-//    gl_check(glGetProgramInfoLog(id, logLength, NULL, &msg[0]));
-//    gl_log("%s", &msg[0]);
-//  }
-//
-//  return val==GL_TRUE;
-//}
+
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -246,16 +231,16 @@ unsigned int ShaderProgram::linkProgram(Shader *vert, Shader *frag) {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-unsigned int ShaderProgram::linkProgram(const std::string &vertPath,
-                                        const std::string &fragPath) {
+unsigned int ShaderProgram::linkProgram(const std::string &vertFilePath,
+                                        const std::string &fragFilePath) {
 
-  Shader *vert{ new Shader(ShaderType::Vertex, vertPath.c_str()) };
+  Shader *vert{ new Shader(ShaderType::Vertex, vertFilePath.c_str()) };
   vert->create();
-  vert->loadFromFile(vertPath);
+  vert->loadFromFile(vertFilePath);
 
-  Shader *frag{ new Shader(ShaderType::Fragment, fragPath.c_str()) };
+  Shader *frag{ new Shader(ShaderType::Fragment, fragFilePath.c_str()) };
   frag->create();
-  frag->loadFromFile(fragPath);
+  frag->loadFromFile(fragFilePath);
 
   return linkProgram(vert, frag);
 
@@ -359,10 +344,29 @@ unsigned int ShaderProgram::programId() const {
   return m_programId;
 }
 
+//////////////////////////////////////////////////////////////////////////
+bool ShaderProgram::validateProgram() {
+  unsigned int id{ m_programId };
+  GLint val{ GL_FALSE };
+  gl_check(glValidateProgram(id));
+  gl_check(glGetProgramiv(id, GL_VALIDATE_STATUS, &val));
+
+  int logLength{ 0 };
+  gl_check(glGetProgramiv(id, GL_INFO_LOG_LENGTH, &logLength));
+  if (logLength > 0) {
+    std::vector<char> msg(logLength);
+    gl_check(glGetProgramInfoLog(id, logLength, NULL, &msg[0]));
+    gl_log("%s", &msg[0]);
+  }
+
+  return val==GL_TRUE;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 //  ShaderProgram Private Members
 ///////////////////////////////////////////////////////////////////////////////
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 unsigned int ShaderProgram::addStage(Shader *stage) {

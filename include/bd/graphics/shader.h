@@ -170,6 +170,8 @@ class ShaderProgram {
 
   /// \brief Get the GL id of this ShaderProgram.
   unsigned int programId() const;
+  
+  bool validateProgram();
 
  private:
   ///////////////////////////////////////////////////////////////////////////////

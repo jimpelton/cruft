@@ -7,9 +7,12 @@ namespace bd {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-VertexArrayObject::VertexArrayObject()
-    : m_bufIds{}, m_idxBufId{0}, m_id{0} {
-}
+  VertexArrayObject::VertexArrayObject()
+    : m_bufIds{ }
+    , m_idxBufId{ 0 }
+    , m_id{ 0 } 
+    , m_numEle{ 0 }
+  { }
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -180,7 +183,7 @@ VertexArrayObject::gen_vbo(const float *verts,
                                  stride_between_verts,
                                  offset));
 
-  unbind();
+  //unbind();
 
   if (vbo==0) {
     gl_log_err("Unable to add vertex buffer to vertex buffer object."
