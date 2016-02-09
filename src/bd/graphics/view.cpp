@@ -48,7 +48,7 @@ namespace bd {
 
 
   ///////////////////////////////////////////////////////////////////////////////
-  void View::setViewport(int x, int y, int w, int h) {
+  void View::setGLViewport(int x, int y, int w, int h) {
     m_viewport = glm::uvec4(x, y, w, h);
     glViewport(x, y, w, h);
 
@@ -89,17 +89,22 @@ namespace bd {
 
 
   ///////////////////////////////////////////////////////////////////////////////
-  void View::rotate(const glm::quat &rot) {
+  void View::rotateBy(const glm::quat &delta) {
+    m_rotation *= delta;
+    m_viewDirty = true;
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////
+  void View::rotateTo(const glm::vec3& dest) {
+    glm::quat rot = glm::rotation(glm::normalize(m_position), dest);
     m_rotation *= rot;
     m_viewDirty = true;
   }
 
-
+  
   ///////////////////////////////////////////////////////////////////////////////
-  void View::setProjectionMatrix(float fov,
-    float aspect_rat,
-    float z_near,
-    float z_far) {
+  void View::setPerspectiveProjectionMatrix(float fov, float aspect_rat, 
+      float z_near, float z_far) {
     m_proj = glm::perspective(fov, aspect_rat, z_near, z_far);
   }
 
