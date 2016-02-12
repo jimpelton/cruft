@@ -6,14 +6,15 @@
 #define bdobj_h__
 
 #include <string>
-namespace bd {
 
+namespace bd
+{
 class BDObj
 {
- private:
+private:
   static unsigned int counter;
 
- public:
+public:
   BDObj();
   BDObj(const std::string&);
   virtual ~BDObj();
@@ -22,7 +23,7 @@ class BDObj
   ////////////////////////////////////////////////////////////////////////////////
   /// \brief Set the human readable name of this BDObj.
   ////////////////////////////////////////////////////////////////////////////////
-  void name(const std::string &);
+  void name(const std::string&);
 
   ////////////////////////////////////////////////////////////////////////////////
   /// \brief Return a string representation of this BDObj. The base class to_string()
@@ -30,11 +31,9 @@ class BDObj
   ////////////////////////////////////////////////////////////////////////////////
   virtual std::string to_string() const;
 
- private:
+private:
   std::string m_name;
-
 };
-
 } // namespace bd
 
 #endif // !bdobj_h__

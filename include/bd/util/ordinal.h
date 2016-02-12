@@ -12,23 +12,23 @@
 #define BD_CONSTEXPR constexpr
 #endif 
 
-namespace bd {
-
-
+namespace bd
+{
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief Return the ordinal value from a strongly typed C++11 enum class.
 /// The only template parameter is the enum class type.
 ///
 /// \return The ordinal value as a std::size_t
 ///////////////////////////////////////////////////////////////////////////////
-template<typename T>
+template <typename T>
 BD_CONSTEXPR
-std::size_t ordinal(T t)
+std::size_t
+ordinal(T t)
 {
-    return static_cast<unsigned int>(t);
+  return static_cast<unsigned int>(t);
 }
-
-
 } // namespace bd
 
 #endif // !ordinal_h__
+
+

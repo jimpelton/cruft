@@ -2,13 +2,12 @@
 #define context_h__
 
 
-namespace bd {
-
-
+namespace bd
+{
 class RenderLoop;
 
-class Context {
-
+class Context
+{
 public:
 
   //////////////////////////////////////////////////////////////////////////
@@ -20,9 +19,9 @@ public:
   ///
   /// \return Context* Pointer to the created Context object.
   //////////////////////////////////////////////////////////////////////////
-  static Context *InitializeContext(RenderLoop *cc);
+  static Context* InitializeContext(RenderLoop* cc);
 
-  static RenderLoop &renderLoop();
+  static RenderLoop& renderLoop();
 
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -63,19 +62,18 @@ public:
 
 
 protected:
-  Context(RenderLoop *cc);
+  Context(RenderLoop* cc);
 
 private:
   void isInit(bool);
 
-  static RenderLoop *m_loop;
+  static RenderLoop* m_loop;
 
   bool m_isInit; ///< True if context initialized
-
 };
-
-
 }
 
 
 #endif // !context_h__
+
+

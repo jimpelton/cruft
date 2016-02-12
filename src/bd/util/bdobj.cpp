@@ -4,27 +4,36 @@
 
 #include <bd/util/bdobj.h>
 
-namespace bd {
+namespace bd
+{
 unsigned int BDObj::counter = 0;
 
 BDObj::BDObj()
-    : BDObj("bd_" + std::to_string(counter)) {
+  : BDObj("bd_" + std::to_string(counter))
+{
   counter++;
 }
 
-BDObj::BDObj(const std::string &name)
-    : m_name{ std::string("{" + name + "}") } {
+BDObj::BDObj(const std::string& name)
+  : m_name{ std::string("{" + name + "}") }
+{
 }
 
-BDObj::~BDObj() {
+BDObj::~BDObj()
+{
 }
 
-void BDObj::name(const std::string &name) {
+void
+BDObj::name(const std::string& name)
+{
   m_name = name;
 }
 
-std::string BDObj::to_string() const {
+std::string
+BDObj::to_string() const
+{
   return m_name;
 }
-
 } // namespace bd
+
+

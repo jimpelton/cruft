@@ -12,8 +12,8 @@
 
 #include <algorithm>
 
-namespace bd {
-
+namespace bd
+{
 class ShaderProgram;
 
 
@@ -23,7 +23,8 @@ class ShaderProgram;
 /// 3D world space. The block's texture contains the GL id/name of the 3D
 /// texture that should be sampled by the proxy geometry.
 //////////////////////////////////////////////////////////////////////////
-class Block : public bd::Transformable {
+class Block : public bd::Transformable
+{
 public:
 
 
@@ -34,8 +35,8 @@ public:
   /// \param[in] lowerLeft Lower left corner of this block in world coords
   ///            (or whatever coords you want...maybe...sigh...whatevs).
   ///////////////////////////////////////////////////////////////////////////////
-  Block(const glm::u64vec3 &ijk, const glm::vec3 &dims,
-        const glm::vec3 &lowerLeft);
+  Block(const glm::u64vec3& ijk, const glm::vec3& dims,
+        const glm::vec3& lowerLeft);
 
   virtual ~Block();
 
@@ -43,7 +44,7 @@ public:
   /// \brief Set/get the ijk location of this block.
   glm::u64vec3 ijk() const;
 
-  void ijk(const glm::u64vec3 &ijk);
+  void ijk(const glm::u64vec3& ijk);
 
 
   /// \brief Set/get if this block is marked empty.
@@ -66,14 +67,15 @@ public:
   virtual std::string to_string() const override;
 
 private:
-  glm::u64vec3 m_ijk;  ///< Block's location in block coordinates.
-  bool m_empty;        ///< True if this block was determined empty.
-  float m_avg;         ///< Avg. val. of this block.
-  Texture m_tex;       ///< Texture data assoc'd with this block.
+  glm::u64vec3 m_ijk; ///< Block's location in block coordinates.
+  bool m_empty; ///< True if this block was determined empty.
+  float m_avg; ///< Avg. val. of this block.
+  Texture m_tex; ///< Texture data assoc'd with this block.
 };
 
-std::ostream &operator<<(std::ostream &os, const Block &b);
-
+std::ostream& operator<<(std::ostream& os, const Block& b);
 } // namespace bd
 
 #endif // !block_h__
+
+

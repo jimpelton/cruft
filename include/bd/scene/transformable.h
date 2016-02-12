@@ -7,62 +7,62 @@
 #include <vector>
 
 
-namespace bd {
-
-
+namespace bd
+{
 class Transformable : public BDObj
 {
 public:
-    Transformable();
-    virtual ~Transformable();
+  Transformable();
+  virtual ~Transformable();
 
-    //////////////////////////////////////////////////////////////////////////
-    /// \brief Update this transformable and all of its children.
-    //////////////////////////////////////////////////////////////////////////
-    void update(Transformable *parent);
-
-
-    void update();
+  //////////////////////////////////////////////////////////////////////////
+  /// \brief Update this transformable and all of its children.
+  //////////////////////////////////////////////////////////////////////////
+  void update(Transformable* parent);
 
 
-    //////////////////////////////////////////////////////////////////////////
-    ///
-    //////////////////////////////////////////////////////////////////////////
-    void addChild(Transformable *c);
+  void update();
 
 
-    //////////////////////////////////////////////////////////////////////////
-    /// \brief Get a non-const reference to the Transform of
-    ///  this transformable.
-    //////////////////////////////////////////////////////////////////////////
-    Transform& transform();
+  //////////////////////////////////////////////////////////////////////////
+  ///
+  //////////////////////////////////////////////////////////////////////////
+  void addChild(Transformable* c);
 
 
-    const std::vector<Transformable*>& children() const;
+  //////////////////////////////////////////////////////////////////////////
+  /// \brief Get a non-const reference to the Transform of
+  ///  this transformable.
+  //////////////////////////////////////////////////////////////////////////
+  Transform& transform();
 
-    virtual std::string to_string() const override;
 
-    //////////////////////////////////////////////////////////////////////////
-    /// Bake takes ingredients for a loaf of bread and creates a delicious
-    /// and wholesome delight.
-    ///
-    /// TL;DR: the bake() method bakes for several hours.
-    /// Interrupting bake() will leave program in a valid, but
-    /// delicious state.  YMMV.
-    //////////////////////////////////////////////////////////////////////////
+  const std::vector<Transformable*>& children() const;
 
-    //  template< class Yummy, class Ingredients, class Bread >
-    //  Yummy bake(Bread &b, std::vector<Ingredients> pantry);
+  virtual std::string to_string() const override;
+
+  //////////////////////////////////////////////////////////////////////////
+  /// Bake takes ingredients for a loaf of bread and creates a delicious
+  /// and wholesome delight.
+  ///
+  /// TL;DR: the bake() method bakes for several hours.
+  /// Interrupting bake() will leave program in a valid, but
+  /// delicious state.  YMMV.
+  //////////////////////////////////////////////////////////////////////////
+
+  //  template< class Yummy, class Ingredients, class Bread >
+  //  Yummy bake(Bread &b, std::vector<Ingredients> pantry);
 
 protected:
-    Transform m_transform;
+  Transform m_transform;
 
 private:
-    void updateChildren();
+  void updateChildren();
 
-    std::vector<Transformable*> m_children;
+  std::vector<Transformable*> m_children;
 };
-
 } // namespace bd
 
 #endif // !transformable_h__
+
+

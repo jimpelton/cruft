@@ -2,27 +2,30 @@
 
 #include <bd/log/gl_log.h>
 #include <bd/context/glfwcontext.h>
+
 //#include <stdio.h>
 
 
-namespace bd {
-
-
+namespace bd
+{
 ///////////////////////////////////////////////////////////////////////////////
-GlfwContext::GlfwContext(RenderLoop *concon)
-    : Context(concon) {
+GlfwContext::GlfwContext(RenderLoop* concon)
+  : Context(concon)
+{
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-GlfwContext::~GlfwContext() {
+GlfwContext::~GlfwContext()
+{
   glfwTerminate();
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-bool GlfwContext::init(int width, int height) {
-
+bool
+GlfwContext::init(int width, int height)
+{
   m_window = nullptr;
   if (!glfwInit()) {
     gl_log_err("could not start GLFW3");
@@ -34,7 +37,7 @@ bool GlfwContext::init(int width, int height) {
 
   glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
   // number of samples to use for multi sampling
-//    glfwWindowHint(GLFW_SAMPLES, 4);
+  //    glfwWindowHint(GLFW_SAMPLES, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -64,28 +67,35 @@ bool GlfwContext::init(int width, int height) {
   gl_log("GLFWContext initialized...");
 
   return true;
-
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void GlfwContext::swapBuffers() {
+void
+GlfwContext::swapBuffers()
+{
   glfwSwapBuffers(m_window);
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void GlfwContext::pollEvents() {
+void
+GlfwContext::pollEvents()
+{
   glfwPollEvents();
 }
 
-bool GlfwContext::windowShouldClose() const {
+bool
+GlfwContext::windowShouldClose() const
+{
   return glfwWindowShouldClose(m_window) == GL_TRUE;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-GLFWwindow *GlfwContext::window() const {
+GLFWwindow*
+GlfwContext::window() const
+{
   return m_window;
 }
 
@@ -96,35 +106,43 @@ GLFWwindow *GlfwContext::window() const {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void GlfwContext::glfw_error_callback(int error, const char *description) {
+void
+GlfwContext::glfw_error_callback(int error, const char* description)
+{
   gl_log("GLFW ERROR: code %i msg: %s", error, description);
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void GlfwContext::glfw_cursorpos_callback(GLFWwindow *win, double x, double y) {
+void
+GlfwContext::glfw_cursorpos_callback(GLFWwindow* win, double x, double y)
+{
   renderLoop().cursorpos_callback(x, y);
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void GlfwContext::glfw_window_size_callback(GLFWwindow *win, int w, int h) {
+void
+GlfwContext::glfw_window_size_callback(GLFWwindow* win, int w, int h)
+{
   renderLoop().window_size_callback(w, h);
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void GlfwContext::glfw_keyboard_callback(GLFWwindow *window, int key, int scancode,
-                                         int action, int mods) {
+void GlfwContext::glfw_keyboard_callback(GLFWwindow* window, int key, int scancode,
+                                         int action, int mods)
+{
   renderLoop().keyboard_callback(key, scancode, action, mods);
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void GlfwContext::glfw_scrollwheel_callback(GLFWwindow *window, double xoff,
-                                            double yoff) {
+void GlfwContext::glfw_scrollwheel_callback(GLFWwindow* window, double xoff,
+                                            double yoff)
+{
   renderLoop().scrollwheel_callback(xoff, yoff);
 }
-
 } // namespace bd
+
 

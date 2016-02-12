@@ -5,24 +5,22 @@
 
 #include <glm/glm.hpp>
 
-namespace bd {
-
+namespace bd
+{
 class BoundingBox : public Transformable
 {
 public:
-    BoundingBox();
-    ~BoundingBox();
+  BoundingBox();
+  ~BoundingBox();
 
-    glm::vec3 min();
-    glm::vec3 max();
+  glm::vec3 min();
+  glm::vec3 max();
 
 private:
-    glm::vec3 m_min;
-    glm::vec3 m_max;
-
+  glm::vec3 m_min;
+  glm::vec3 m_max;
 };
-
-        
-
 } // namespace bd
 #endif // !boundingbox_h__
+
+

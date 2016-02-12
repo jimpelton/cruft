@@ -13,13 +13,14 @@
 #include <iostream>
 
 
-namespace bd {
-
-namespace {
-
-const std::array<GLenum, 2> gl_target{ GL_VERTEX_SHADER,
-                                       GL_FRAGMENT_SHADER };
-
+namespace bd
+{ namespace
+{
+const std::array<GLenum, 2> gl_target
+{
+  GL_VERTEX_SHADER,
+  GL_FRAGMENT_SHADER
+};
 } // namespace
 
 
@@ -29,8 +30,9 @@ const std::array<GLenum, 2> gl_target{ GL_VERTEX_SHADER,
 
 
 ///////////////////////////////////////////////////////////////////////////////
-bool Compiler::compile(Shader &shader, const char *code) {
-
+bool
+Compiler::compile(Shader& shader, const char* code)
+{
   unsigned int shaderId = shader.id();
 
   gl_check(glShaderSource(shaderId, 1, &code, nullptr));
@@ -51,11 +53,7 @@ bool Compiler::compile(Shader &shader, const char *code) {
   }
 
   return result == GL_TRUE;
-
 }
-
-
-
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -64,30 +62,35 @@ bool Compiler::compile(Shader &shader, const char *code) {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-Shader::Shader(ShaderType t, const std::string &name)
-    : BDObj(name)
+Shader::Shader(ShaderType t, const std::string& name)
+  : BDObj(name)
     , m_type(t)
-    , m_id(0) {
+    , m_id(0)
+{
 }
 
-Shader::~Shader() {
+Shader::~Shader()
+{
   gl_log("Destructing shader: Type: %s, GLid: %d", typeString(), m_id);
 }
 
 
-unsigned int Shader::create() {
+unsigned int
+Shader::create()
+{
   GLenum gl_type{ gl_target[ordinal<ShaderType>(m_type)] };
   GLuint shaderId = gl_check(glCreateShader(gl_type));
 
   gl_log("glCreateShader for type=%s returned id=%d",
-         bd::gl_to_string(gl_type), shaderId);
+    bd::gl_to_string(gl_type), shaderId);
 
   return m_id = shaderId;
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void Shader::loadFromFile(const std::string &filepath) {
+void
+Shader::loadFromFile(const std::string& filepath)
+{
   //GLuint shaderId = 0;
   std::ifstream file(filepath.c_str());
   if (!file.is_open()) {
@@ -98,7 +101,7 @@ void Shader::loadFromFile(const std::string &filepath) {
   shaderCode << file.rdbuf();
 
   std::string code{ shaderCode.str() };
-  const char *ptrCode{ code.c_str() };
+  const char* ptrCode{ code.c_str() };
   file.close();
 
   Compiler::compile(*this, ptrCode); //compileShader(ptrCode);
@@ -106,7 +109,9 @@ void Shader::loadFromFile(const std::string &filepath) {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void Shader::loadFromString(const std::string &shaderString) {
+void
+Shader::loadFromString(const std::string& shaderString)
+{
   Compiler::compile(*this, shaderString.c_str());
   //return compileShader(shaderString.c_str());
 }
@@ -119,17 +124,23 @@ void Shader::loadFromString(const std::string &shaderString) {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-ShaderType Shader::type() const {
+ShaderType
+Shader::type() const
+{
   return m_type;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-const char* Shader::typeString() const {
+const char*
+Shader::typeString() const
+{
   return gl_to_string(gl_target[ordinal(m_type)]);
 }
 
-std::string Shader::to_string() const {
+std::string
+Shader::to_string() const
+{
   return BDObj::to_string() + " " + typeString();
 }
 
@@ -141,14 +152,16 @@ std::string Shader::to_string() const {
 
 ///////////////////////////////////////////////////////////////////////////////
 ShaderProgram::ShaderProgram()
-  : ShaderProgram(nullptr, nullptr) { }
+  : ShaderProgram(nullptr, nullptr)
+{
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
-ShaderProgram::ShaderProgram(Shader *vert, Shader *frag)
+ShaderProgram::ShaderProgram(Shader* vert, Shader* frag)
   : m_stages{ }
-  , m_programId{ 0 }
-  , m_params{ }
+    , m_programId{ 0 }
+    , m_params{ }
 {
   if (vert) addStage(vert);
   if (frag) addStage(frag);
@@ -156,12 +169,12 @@ ShaderProgram::ShaderProgram(Shader *vert, Shader *frag)
 
 
 ///////////////////////////////////////////////////////////////////////////////
-ShaderProgram::~ShaderProgram() {
+ShaderProgram::~ShaderProgram()
+{
   //TODO: cleanup opengl shaders ... glDelete?
   gl_log_err(
-      "I might be a memory/resource leak (no cleanup in shader destructor).");
+    "I might be a memory/resource leak (no cleanup in shader destructor).");
 }
-
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -174,7 +187,9 @@ ShaderProgram::~ShaderProgram() {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-unsigned int ShaderProgram::linkProgram() {
+unsigned int
+ShaderProgram::linkProgram()
+{
   if (!checkBuilt()) {
     // this ShaderProgram has already been built.
     return 0;
@@ -182,7 +197,7 @@ unsigned int ShaderProgram::linkProgram() {
 
   if (m_stages.empty()) {
     gl_log_err("When linking program, there were no shaders to link! Cannot "
-                   "create shader program.");
+      "create shader program.");
     return 0;
   }
 
@@ -210,9 +225,9 @@ unsigned int ShaderProgram::linkProgram() {
   if (InfoLogLength > 1) {
     std::vector<char> programErrorMessage(InfoLogLength + 1);
     gl_check(glGetProgramInfoLog(m_programId,
-                                 InfoLogLength,
-                                 nullptr,
-                                 &programErrorMessage[0]));
+      InfoLogLength,
+      nullptr,
+      &programErrorMessage[0]));
     gl_log("%s", &programErrorMessage[0]);
   }
 
@@ -221,60 +236,67 @@ unsigned int ShaderProgram::linkProgram() {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-unsigned int ShaderProgram::linkProgram(Shader *vert, Shader *frag) {
-
+unsigned int
+ShaderProgram::linkProgram(Shader* vert, Shader* frag)
+{
   addStage(vert);
   addStage(frag);
   return linkProgram();
-
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-unsigned int ShaderProgram::linkProgram(const std::string &vertFilePath,
-                                        const std::string &fragFilePath) {
-
-  Shader *vert{ new Shader(ShaderType::Vertex, vertFilePath.c_str()) };
+unsigned int ShaderProgram::linkProgram(const std::string& vertFilePath,
+                                        const std::string& fragFilePath)
+{
+  Shader* vert{ new Shader(ShaderType::Vertex, vertFilePath.c_str()) };
   vert->create();
   vert->loadFromFile(vertFilePath);
 
-  Shader *frag{ new Shader(ShaderType::Fragment, fragFilePath.c_str()) };
+  Shader* frag{ new Shader(ShaderType::Fragment, fragFilePath.c_str()) };
   frag->create();
   frag->loadFromFile(fragFilePath);
 
   return linkProgram(vert, frag);
-
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void ShaderProgram::setUniform(const char *param, const glm::mat4 &val) {
+void
+ShaderProgram::setUniform(const char* param, const glm::mat4& val)
+{
   unsigned int loc = getUniformLocation(param);
-//  gl_check(glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(val)));
+  //  gl_check(glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(val)));
   gl_check(glProgramUniformMatrix4fv(m_programId, loc, 1, GL_FALSE, glm::value_ptr(val)));
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void ShaderProgram::setUniform(const char *param, const glm::vec4 &val) {
+void
+ShaderProgram::setUniform(const char* param, const glm::vec4& val)
+{
   unsigned int loc = getUniformLocation(param);
-//  gl_check(glUniform4fv(loc, 1, glm::value_ptr(val)));
+  //  gl_check(glUniform4fv(loc, 1, glm::value_ptr(val)));
   gl_check(glProgramUniform4fv(m_programId, loc, 1, glm::value_ptr(val)));
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void ShaderProgram::setUniform(const char *param, const glm::vec3 &val) {
+void
+ShaderProgram::setUniform(const char* param, const glm::vec3& val)
+{
   unsigned int loc = getUniformLocation(param);
-//  gl_check(glUniform3fv(m_programId, loc, 1, glm::value_ptr(val)));
+  //  gl_check(glUniform3fv(m_programId, loc, 1, glm::value_ptr(val)));
   gl_check(glProgramUniform3fv(m_programId, loc, 1, glm::value_ptr(val)));
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void ShaderProgram::setUniform(const char *param, float val) {
+void
+ShaderProgram::setUniform(const char* param, float val)
+{
   unsigned int loc = getUniformLocation(param);
-//  gl_check(glUniform1f(m_programId, loc, val));
+  //  gl_check(glUniform1f(m_programId, loc, val));
   gl_check(glProgramUniform1f(m_programId, loc, val));
 }
 
@@ -286,14 +308,18 @@ void ShaderProgram::setUniform(const char *param, float val) {
 //    m_textures[loc] = &tex;
 //}
 
-void ShaderProgram::setUniform(const char *param, int val) {
+void
+ShaderProgram::setUniform(const char* param, int val)
+{
   unsigned int loc = getUniformLocation(param);
-//  gl_check(glUniform1f(m_programId, loc, val));
+  //  gl_check(glUniform1f(m_programId, loc, val));
   gl_check(glProgramUniform1i(m_programId, loc, val));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-unsigned int ShaderProgram::getUniformLocation(const char *param) {
+unsigned int
+ShaderProgram::getUniformLocation(const char* param)
+{
   int rval{ 0 };
   ParamTable::iterator found = m_params.find(param);
   if (found != m_params.end()) {
@@ -309,43 +335,51 @@ unsigned int ShaderProgram::getUniformLocation(const char *param) {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void ShaderProgram::bind() {
-//    static const std::array<GLenum, 3> targets
-//    {
-//        GL_TEXTURE_1D, GL_TEXTURE_2D, GL_TEXTURE_3D
-//    };
+void
+ShaderProgram::bind()
+{
+  //    static const std::array<GLenum, 3> targets
+  //    {
+  //        GL_TEXTURE_1D, GL_TEXTURE_2D, GL_TEXTURE_3D
+  //    };
 
   gl_check(glUseProgram(m_programId));
 
-//    int i = 0;
+  //    int i = 0;
   // pair is (glsl sampler location, Texture)
-//    for (auto &pair : m_textures) {
-//        gl_check(glActiveTexture(GL_TEXTURE0 + i));
-//        const Texture &tex = *(pair.second);
-//        GLenum target = targets.at(static_cast<int>(tex.type()));
-//        gl_check(glBindTexture(target, tex.id()));
-//        gl_check(glUniform1f(pair.first, tex.id()));
-//
-//        i += 1;
-//    }
+  //    for (auto &pair : m_textures) {
+  //        gl_check(glActiveTexture(GL_TEXTURE0 + i));
+  //        const Texture &tex = *(pair.second);
+  //        GLenum target = targets.at(static_cast<int>(tex.type()));
+  //        gl_check(glBindTexture(target, tex.id()));
+  //        gl_check(glUniform1f(pair.first, tex.id()));
+  //
+  //        i += 1;
+  //    }
 
   //gl_check(glActiveTexture(GL_TEXTURE0));
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void ShaderProgram::unbind() {
+void
+ShaderProgram::unbind()
+{
   gl_check(glUseProgram(0));
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-unsigned int ShaderProgram::programId() const {
+unsigned int
+ShaderProgram::programId() const
+{
   return m_programId;
 }
 
 //////////////////////////////////////////////////////////////////////////
-bool ShaderProgram::validateProgram() {
+bool
+ShaderProgram::validateProgram()
+{
   unsigned int id{ m_programId };
   GLint val{ GL_FALSE };
   gl_check(glValidateProgram(id));
@@ -359,7 +393,7 @@ bool ShaderProgram::validateProgram() {
     gl_log("%s", &msg[0]);
   }
 
-  return val==GL_TRUE;
+  return val == GL_TRUE;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -367,32 +401,35 @@ bool ShaderProgram::validateProgram() {
 ///////////////////////////////////////////////////////////////////////////////
 
 
-
 ///////////////////////////////////////////////////////////////////////////////
-unsigned int ShaderProgram::addStage(Shader *stage) {
+unsigned int
+ShaderProgram::addStage(Shader* stage)
+{
   m_stages.push_back(stage);
   unsigned int id{ stage->id() };
   gl_log("Added shader %s", stage->to_string().c_str()); // with id=%d",
-//         gl_to_string(gl_target[static_cast<unsigned>(stage->type())]),
-//         id);
+  //         gl_to_string(gl_target[static_cast<unsigned>(stage->type())]),
+  //         id);
 
   return id;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-unsigned int ShaderProgram::createNewProgram() {
+unsigned int
+ShaderProgram::createNewProgram()
+{
   GLuint programId = gl_check(glCreateProgram());
-  if (programId==0) {
+  if (programId == 0) {
 
     gl_log_err(
-        "Unable to create shader program with glCreateProgram(). "
-            "Returned id was 0.");
+      "Unable to create shader program with glCreateProgram(). "
+      "Returned id was 0.");
 
   } else {
 
     gl_log("Created program id: %d", programId);
-    for (const Shader *stage : m_stages) {
+    for (const Shader* stage : m_stages) {
       gl_check(glAttachShader(programId, stage->id()));
     }
 
@@ -402,27 +439,29 @@ unsigned int ShaderProgram::createNewProgram() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-bool ShaderProgram::checkBuilt() {
+bool
+ShaderProgram::checkBuilt()
+{
   bool rval = true;
   auto shader = m_stages.begin();
 
   while (rval && shader != m_stages.end()) {
     rval = (*shader)->isBuilt();
     gl_log("Checking if shader %s is built: is built=%s",
-           (*shader)->to_string().c_str(),
-           rval ? "true" : "false");
+      (*shader)->to_string().c_str(),
+      rval ? "true" : "false")    ;
     ++shader;
   }
 
   if (!rval && shader != m_stages.end()) {
     gl_log_err("While linking shader program %d, I found "
-                   "that shader %s was not built, cannot link program.",
-               m_programId,
-               (*shader)->to_string().c_str());
+      "that shader %s was not built, cannot link program.",
+      m_programId,
+      (*shader)->to_string().c_str())    ;
   }
 
   return rval;
 }
-
 } //namespace bd
+
 

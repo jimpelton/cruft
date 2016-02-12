@@ -6,15 +6,15 @@
 #include <glm/gtx/quaternion.hpp>
 
 namespace bd
+{ namespace
 {
-namespace {
-    const glm::mat4 I4x4{ 1.0f };
+const glm::mat4 I4x4{ 1.0f };
 }
 
 
 //////////////////////////////////////////////////////////////////////////////
 Transformable::Transformable()
-    : BDObj()
+  : BDObj()
     , m_transform{ }
     , m_children{ }
 {
@@ -28,54 +28,58 @@ Transformable::~Transformable()
 
 
 //////////////////////////////////////////////////////////////////////////////      
-void Transformable::update(Transformable * parent)
+void
+Transformable::update(Transformable* parent)
 {
-    assert(parent != nullptr);
-    m_transform.update(parent->transform().matrix());
-    updateChildren();
+  assert(parent != nullptr);
+  m_transform.update(parent->transform().matrix());
+  updateChildren();
 }
 
-void Transformable::update()
+void
+Transformable::update()
 {
-    m_transform.update(m_transform.matrix());
+  m_transform.update(m_transform.matrix());
 
-    updateChildren();
+  updateChildren();
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void Transformable::addChild(Transformable *c)
+void
+Transformable::addChild(Transformable* c)
 {
-    assert(c != nullptr);
-    m_children.push_back(c);
+  assert(c != nullptr);
+  m_children.push_back(c);
 }
 
 
-Transform& Transformable::transform()
+Transform&
+Transformable::transform()
 {
-    return m_transform;
+  return m_transform;
 }
 
 
-const std::vector<Transformable*>& Transformable::children() const
+const std::vector<Transformable*>&
+Transformable::children() const
 {
-    return m_children;
+  return m_children;
 }
 
-std::string Transformable::to_string() const
+std::string
+Transformable::to_string() const
 {
-    return BDObj::to_string() + " { children: " + std::to_string(m_children.size()) + " }";
+  return BDObj::to_string() + " { children: " + std::to_string(m_children.size()) + " }";
 }
 
-void Transformable::updateChildren()
+void
+Transformable::updateChildren()
 {
-    for (auto &t : m_children)
-    {
-        t->update(this);
-    }
+  for (auto& t : m_children) {
+    t->update(this);
+  }
 }
-
 } // namespace bd
-
 
 

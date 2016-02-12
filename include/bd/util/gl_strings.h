@@ -1,4 +1,3 @@
-
 #include <GL/glew.h>
 
 #ifndef gl_strings_h__
@@ -6,10 +5,7 @@
 
 namespace bd
 {
-
-    const char* gl_to_string(GLenum e);
-
-
+const char* gl_to_string(GLenum e);
 }
 
 

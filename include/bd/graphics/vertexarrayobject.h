@@ -8,10 +8,11 @@
 #include <array>
 #include <utility>
 
-namespace bd {
-
-class VertexArrayObject {
- public:
+namespace bd
+{
+class VertexArrayObject
+{
+public:
 
   ///////////////////////////////////////////////////////////////////////////////
   // Ctor/Dtor
@@ -43,7 +44,7 @@ class VertexArrayObject {
   ///
   /// \returns The gl id of the vertex buffer object created.
   ///////////////////////////////////////////////////////////////////////////////
-  unsigned int addVbo(float const *verts, size_t length,
+  unsigned int addVbo(float const* verts, size_t length,
                       unsigned int elements_per_vertex, unsigned int attr_idx);
 
 
@@ -54,7 +55,7 @@ class VertexArrayObject {
   ///
   /// \returns The gl id of the vertex buffer object created.
   ///////////////////////////////////////////////////////////////////////////////
-  unsigned int addVbo(const std::vector<float> &verts,
+  unsigned int addVbo(const std::vector<float>& verts,
                       unsigned int elements_per_vertex,
                       unsigned int attr_idx);
 
@@ -66,7 +67,7 @@ class VertexArrayObject {
   ///
   /// \returns The gl id of the vertex buffer object created.
   ///////////////////////////////////////////////////////////////////////////////
-  unsigned int addVbo(const std::vector<glm::vec3> &verts,
+  unsigned int addVbo(const std::vector<glm::vec3>& verts,
                       unsigned int attr_idx);
 
 
@@ -77,7 +78,7 @@ class VertexArrayObject {
   ///
   /// \returns The gl id of the vertex buffer object created.
   ///////////////////////////////////////////////////////////////////////////////
-  unsigned int addVbo(const std::vector<glm::vec4> &verts,
+  unsigned int addVbo(const std::vector<glm::vec4>& verts,
                       unsigned int attr_idx);
 
 
@@ -89,7 +90,7 @@ class VertexArrayObject {
   ///
   /// \returns The gl id of the index buffer created.
   ///////////////////////////////////////////////////////////////////////////////
-  unsigned int setIndexBuffer(unsigned short *indices, size_t length);
+  unsigned int setIndexBuffer(unsigned short* indices, size_t length);
 
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Add an index buffer to be bound with this VAO.
@@ -99,7 +100,7 @@ class VertexArrayObject {
   ///
   /// \returns The gl id of the index buffer created.
   ///////////////////////////////////////////////////////////////////////////////
-  unsigned int setIndexBuffer(const std::vector<unsigned short> &indices);
+  unsigned int setIndexBuffer(const std::vector<unsigned short>& indices);
 
   //////////////////////////////////////////////////////////////////////////
   /// \brief Number of elements in index array.
@@ -116,18 +117,18 @@ class VertexArrayObject {
   ///////////////////////////////////////////////////////////////////////////////
   void unbind();
 
- private:
+private:
   ///////////////////////////////////////////////////////////////////////////////
   // Private Members
   ///////////////////////////////////////////////////////////////////////////////
 
   // vertex buffer object helper
-  unsigned int gen_vbo(const float *verts, size_t length,
+  unsigned int gen_vbo(const float* verts, size_t length,
                        unsigned int elements_per_vertex,
                        unsigned int attr_idx);
 
   // index buffer object helper
-  unsigned int gen_ibo(const unsigned short *indices, size_t length);
+  unsigned int gen_ibo(const unsigned short* indices, size_t length);
 
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -138,9 +139,9 @@ class VertexArrayObject {
   unsigned int m_idxBufId; //< gl id of the index buffer
   unsigned int m_id; //< gl id of the VAO rep'd by this instance.
   unsigned int m_numEle; //< Number of elements in index array (= #of verts)
-
 };
-
 } // namespace bd
 
 #endif // !vertexarrayobject_h__
+
+

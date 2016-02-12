@@ -4,23 +4,24 @@
 #include <map>
 #include <string>
 
-namespace bd {
+namespace bd
+{
+enum class DataType
+{
+  Integer,
+  UnsignedInteger,
 
-enum class DataType {
-    Integer,
-    UnsignedInteger,
+  Character,
+  UnsignedCharacter,
 
-    Character,
-    UnsignedCharacter,
+  Short,
+  UnsignedShort,
 
-    Short,
-    UnsignedShort,
-
-    Float
+  Float
 };
 
 extern const std::map<std::string, DataType> DataTypesMap;
-
 } /* namespace bd */
 
 #endif /* ifndef datatypes_h__ */
+

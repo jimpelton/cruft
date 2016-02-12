@@ -7,19 +7,18 @@
 
 #include <GLFW/glfw3.h>
 
-namespace bd {
-
-
-
+namespace bd
+{
 //typedef void (*CursorPosCallback)(double x, double y);
 //typedef void (*WindowSizeCallback)(int x, int y);
 //typedef void (*ScrollWheelCallback)(double xoff, double yoff);
 //typedef void (*KeyboardCallback)(int key, int scancode, int action, int mods);
 
-class GlfwContext : public Context {
+class GlfwContext : public Context
+{
 public:
 
-  explicit GlfwContext(RenderLoop *);
+  explicit GlfwContext(RenderLoop*);
 
   ~GlfwContext();
 
@@ -31,33 +30,33 @@ public:
 
   bool windowShouldClose() const override;
 
-  GLFWwindow *window() const;
+  GLFWwindow* window() const;
 
 private:
 
 
-///////////////////////////////////////////////////////////////////////////////
-// GLFW static callbacks
-///////////////////////////////////////////////////////////////////////////////
-  static void glfw_error_callback(int error, const char *description);
+  ///////////////////////////////////////////////////////////////////////////////
+  // GLFW static callbacks
+  ///////////////////////////////////////////////////////////////////////////////
+  static void glfw_error_callback(int error, const char* description);
 
-  static void glfw_cursorpos_callback(GLFWwindow *win, double x, double y);
+  static void glfw_cursorpos_callback(GLFWwindow* win, double x, double y);
 
-  static void glfw_window_size_callback(GLFWwindow *win, int w, int h);
+  static void glfw_window_size_callback(GLFWwindow* win, int w, int h);
 
-  static void glfw_keyboard_callback(GLFWwindow *window, int key, int scancode,
+  static void glfw_keyboard_callback(GLFWwindow* window, int key, int scancode,
                                      int action, int mods);
 
-  static void glfw_scrollwheel_callback(GLFWwindow *window, double xoff,
+  static void glfw_scrollwheel_callback(GLFWwindow* window, double xoff,
                                         double yoff);
 
   ///////////////////////////////////////////////////////////////////////////////
   // Data members
   ///////////////////////////////////////////////////////////////////////////////
-  GLFWwindow *m_window;
-
+  GLFWwindow* m_window;
 }; // GlfwContext
 } // namespace bd
 
 #endif // !glfwcontext_h__
+
 

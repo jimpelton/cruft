@@ -10,23 +10,27 @@
 
 #include <array>
 
-namespace bd {
-
+namespace bd
+{
 class CoordinateAxis : public Transformable, public IDrawable
 {
 public:
-    static const std::array<glm::vec4, 6> verts;
-    static const std::array<glm::vec3, 6> colors;
-    static const std::array<unsigned short, 6> elements;
-    static const unsigned int vert_element_size = 4;
+  static const std::array<glm::vec4, 6> verts;
+  static const std::array<glm::vec3, 6> colors;
+  static const std::array<unsigned short, 6> elements;
+  static const unsigned int vert_element_size = 4;
 
-    CoordinateAxis();
-//    CoordinateAxis(const glm::vec3 &center, const glm::vec3 &dims);
-    ~CoordinateAxis() { }
+  CoordinateAxis();
 
-    virtual void draw() override;
+  //    CoordinateAxis(const glm::vec3 &center, const glm::vec3 &dims);
+  ~CoordinateAxis()
+  {
+  }
 
+  virtual void draw() override;
 };
 } // namespace bd
 
 #endif // !bd_axis_h__
+
+

@@ -3,17 +3,19 @@
 #include <bd/context/glfwcontext.h>
 
 
-namespace bd {
+namespace bd
+{
+// static
+RenderLoop* Context::m_loop = nullptr;
 
 // static
-RenderLoop *Context::m_loop = nullptr;
-
-// static
-Context *Context::InitializeContext(RenderLoop *cc) {
+Context*
+Context::InitializeContext(RenderLoop* cc)
+{
   gl_log_restart();
   gl_debug_log_restart();
 
-  Context *context = new GlfwContext(cc);
+  Context* context = new GlfwContext(cc);
   bool success = context->init(1280, 720);
   context->isInit(success);
 
@@ -22,21 +24,24 @@ Context *Context::InitializeContext(RenderLoop *cc) {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-Context::Context(RenderLoop *cc)
-    : m_isInit{ false } {
+Context::Context(RenderLoop* cc)
+  : m_isInit{ false }
+{
   m_loop = cc;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-Context::~Context() {
+Context::~Context()
+{
   if (m_loop) delete m_loop;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void Context::startLoop() {
-
+void
+Context::startLoop()
+{
   gl_log("Context initializing renderloop.");
   m_loop->initialize(*this);
 
@@ -52,20 +57,27 @@ void Context::startLoop() {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-RenderLoop &Context::renderLoop() {
+RenderLoop&
+Context::renderLoop()
+{
   return *m_loop;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void Context::isInit(bool i) {
+void
+Context::isInit(bool i)
+{
   m_isInit = i;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-bool Context::isInit() const {
+bool
+Context::isInit() const
+{
   return m_isInit;
 }
-
 } // namespace bd
+
+

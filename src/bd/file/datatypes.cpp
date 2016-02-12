@@ -1,22 +1,22 @@
 #include <bd/file/datatypes.h>
 
-namespace bd {
-
+namespace bd
+{
 const std::map<std::string, DataType> DataTypesMap
 {
-    { "int", DataType::Integer },
-    { "unsigned integer", DataType::UnsignedInteger },
+  { "int", DataType::Integer },
+  { "unsigned integer", DataType::UnsignedInteger },
 
-    { "char", DataType::Character },
-    { "uchar", DataType::UnsignedCharacter },
-    { "unsigned char", DataType::UnsignedCharacter },
+  { "char", DataType::Character },
+  { "uchar", DataType::UnsignedCharacter },
+  { "unsigned char", DataType::UnsignedCharacter },
 
-    { "short", DataType::Short },
-    { "ushort", DataType::UnsignedShort },
-    { "unsigned short", DataType::UnsignedShort },
+  { "short", DataType::Short },
+  { "ushort", DataType::UnsignedShort },
+  { "unsigned short", DataType::UnsignedShort },
 
-    { "float", DataType::Float }
+  { "float", DataType::Float }
 };
-
 } /* namespace bd */
+
 

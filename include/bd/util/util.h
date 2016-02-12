@@ -6,9 +6,8 @@
 #include <memory>
 #include <string>
 
-namespace bd {
-
-
+namespace bd
+{
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief Convert hue, saturation and value to red, green, blue.
 /// \param h Hue value
@@ -16,7 +15,7 @@ namespace bd {
 /// \param v Value value ;)
 /// \param[out] Returns the corresponding rgb value for h,s,v.
 ///////////////////////////////////////////////////////////////////////////////
-void hsvToRgb(float h, float s, float v, glm::vec3 &rgb);
+void hsvToRgb(float h, float s, float v, glm::vec3& rgb);
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,9 +40,10 @@ unsigned long long vecCompMult(glm::u64vec3 v);
 /// \param[in] volz Number of samples in the z dim
 /// \returns An std::unique_ptr to an array of floats.
 ///////////////////////////////////////////////////////////////////////////////
-std::unique_ptr<float []> readVolumeData(const std::string &dtype,
-    const std::string &fpath, size_t volx, size_t voly, size_t volz);
-
+std::unique_ptr<float []> readVolumeData(const std::string& dtype,
+                                         const std::string& fpath, size_t volx, size_t voly, size_t volz);
 } // namespace bd
 
 #endif // !util_h__
+
+

@@ -9,14 +9,11 @@
 #include <sstream>
 
 
-namespace bd {
-
+namespace bd
+{
 ///////////////////////////////////////////////////////////////////////////////
 //      Static   Members
 ///////////////////////////////////////////////////////////////////////////////
-
-
-
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -25,22 +22,22 @@ namespace bd {
 
 
 ///////////////////////////////////////////////////////////////////////////////
-Block::Block(const glm::u64vec3 &ijk, const glm::vec3 &dims,
-             const glm::vec3 &lowerLeft)
-  : m_ijk{ijk}
-  , m_empty{false}
-  , m_avg{0.0f}
-  , m_tex{bd::Texture::Target::Tex3D} {
-
+Block::Block(const glm::u64vec3& ijk, const glm::vec3& dims,
+             const glm::vec3& lowerLeft)
+  : m_ijk{ ijk }
+    , m_empty{ false }
+    , m_avg{ 0.0f }
+    , m_tex{ bd::Texture::Target::Tex3D }
+{
   transform().scale(dims);
   transform().origin(lowerLeft);
   update();
-
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-Block::~Block() {
+Block::~Block()
+{
 }
 
 //void Block::draw()
@@ -49,60 +46,79 @@ Block::~Block() {
 //}
 
 ///////////////////////////////////////////////////////////////////////////////
-glm::u64vec3 Block::ijk() const {
+glm::u64vec3
+Block::ijk() const
+{
   return m_ijk;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void Block::ijk(const glm::u64vec3 &ijk) {
+void
+Block::ijk(const glm::u64vec3& ijk)
+{
   m_ijk = ijk;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-bool Block::empty() const {
+bool
+Block::empty() const
+{
   return m_empty;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void Block::empty(bool b) {
+void
+Block::empty(bool b)
+{
   m_empty = b;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-float Block::avg() const {
+float
+Block::avg() const
+{
   return m_avg;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void Block::avg(float a) {
+void
+Block::avg(float a)
+{
   m_avg = a;
 }
 
-bd::Texture& Block::texture() {
+bd::Texture&
+Block::texture()
+{
   return m_tex;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-std::string Block::to_string() const {
+std::string
+Block::to_string() const
+{
   std::stringstream ss;
   ss << "{ ijk: (" << m_ijk.x << ',' << m_ijk.y << ',' << m_ijk.z << ")\n"
-    "Origin: " << m_transform.origin().x <<
+      "Origin: " << m_transform.origin().x <<
       ',' << m_transform.origin().y <<
       ',' << m_transform.origin().z <<
-    "Empty: " << (m_empty ? "True\n" : "False\n") << "\n"
-    "Texture: " << m_tex << " }";
+      "Empty: " << (m_empty ? "True\n" : "False\n") << "\n"
+      "Texture: " << m_tex << " }";
 
   return ss.str();
 }
 
-std::ostream &operator<<(std::ostream &os, const Block &b) {
+std::ostream&
+operator<<(std::ostream& os, const Block& b)
+{
   return os << b.to_string();
 }
-
 } // namespace bd
+
+

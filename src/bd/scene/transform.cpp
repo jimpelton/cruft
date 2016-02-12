@@ -7,15 +7,13 @@
 #include <glm/gtx/string_cast.hpp>
 
 
-
-namespace bd {
-
-
+namespace bd
+{
 const glm::mat4 I4x4{ 1.0f };
 
 //////////////////////////////////////////////////////////////////////////////
 Transform::Transform()
-    : m_pos{ 0.0f }
+  : m_pos{ 0.0f }
     , m_rot{ }
     , m_scale{ 1.0f }
     , m_transform{ I4x4 }
@@ -31,102 +29,114 @@ Transform::~Transform()
 
 
 //////////////////////////////////////////////////////////////////////////////
-void Transform::origin(glm::vec3 pos)
+void
+Transform::origin(glm::vec3 pos)
 {
-    m_pos = pos;
-    m_isDirty = true;
+  m_pos = pos;
+  m_isDirty = true;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void Transform::translate(glm::vec3 amt)
+void
+Transform::translate(glm::vec3 amt)
 {
-    m_pos += amt;
-    m_isDirty = true;
+  m_pos += amt;
+  m_isDirty = true;
 }
 
 
 //////////////////////////////////////////////////////////////////////////////
-void Transform::orientation(glm::quat o)
+void
+Transform::orientation(glm::quat o)
 {
-    m_rot = o;
-    m_isDirty = true;
+  m_rot = o;
+  m_isDirty = true;
 }
 
 
 //////////////////////////////////////////////////////////////////////////////
-void Transform::rotate(float amt, glm::vec3 axis)
+void
+Transform::rotate(float amt, glm::vec3 axis)
 {
-    glm::quat q{ amt, axis };
-    rotate(q);
+  glm::quat q{ amt, axis };
+  rotate(q);
 }
 
 
 //////////////////////////////////////////////////////////////////////////////
-void Transform::rotate(glm::quat amt)
+void
+Transform::rotate(glm::quat amt)
 {
-    m_rot *= amt;
-    m_isDirty = true;
+  m_rot *= amt;
+  m_isDirty = true;
 }
 
 
 //////////////////////////////////////////////////////////////////////////////
-void Transform::scale(glm::vec3 s)
+void
+Transform::scale(glm::vec3 s)
 {
-    m_scale = s;
-    m_isDirty = true;
+  m_scale = s;
+  m_isDirty = true;
 }
 
 
 //////////////////////////////////////////////////////////////////////////////
-void Transform::lookat(glm::vec3 up, glm::vec3 point)
+void
+Transform::lookat(glm::vec3 up, glm::vec3 point)
 {
-    glm::quat q{ up, point };
-    m_rot = q;
-    m_isDirty = true;
+  glm::quat q{ up, point };
+  m_rot = q;
+  m_isDirty = true;
 }
 
 
 //////////////////////////////////////////////////////////////////////////////
-glm::mat4 Transform::update(const glm::mat4 &p)
+glm::mat4
+Transform::update(const glm::mat4& p)
 {
-    if (m_isDirty) {
-        glm::mat4 s = glm::scale(p, m_scale);
-        glm::mat4 r = p * glm::toMat4(m_rot);
-        glm::mat4 t = glm::translate(p, m_pos);
+  if (m_isDirty) {
+    glm::mat4 s = glm::scale(p, m_scale);
+    glm::mat4 r = p * glm::toMat4(m_rot);
+    glm::mat4 t = glm::translate(p, m_pos);
 
-        m_transform =  /*p **/ t * r * s;
+    m_transform = /*p **/ t * r * s;
 
-        m_isDirty = false;
-    }
+    m_isDirty = false;
+  }
 
-    return m_transform;
+  return m_transform;
 }
 
 
 //////////////////////////////////////////////////////////////////////////////
-const glm::mat4& Transform::matrix() const
+const glm::mat4&
+Transform::matrix() const
 {
-    return m_transform;
+  return m_transform;
 }
 
 
-const glm::vec3& Transform::origin() const
+const glm::vec3&
+Transform::origin() const
 {
-    return m_pos;
+  return m_pos;
 }
 
 
-const glm::vec3& Transform::scale() const
+const glm::vec3&
+Transform::scale() const
 {
-    return m_scale;
+  return m_scale;
 }
 
 
-const glm::quat& Transform::rotation() const
+const glm::quat&
+Transform::rotation() const
 {
-    return m_rot;
+  return m_rot;
 }
-
-
 } // namespace bd
+
+
