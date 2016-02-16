@@ -81,7 +81,7 @@ BlockCollection::initBlocks(glm::u64vec3 nb, glm::u64vec3 vd)
         // origin (centroid) in world coordiates
         glm::vec3 blk_origin{ (worldLoc + (worldLoc + wld_dims)) * 0.5f };
 
-        Block blk{ glm::u64vec3(bx, by, bz), wld_dims, blk_origin };
+        Block blk{ glm::u64vec3{bx, by, bz}, wld_dims, blk_origin };
         m_blocks.push_back(blk);
       }
 

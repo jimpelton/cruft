@@ -4,6 +4,7 @@
 #include <bd/file/parsedat.h>
 
 #include <glm/glm.hpp>
+#include <algorithm>
 
 namespace bd
 {
