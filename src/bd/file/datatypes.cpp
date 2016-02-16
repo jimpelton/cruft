@@ -5,6 +5,7 @@ namespace bd
 const std::map<std::string, DataType> DataTypesMap
 {
   { "int", DataType::Integer },
+  { "uint", DataType::UnsignedInteger },
   { "unsigned integer", DataType::UnsignedInteger },
 
   { "char", DataType::Character },

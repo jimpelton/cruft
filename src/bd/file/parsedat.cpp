@@ -12,7 +12,9 @@
 #include <ctype.h>
 
 namespace bd
-{ namespace
+{
+
+namespace
 {
 using SplitPair = std::pair<std::string, std::string>;
 
@@ -171,6 +173,7 @@ parseDat(const std::string& datfile, DatFileData& data)
 }
 
 
+///////////////////////////////////////////////////////////////////////////////
 std::ostream&
 operator<<(std::ostream& os, const DatFileData& d)
 {

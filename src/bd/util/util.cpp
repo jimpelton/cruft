@@ -1,6 +1,7 @@
 #include <bd/util/util.h>
 #include <bd/file/datareader.h>
 #include <bd/file/datatypes.h>
+#include <bd/file/parsedat.h>
 
 #include <glm/glm.hpp>
 
@@ -92,8 +93,9 @@ vecCompMult(glm::u64vec3 v)
   return v.x * v.y * v.z;
 }
 
-std::unique_ptr<float []> readVolumeData(const std::string& dtype,
-                                         const std::string& fpath, size_t volx, size_t voly, size_t volz)
+std::unique_ptr<float []>
+readVolumeData(const std::string& dtype, const std::string& fpath,
+    size_t volx, size_t voly, size_t volz)
 {
   bd::DataType t = bd::DataTypesMap.at(dtype);
   float* rawdata = nullptr;
@@ -125,6 +127,23 @@ std::unique_ptr<float []> readVolumeData(const std::string& dtype,
 
   return std::unique_ptr<float []>(rawdata);
 }
+
+std::unique_ptr<float []>
+readVolumeData(const std::string& datFilePath, const std::string &filePath)
+{
+  bd::DatFileData dat{};
+  bool success{ bd::parseDat(datFilePath, dat) };
+  if (! success) {
+    return nullptr;
+  }
+
+  auto cit = std::find_if(DataTypesMap.begin(), DataTypesMap.end(),
+      [&dat](std::pair<std::string, DataType> p){ return p.second == dat.dataType; });
+
+  return readVolumeData(cit->first, filePath, dat.rX, dat.rY, dat.rZ);
+
+}
+
 } // namespace bd
 
 

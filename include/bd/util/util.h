@@ -41,7 +41,11 @@ unsigned long long vecCompMult(glm::u64vec3 v);
 /// \returns An std::unique_ptr to an array of floats.
 ///////////////////////////////////////////////////////////////////////////////
 std::unique_ptr<float []> readVolumeData(const std::string& dtype,
-                                         const std::string& fpath, size_t volx, size_t voly, size_t volz);
+    const std::string& fpath, size_t volx, size_t voly, size_t volz);
+
+std::unique_ptr<float []>
+readVolumeData(const std::string& datFilePath, const std::string &filePath);
+
 } // namespace bd
 
 #endif // !util_h__
