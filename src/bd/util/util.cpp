@@ -140,6 +140,9 @@ readVolumeData(const std::string& datFilePath, const std::string &filePath)
 
   auto cit = std::find_if(DataTypesMap.begin(), DataTypesMap.end(),
       [&dat](std::pair<std::string, DataType> p){ return p.second == dat.dataType; });
+  
+ 
+  gl_log("Dat file: %s", dat.to_string().c_str());
 
   return readVolumeData(cit->first, filePath, dat.rX, dat.rY, dat.rZ);
 

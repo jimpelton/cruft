@@ -177,8 +177,7 @@ parseDat(const std::string& datfile, DatFileData& data)
 std::ostream&
 operator<<(std::ostream& os, const DatFileData& d)
 {
-  os << "{ Res: " << d.rX << "X" << d.rY << "X" << d.rZ << ", "
-      "Filename: " << d.volumeFileName << ", dataType: " << bd::ordinal(d.dataType) << "}";
+  os << d.to_string();
   return os;
 }
 } // namespace bd
