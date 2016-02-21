@@ -21,6 +21,10 @@ enum class DataType
 };
 
 extern const std::map<std::string, DataType> DataTypesMap;
+
+std::string
+to_string(bd::DataType);
+
 } /* namespace bd */
 
 #endif /* ifndef datatypes_h__ */

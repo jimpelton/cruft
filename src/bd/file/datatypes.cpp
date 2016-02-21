@@ -18,6 +18,26 @@ const std::map<std::string, DataType> DataTypesMap
 
   { "float", DataType::Float }
 };
+
+std::string
+to_string(bd::DataType type)
+{
+
+  // convert data type to string.
+  auto cit = std::find_if(DataTypesMap.begin(), DataTypesMap.end(),
+      [type](std::pair<std::string, DataType> p)
+      {
+        return p.second == type;
+      });
+
+  if (cit != DataTypesMap.end()) {
+    return (cit->first).c_str();
+  } else {
+    return "unknown";
+  }
+
+}
+
 } /* namespace bd */
 
 
