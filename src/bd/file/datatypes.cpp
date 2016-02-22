@@ -1,4 +1,5 @@
 #include <bd/file/datatypes.h>
+#include <algorithm>
 
 namespace bd
 {
