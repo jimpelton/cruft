@@ -32,30 +32,30 @@ public:
   /// \brief Create block (i,j,k) with specified dims and world origin.
   /// \param[in] ijk The block ID (and position with in the grid of blocks).
   /// \param[in] dims The dimensions in data points of this block.
-  /// \param[in] lowerLeft Lower left corner of this block in world coords
+  /// \param[in] origin Center of this block in world coords
   ///            (or whatever coords you want...maybe...sigh...whatevs).
   ///////////////////////////////////////////////////////////////////////////////
   Block(const glm::u64vec3& ijk, const glm::vec3& dims,
-        const glm::vec3& lowerLeft);
+        const glm::vec3& origin);
 
   virtual ~Block();
 
 
-  /// \brief Set/get the ijk location of this block.
+  /// \brief Get the ijk location of this block.
   glm::u64vec3 ijk() const;
-
+  /// \brief Set the ijk location of this block.
   void ijk(const glm::u64vec3& ijk);
 
 
   /// \brief Set/get if this block is marked empty.
   void empty(bool);
-
+  /// \brief Set/get if this block is marked empty.
   bool empty() const;
 
 
   /// \brief Set/get the average value of this here block.
   void avg(float);
-
+  /// \brief Set/get the average value of this here block.
   float avg() const;
 
 
