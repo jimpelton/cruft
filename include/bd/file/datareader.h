@@ -224,7 +224,7 @@ DataReader<ExternTy, InternTy>::volsize
 )
 {
   pbuf->pubseekpos(0);
-  size_t szbytes = pbuf->pubseekoff(0, std::ifstream::end, std::ifstream::in);
+  size_t szbytes = pbuf->pubseekoff(0, std::istream::end, std::istream::in);
   pbuf->pubseekpos(0);
   return szbytes;
 }
