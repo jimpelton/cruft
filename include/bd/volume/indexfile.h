@@ -57,7 +57,7 @@ namespace bd
 
 ///////////////////////////////////////////////////////////////////////////////
   std::ostream&
-  operator<<(std::ostream& os, const IndexFileHeader& h);
+      operator<<(std::ostream& os, const IndexFileHeader& h);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -116,12 +116,11 @@ namespace bd
 
   };
 
-
 ///////////////////////////////////////////////////////////////////////////////
   template<typename Ty>
   IndexFile<Ty>::IndexFile(const BlockCollection2<Ty>& collection)
       : m_collection{ collection }
-      , m_header{ IndexFile<Ty>::makeHeaderFromCollection(collection) }
+        , m_header{ IndexFile<Ty>::makeHeaderFromCollection(collection) }
   { }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -136,10 +135,18 @@ namespace bd
   IndexFile<Ty>::makeHeaderFromCollection(const BlockCollection2<Ty>& collection)
   {
     IndexFileHeader ifh{
-        MAGIC, VERSION, HEAD_LEN,
+        MAGIC,
+        VERSION,
+        HEAD_LEN,
+//------Block metadata---------------------
         collection.numBlocks().x,
         collection.numBlocks().y,
         collection.numBlocks().z,
+//------Volume statistics------------------
+        collection.volDims().x,
+        collection.volDims().y,
+        collection.volDims().z,
+
         collection.volAvg(),
         collection.volMin(),
         collection.volMax() };
@@ -227,6 +234,8 @@ namespace bd
     }
   }
 
+
 } // namespace bd
 
-#endif //! indexfile_h__
+
+#endif // !indexfile_h__
