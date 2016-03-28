@@ -84,10 +84,13 @@ class IndexFile
 public:
   IndexFile();
 
-  IndexFile(const std::string& fileName);
+  //IndexFile(const std::string& fileName);
 
   ~IndexFile();
 
+
+  static IndexFile fromRawFile(const std::string &path);
+  static IndexFile fromBinaryIndex(const std::string &path);
 
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Read binary index file from \c is and populate \c collection with
@@ -104,6 +107,7 @@ public:
   /// \brief Write ascii index file to ostream \c os.
   ///////////////////////////////////////////////////////////////////////////////
   void writeAscii(std::ostream& os);
+
 
 
 //    static IndexFileHeader makeHeaderFromCollection(
@@ -126,18 +130,24 @@ private:
   /// \brief Write the binary header for index file.
   ///////////////////////////////////////////////////////////////////////////////
   void writeIndexFileHeaderBinary(std::ostream& os);
+  
 
-  void openRead();
-
-  void openWrite();
-
+  ///////////////////////////////////////////////////////////////////////////////
+  /// \brief This rediculousness allows using templated BlockCollection2 without
+  ///        exposing the templated-ness of BlockCollection2, since we don't
+  ///        know what type of BC2 we need until runtime.
+  ///////////////////////////////////////////////////////////////////////////////
   class base_collection_wrapper {
   public:
     virtual ~base_collection_wrapper() { }
 
     virtual void addBlock(const FileBlock&) = 0;
+    virtual const std::vector<FileBlock>& blocks() = 0;
   };
 
+  ///////////////////////////////////////////////////////////////////////////////
+  /// \sa base_collection_wrapper
+  ///////////////////////////////////////////////////////////////////////////////
   template<typename Ty>
   class collection_wrapper : public base_collection_wrapper
   {
@@ -147,13 +157,19 @@ private:
 
     BlockCollection2<Ty> c;
 
-    void addBlock(const FileBlock &b) override {
+    void addBlock(const FileBlock &b) override 
+    {
       c.addBlock(b);
     }
 
+    const std::vector<FileBlock> & blocks() override
+    {
+      return c.blocks();
+    }
+    
   };
 
-  template<Ty>
+  
 
   IndexFileHeader m_header;
   std::string m_fileName;

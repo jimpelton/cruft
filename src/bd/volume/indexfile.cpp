@@ -10,10 +10,12 @@
 #include <fstream>
 
 
-
-
 namespace bd
 {
+
+///////////////////////////////////////////////////////////////////////////////
+// I n d e x F i l e H e a d e r    C l a s s
+///////////////////////////////////////////////////////////////////////////////
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,6 +56,8 @@ IndexFileHeader::getType(const IndexFileHeader& ifh)
   }
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
 uint32_t
 IndexFileHeader::getTypeInt(DataType ty)
 {
@@ -64,19 +68,30 @@ IndexFileHeader::getTypeInt(DataType ty)
   case DataType::UnsignedCharacter: return 0x3;
   case DataType::UnsignedShort:     return 0x4;
   case DataType::UnsignedInteger:   return 0x5;
-  case DataType::Float:             return 0x6;
+  case DataType::Float:
+  default:                          return 0x6;
   }
 }
 
 
+///////////////////////////////////////////////////////////////////////////////
+// I n d e x F i l e   c l a s s
+///////////////////////////////////////////////////////////////////////////////
 
-IndexFile::IndexFile(const std::string& fileName)
-  : m_fileName{ fileName }
-{
-}
 
-IndexFile::~IndexFile()
+///////////////////////////////////////////////////////////////////////////////
+IndexFile::IndexFile()
+  : m_header{ }
+  , m_fileName{ }
+  , m_col{ nullptr }
 { }
+
+
+///////////////////////////////////////////////////////////////////////////////
+IndexFile::~IndexFile()
+{
+  if (m_col) delete m_col;
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -106,13 +121,13 @@ IndexFile::~IndexFile()
 //  }
 
 
-
-
+///////////////////////////////////////////////////////////////////////////////
 const IndexFileHeader&
 IndexFile::getHeader() const
 {
   return m_header;
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 bool
@@ -130,7 +145,7 @@ IndexFile::readBinary()
   is.seekg(0, std::ios::beg);
   is.read(reinterpret_cast<char*>(&ifh), sizeof(IndexFileHeader));
 
-  bd::DataType type;
+  bd::DataType type{ IndexFileHeader::getType(ifh) };
   switch (type) {
   case bd::DataType::UnsignedCharacter:
     m_col = new collection_wrapper<unsigned char>
@@ -156,15 +171,38 @@ IndexFile::readBinary()
   }
 
 
-  size_t numBlocks{ ifh.numblocks[0]*ifh.numblocks[1]*ifh.numblocks[2] };
+  size_t numBlocks{ ifh.numblocks[0] * ifh.numblocks[1] * ifh.numblocks[2] };
 
   // read many blocks!
   FileBlock fb;
   for (size_t i = 0; i<numBlocks; ++i) {
     is.read(reinterpret_cast<char*>(&fb), sizeof(FileBlock));
-    m_col->c.addBlock(fb);
+    m_col->addBlock(fb);
   }
 
+  return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void
+IndexFile::writeBinary(std::ostream& os)
+{
+  writeIndexFileHeaderBinary(os);
+
+  for (const FileBlock& b : m_col->blocks()) {
+    writeSingleBlockHeaderBinary(os, b);
+  }
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+void
+IndexFile::writeAscii(std::ostream& os)
+{
+  os << m_header << "\n";
+  for (const FileBlock& b : m_col->blocks()) {
+    os << b << "\n";
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -174,6 +212,7 @@ IndexFile::writeIndexFileHeaderBinary(std::ostream& os)
   IndexFileHeader::writeToStream(os, m_header);
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////
 void
 IndexFile::writeSingleBlockHeaderBinary(std::ostream& os,
@@ -182,40 +221,6 @@ IndexFile::writeSingleBlockHeaderBinary(std::ostream& os,
   os.write(reinterpret_cast<const char*>(&block), sizeof(FileBlock));
 }
 
-///////////////////////////////////////////////////////////////////////////////
-void
-IndexFile::writeBinary(std::ostream& os)
-{
-  writeIndexFileHeaderBinary(os);
-
-  for (const FileBlock& b : m_col->c.blocks()) {
-    writeSingleBlockHeaderBinary(os, b);
-  }
-}
-
-///////////////////////////////////////////////////////////////////////////////
-void
-IndexFile::writeAscii(std::ostream& os)
-{
-  os << m_header << "\n";
-  for (const FileBlock& b : m_col->c.blocks()) {
-    os << b << "\n";
-  }
-}
-
-
-void
-IndexFile::openRead(const std::string& fileName)
-{
-
-}
-
-
-void
-IndexFile::openWrite()
-{
-
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 std::ostream&
@@ -238,6 +243,8 @@ operator<<(std::ostream& os, const bd::FileBlock& block)
   return os;
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
 std::ostream&
 operator<<(std::ostream& os, const bd::IndexFileHeader& h)
 {
@@ -255,6 +262,5 @@ operator<<(std::ostream& os, const bd::IndexFileHeader& h)
 
   return os;
 }
-
 
 } // namepsace bd

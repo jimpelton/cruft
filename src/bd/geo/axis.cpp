@@ -43,7 +43,7 @@ CoordinateAxis::CoordinateAxis()
 void
 CoordinateAxis::draw()
 {
-  gl_check(glDrawArrays(GL_LINES, 0, verts.size()));
+  gl_check( glDrawArrays( GL_LINES, 0, static_cast<GLsizei>(verts.size()) ));
 }
 } /* namespace  bd */
 

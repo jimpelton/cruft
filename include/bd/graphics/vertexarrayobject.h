@@ -90,7 +90,7 @@ public:
   ///
   /// \returns The gl id of the index buffer created.
   ///////////////////////////////////////////////////////////////////////////////
-  unsigned int setIndexBuffer(unsigned short* indices, size_t length);
+  unsigned int setIndexBuffer(unsigned short* indices, unsigned int length);
 
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Add an index buffer to be bound with this VAO.
@@ -128,7 +128,7 @@ private:
                        unsigned int attr_idx);
 
   // index buffer object helper
-  unsigned int gen_ibo(const unsigned short* indices, size_t length);
+  unsigned int gen_ibo(const unsigned short* indices, unsigned int length);
 
 
   ///////////////////////////////////////////////////////////////////////////////

@@ -114,7 +114,7 @@ VertexArrayObject::setIndexBuffer(const std::vector<unsigned short>& indices)
 ///////////////////////////////////////////////////////////////////////////////
 unsigned int
 VertexArrayObject::setIndexBuffer(unsigned short* indices,
-                                  size_t length)
+                                  unsigned int length)
 {
   unsigned int iboId{ 0 };
 
@@ -209,7 +209,7 @@ VertexArrayObject::gen_vbo(const float* verts,
 ///////////////////////////////////////////////////////////////////////////////
 unsigned int
 VertexArrayObject::gen_ibo(const unsigned short* indices,
-                           size_t length)
+                           unsigned int length)
 {
   unsigned int ibo{ 0 };
 

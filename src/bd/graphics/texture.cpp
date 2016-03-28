@@ -62,7 +62,7 @@ Texture::genGLTex1d(float* img, Format ity, Format ety, size_t w)
     0,
     gl_format[ordinal<Format>(ety)],
     GL_FLOAT,
-    (void *) img
+    static_cast<void *>(img)
     ));
 
   gl_check(glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));

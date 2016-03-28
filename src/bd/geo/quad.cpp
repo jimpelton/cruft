@@ -78,7 +78,10 @@ Quad::~Quad()
 void
 Quad::draw()
 {
-  gl_check(glDrawElements(GL_TRIANGLE_STRIP, elements.size(), GL_UNSIGNED_SHORT, 0));
+  gl_check(glDrawElements(GL_TRIANGLE_STRIP, 
+    static_cast<GLsizei>(elements.size()), 
+    GL_UNSIGNED_SHORT, 
+    nullptr));
 }
 } // namespace bd
 
