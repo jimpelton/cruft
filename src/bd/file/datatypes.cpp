@@ -1,5 +1,6 @@
 #include <bd/file/datatypes.h>
 #include <algorithm>
+#include <iostream>
 
 namespace bd
 {
@@ -22,7 +23,8 @@ const std::map<std::string, DataType> DataTypesMap
 
 std::string
 to_string(bd::DataType type)
-{
+try {
+
 
   // convert data type to string.
   auto cit = std::find_if(DataTypesMap.begin(), DataTypesMap.end(),
@@ -37,6 +39,9 @@ to_string(bd::DataType type)
     return "unknown";
   }
 
+} catch (std::exception &e) {
+  std::cerr << e.what() << std::endl;
+  return "unknown";
 }
 
 } /* namespace bd */
