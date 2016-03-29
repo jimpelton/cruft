@@ -7,6 +7,7 @@
 #include <iostream>
 #include <cstdint>
 #include <bd/file/datatypes.h>
+#include <fstream>
 
 namespace bd
 {
@@ -70,48 +71,96 @@ const uint32_t HEAD_LEN{ sizeof(IndexFileHeader) };
 std::ostream& operator<<(std::ostream& os, const IndexFileHeader& h);
 
 ///////////////////////////////////////////////////////////////////////////////
+/// \brief This rediculousness allows using templated BlockCollection2 without
+///        exposing the templated-ness of BlockCollection2, since we don't
+///        know what type of BC2 we need until runtime.
+///////////////////////////////////////////////////////////////////////////////
+class base_collection_wrapper {
+public:
+  virtual ~base_collection_wrapper() { }
+
+  virtual void addBlock(const FileBlock&) = 0;
+  virtual const std::vector<std::shared_ptr<FileBlock>>& blocks() = 0;
+  virtual void filterBlocks(std::ifstream &, float min, float max) = 0;
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// \sa base_collection_wrapper
+///////////////////////////////////////////////////////////////////////////////
+template<typename Ty>
+class collection_wrapper : public base_collection_wrapper
+{
+public:
+
+  collection_wrapper(glm::u64vec3 volDims, glm::u64vec3 numBlocks)
+      : c{ volDims, numBlocks }
+  {
+  }
+
+
+  void addBlock(const FileBlock &b) override
+  {
+    c.addBlock(b);
+  }
+
+  const std::vector<std::shared_ptr<FileBlock>>& blocks() override
+  {
+    return c.blocks();
+  }
+
+  void filterBlocks(std::ifstream &rawFile, float min, float max) override
+  {
+    c.filterBlocks(rawFile, min, max);
+  }
+
+private:
+  BlockCollection2<Ty> c;
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
 /// \brief Generate an index file from the provided BlockCollection2. The
 ///        IndexFile can be written to disk in either ASCII or binary format.
 ///////////////////////////////////////////////////////////////////////////////
 class IndexFile
 {
 
-  enum class Mode
-  {
-    Read, Write
-  };
 
 public:
+
+  ///////////////////////////////////////////////////////////////////////////////
+  /// \brief Create IndexFile from an existing raw file.
+  ///////////////////////////////////////////////////////////////////////////////
+  static std::shared_ptr<IndexFile> fromRawFile(
+      const std::string &path,
+      DataType type,
+      const unsigned long long numVox[3],
+      const unsigned long long numBlks[3],
+      const float minmax[2]);
+
+
+  ///////////////////////////////////////////////////////////////////////////////
+  /// \brief Create IndexFile from an existing binary index file.
+  ///////////////////////////////////////////////////////////////////////////////
+  static std::shared_ptr<IndexFile> fromBinaryIndexFile(const std::string &path);
+
+
   IndexFile();
-
-  //IndexFile(const std::string& fileName);
-
   ~IndexFile();
 
-
-  static IndexFile fromRawFile(const std::string &path);
-  static IndexFile fromBinaryIndex(const std::string &path);
-
-  ///////////////////////////////////////////////////////////////////////////////
-  /// \brief Read binary index file from \c is and populate \c collection with
-  ///        blocks.
-  ///////////////////////////////////////////////////////////////////////////////
-  bool readBinary();
 
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Write binary index file to ostream \c os.
   ///////////////////////////////////////////////////////////////////////////////
-  void writeBinary(std::ostream& os);
+  void writeBinaryIndexFile(std::ostream& os);
+  void writeBinaryIndexFile(const std::string& outpath);
 
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Write ascii index file to ostream \c os.
   ///////////////////////////////////////////////////////////////////////////////
-  void writeAscii(std::ostream& os);
-
-
-
-//    static IndexFileHeader makeHeaderFromCollection(
-//        const BlockCollection2<Ty>& collection);
+  void writeAsciiIndexFile(std::ostream& os);
+  void writeAsciiIndexFile(const std::string& outpath);
 
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -119,58 +168,33 @@ public:
   ///////////////////////////////////////////////////////////////////////////////
   const IndexFileHeader& getHeader() const;
 
+  const std::vector<std::shared_ptr<FileBlock>>& blocks();
+
+  static base_collection_wrapper* make_wrapper(DataType type,
+      const unsigned long long num_vox[3], const unsigned long long numblocks[3]);
+
+
 private:
 
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Write single block binary to \c os.
   ///////////////////////////////////////////////////////////////////////////////
-  void writeSingleBlockHeaderBinary(std::ostream& os, const FileBlock& block);
+  void writeBinarySingleBlockHeader(std::ostream& os, const FileBlock& block);
 
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Write the binary header for index file.
   ///////////////////////////////////////////////////////////////////////////////
-  void writeIndexFileHeaderBinary(std::ostream& os);
-  
+  void writeBinaryIndexFileHeader(std::ostream& os);
+
 
   ///////////////////////////////////////////////////////////////////////////////
-  /// \brief This rediculousness allows using templated BlockCollection2 without
-  ///        exposing the templated-ness of BlockCollection2, since we don't
-  ///        know what type of BC2 we need until runtime.
+  /// \brief Read binary index file from \c is and populate \c collection with
+  ///        blocks.
   ///////////////////////////////////////////////////////////////////////////////
-  class base_collection_wrapper {
-  public:
-    virtual ~base_collection_wrapper() { }
+  bool readBinaryIndexFile();
 
-    virtual void addBlock(const FileBlock&) = 0;
-    virtual const std::vector<FileBlock>& blocks() = 0;
-  };
 
-  ///////////////////////////////////////////////////////////////////////////////
-  /// \sa base_collection_wrapper
-  ///////////////////////////////////////////////////////////////////////////////
-  template<typename Ty>
-  class collection_wrapper : public base_collection_wrapper
-  {
-  public:
-    collection_wrapper(glm::u64vec3 volDims, glm::u64vec3 numBlocks)
-        : c{ volDims, numBlocks } { }
-
-    BlockCollection2<Ty> c;
-
-    void addBlock(const FileBlock &b) override 
-    {
-      c.addBlock(b);
-    }
-
-    const std::vector<FileBlock> & blocks() override
-    {
-      return c.blocks();
-    }
-    
-  };
-
-  
-
+private:
   IndexFileHeader m_header;
   std::string m_fileName;
   base_collection_wrapper *m_col;

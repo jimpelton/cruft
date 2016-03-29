@@ -78,6 +78,77 @@ IndexFileHeader::getTypeInt(DataType ty)
 // I n d e x F i l e   c l a s s
 ///////////////////////////////////////////////////////////////////////////////
 
+base_collection_wrapper*
+IndexFile::make_wrapper(DataType type, const unsigned long long num_vox[3],
+    const unsigned long long numblocks[3])
+{
+  base_collection_wrapper *col{ nullptr };
+
+  switch (type) {
+  case bd::DataType::UnsignedCharacter:
+    col = new collection_wrapper<unsigned char>
+        {{ num_vox[0], num_vox[1], num_vox[2] },
+         { numblocks[0], numblocks[1], numblocks[2] }};
+    break;
+
+  case bd::DataType::UnsignedShort:
+    col = new collection_wrapper<unsigned short>
+        {{ num_vox[0], num_vox[1], num_vox[2] },
+         { numblocks[0], numblocks[1], numblocks[2] }};
+    break;
+
+  case bd::DataType::Float:
+    col = new collection_wrapper<float>
+        {{ num_vox[0], num_vox[1], num_vox[2] },
+         { numblocks[0], numblocks[1], numblocks[2] }};
+    break;
+
+  default:
+    std::cerr << "Unsupported/unknown datatype: " << bd::to_string(type) << ".\n";
+    break;
+  }
+
+  return col;
+}
+
+std::shared_ptr<IndexFile>
+IndexFile::fromRawFile
+(
+    const std::string& path,
+    DataType type,
+    const unsigned long long num_vox[3],
+    const unsigned long long numblocks[3],
+    const float minmax[2]
+)
+{
+  std::shared_ptr<IndexFile> idxfile{ std::make_shared<IndexFile>() };
+  idxfile->m_fileName = path;
+  idxfile->m_col = IndexFile::make_wrapper(type, num_vox, numblocks);
+
+
+  // open raw file
+  std::ifstream rawFile;
+  rawFile.open(idxfile->m_fileName, std::ios::in | std::ios::binary);
+  if (! rawFile.is_open()) {
+    std::cerr << idxfile->m_fileName << " not found." << std::endl;
+    exit(1);
+  }
+
+  // filter the blocks
+  idxfile->m_col->filterBlocks(rawFile, minmax[0], minmax[1]);
+
+  return idxfile;
+
+}
+
+std::shared_ptr<IndexFile>
+IndexFile::fromBinaryIndexFile(const std::string& path)
+{
+  std::shared_ptr<IndexFile> idxfile{ std::make_shared<IndexFile>() };
+  idxfile->m_fileName = path;
+  idxfile->readBinaryIndexFile();
+  return idxfile;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 IndexFile::IndexFile()
@@ -87,7 +158,16 @@ IndexFile::IndexFile()
 { }
 
 
-///////////////////////////////////////////////////////////////////////////////
+//IndexFile::IndexFile(const IndexFile& o)
+//{
+//  m_fileName = o.m_fileName;
+//
+//  m_header = o.m_header;
+//
+//  m_col = o.m_col;
+//
+//}
+
 IndexFile::~IndexFile()
 {
   if (m_col) delete m_col;
@@ -131,7 +211,7 @@ IndexFile::getHeader() const
 
 ///////////////////////////////////////////////////////////////////////////////
 bool
-IndexFile::readBinary()
+IndexFile::readBinaryIndexFile()
 {
   // open index file (binary)
   std::ifstream is{ m_fileName, std::ios::binary };
@@ -144,32 +224,8 @@ IndexFile::readBinary()
   IndexFileHeader ifh;
   is.seekg(0, std::ios::beg);
   is.read(reinterpret_cast<char*>(&ifh), sizeof(IndexFileHeader));
-
-  bd::DataType type{ IndexFileHeader::getType(ifh) };
-  switch (type) {
-  case bd::DataType::UnsignedCharacter:
-    m_col = new collection_wrapper<unsigned char>
-        {{ ifh.num_vox[0], ifh.num_vox[1], ifh.num_vox[2] },
-        { ifh.numblocks[0], ifh.numblocks[1], ifh.numblocks[2] }};
-    break;
-
-  case bd::DataType::UnsignedShort:
-    m_col = new collection_wrapper<unsigned short>
-        {{ ifh.num_vox[0], ifh.num_vox[1], ifh.num_vox[2] },
-          { ifh.numblocks[0], ifh.numblocks[1], ifh.numblocks[2] }};
-    break;
-
-  case bd::DataType::Float:
-    m_col = new collection_wrapper<float>
-        {{ ifh.num_vox[0], ifh.num_vox[1], ifh.num_vox[2] },
-         { ifh.numblocks[0], ifh.numblocks[1], ifh.numblocks[2] }};
-    break;
-
-  default:
-    std::cerr << "Unsupported/unknown datatype: " << bd::to_string(type) << ".\n";
-    break;
-  }
-
+  m_header = ifh;
+  m_col = IndexFile::make_wrapper(IndexFileHeader::getType(ifh), ifh.num_vox, ifh.numblocks);
 
   size_t numBlocks{ ifh.numblocks[0] * ifh.numblocks[1] * ifh.numblocks[2] };
 
@@ -185,29 +241,66 @@ IndexFile::readBinary()
 
 ///////////////////////////////////////////////////////////////////////////////
 void
-IndexFile::writeBinary(std::ostream& os)
+IndexFile::writeBinaryIndexFile(std::ostream& os)
 {
-  writeIndexFileHeaderBinary(os);
+  writeBinaryIndexFileHeader(os);
 
-  for (const FileBlock& b : m_col->blocks()) {
-    writeSingleBlockHeaderBinary(os, b);
+  for (const std::shared_ptr<FileBlock> b : m_col->blocks()) {
+    writeBinarySingleBlockHeader(os, *b);
   }
+}
+
+void
+IndexFile::writeBinaryIndexFile(const std::string& outpath)
+{
+  std::ofstream os;
+  os.open(outpath, std::ios::binary);
+  if (! os.is_open()) {
+    std::cerr << outpath << " could not be opened." << std::endl;
+    return;
+  }
+
+  writeBinaryIndexFile(os);
+  os.flush();
+  os.close();
+
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
 void
-IndexFile::writeAscii(std::ostream& os)
+IndexFile::writeAsciiIndexFile(std::ostream& os)
 {
   os << m_header << "\n";
-  for (const FileBlock& b : m_col->blocks()) {
-    os << b << "\n";
+  for (const std::shared_ptr<FileBlock> b : m_col->blocks()) {
+    os << *b << "\n";
   }
+}
+
+void
+IndexFile::writeAsciiIndexFile(const std::string& outpath)
+{
+  std::ofstream os;
+  os.open(outpath);
+  if (! os.is_open()) {
+    std::cerr << outpath << " could not be opened." << std::endl;
+    return;
+  }
+
+  writeAsciiIndexFile(os);
+  os.flush();
+  os.close();
+}
+
+const std::vector<std::shared_ptr<FileBlock>>&
+IndexFile::blocks()
+{
+  return m_col->blocks();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 void
-IndexFile::writeIndexFileHeaderBinary(std::ostream& os)
+IndexFile::writeBinaryIndexFileHeader(std::ostream& os)
 {
   IndexFileHeader::writeToStream(os, m_header);
 }
@@ -215,7 +308,7 @@ IndexFile::writeIndexFileHeaderBinary(std::ostream& os)
 
 ///////////////////////////////////////////////////////////////////////////////
 void
-IndexFile::writeSingleBlockHeaderBinary(std::ostream& os,
+IndexFile::writeBinarySingleBlockHeader(std::ostream& os,
     const FileBlock& block)
 {
   os.write(reinterpret_cast<const char*>(&block), sizeof(FileBlock));
