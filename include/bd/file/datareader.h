@@ -8,6 +8,7 @@
 #include <memory>
 #include <cmath>
 #include <cstdint>
+#include <algorithm>
 
 namespace bd
 {
@@ -210,7 +211,7 @@ DataReader<ExternTy, InternTy>::loadRaw3d
     delete [] raw;
     raw = nullptr;
   } else {
-    m_data = (InternTy *)raw;
+    m_data = reinterpret_cast<InternTy *>(raw);
   }
 
   return m_numVoxels;
@@ -253,13 +254,16 @@ DataReader<ExternTy, InternTy>::minMax
 {
   gl_log("Calculating min and max.");
 
+  double avg{ 0.0 };
   for (size_t idx = 0; idx < m_numVoxels; ++idx) {
-    ExternTy d = image[idx];
-    if (d > m_max) m_max = static_cast<InternTy>(d);
-    if (d < m_min) m_min = static_cast<InternTy>(d);
+    InternTy d{ static_cast<InternTy>(image[idx]) };
+    m_max = std::max<InternTy>(m_max, d);
+    m_min = std::min<InternTy>(m_min, d);
+    avg += d;
   }
+  avg /= m_numVoxels;
 
-  gl_log("Max: %.2f, Min: %.2f", m_max, m_min);
+  gl_log("Max: %f, Min: %f, Mean: %f", m_max, m_min, avg);
 }
 
 template <typename ExternTy, typename InternTy>
@@ -272,22 +276,26 @@ DataReader<ExternTy, InternTy>::normalize_copy
 {
   gl_log("Normalizing data");
 
-  InternTy min = std::numeric_limits<InternTy>::max();
-  InternTy max = std::numeric_limits<InternTy>::lowest();
+  double min = std::numeric_limits<InternTy>::max();
+  double max = std::numeric_limits<InternTy>::lowest();
+  
+  double avg{ 0.0 };
+  const double diff{ m_max - m_min };
 
-  InternTy amt = shiftAmt();
-
-  for (size_t idx = 0; idx < m_numVoxels; ++idx) {
-    float d = (static_cast<InternTy>(image[idx]) + amt) / m_max;
-    if (d > max) max = static_cast<InternTy>(d);
-    if (d < min) min = static_cast<InternTy>(d);
+  for (size_t idx{ 0 }; idx < m_numVoxels; ++idx) {
+    InternTy val = static_cast<InternTy>(image[idx]);
+    double d{ (val - m_min) / diff };
+    max = std::max<InternTy>(max, d);
+    min = std::min<InternTy>(min, d);
     internal[idx] = d;
+    avg += d;
   }
 
   m_max = max;
   m_min = min;
+  avg /= m_numVoxels;
 
-  gl_log("Max: %.2f, Min: %.2f", m_max, m_min);
+  gl_log("Max: %f, Min: %f, Mean: %f", m_max, m_min, avg);
 }
 } // namespace bd
 

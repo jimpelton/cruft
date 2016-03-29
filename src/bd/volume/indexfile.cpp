@@ -78,38 +78,7 @@ IndexFileHeader::getTypeInt(DataType ty)
 // I n d e x F i l e   c l a s s
 ///////////////////////////////////////////////////////////////////////////////
 
-base_collection_wrapper*
-IndexFile::make_wrapper(DataType type, const unsigned long long num_vox[3],
-    const unsigned long long numblocks[3])
-{
-  base_collection_wrapper *col{ nullptr };
 
-  switch (type) {
-  case bd::DataType::UnsignedCharacter:
-    col = new collection_wrapper<unsigned char>
-        {{ num_vox[0], num_vox[1], num_vox[2] },
-         { numblocks[0], numblocks[1], numblocks[2] }};
-    break;
-
-  case bd::DataType::UnsignedShort:
-    col = new collection_wrapper<unsigned short>
-        {{ num_vox[0], num_vox[1], num_vox[2] },
-         { numblocks[0], numblocks[1], numblocks[2] }};
-    break;
-
-  case bd::DataType::Float:
-    col = new collection_wrapper<float>
-        {{ num_vox[0], num_vox[1], num_vox[2] },
-         { numblocks[0], numblocks[1], numblocks[2] }};
-    break;
-
-  default:
-    std::cerr << "Unsupported/unknown datatype: " << bd::to_string(type) << ".\n";
-    break;
-  }
-
-  return col;
-}
 
 std::shared_ptr<IndexFile>
 IndexFile::fromRawFile
@@ -224,36 +193,44 @@ IndexFile::getHeader() const
   return m_header;
 }
 
-
-///////////////////////////////////////////////////////////////////////////////
-bool
-IndexFile::readBinaryIndexFile()
+base_collection_wrapper*
+IndexFile::make_wrapper
+(
+  DataType type,
+  const unsigned long long num_vox[3],
+  const unsigned long long numblocks[3]
+  )
 {
-  // open index file (binary)
-  std::ifstream is{ m_fileName, std::ios::binary };
-  if (! is.is_open()){
-    gl_log_err("The file %s could not be opened.", m_fileName.c_str());
-    return false;
+  base_collection_wrapper *col{ nullptr };
+
+  switch (type) {
+  case bd::DataType::UnsignedCharacter:
+    col = new collection_wrapper<unsigned char>
+    { { num_vox[0], num_vox[1], num_vox[2] },
+    { numblocks[0], numblocks[1], numblocks[2] } };
+    break;
+
+  case bd::DataType::UnsignedShort:
+    col = new collection_wrapper<unsigned short>
+    { { num_vox[0], num_vox[1], num_vox[2] },
+    { numblocks[0], numblocks[1], numblocks[2] } };
+    break;
+
+  case bd::DataType::Float:
+    col = new collection_wrapper<float>
+    { { num_vox[0], num_vox[1], num_vox[2] },
+    { numblocks[0], numblocks[1], numblocks[2] } };
+    break;
+
+  default:
+    std::cerr << "Unsupported/unknown datatype: " << bd::to_string(type) << ".\n";
+    break;
   }
 
-  // read header
-  IndexFileHeader ifh;
-  is.seekg(0, std::ios::beg);
-  is.read(reinterpret_cast<char*>(&ifh), sizeof(IndexFileHeader));
-  m_header = ifh;
-  m_col = IndexFile::make_wrapper(IndexFileHeader::getType(ifh), ifh.num_vox, ifh.numblocks);
-
-  size_t numBlocks{ ifh.numblocks[0] * ifh.numblocks[1] * ifh.numblocks[2] };
-
-  // read many blocks!
-  FileBlock fb;
-  for (size_t i = 0; i<numBlocks; ++i) {
-    is.read(reinterpret_cast<char*>(&fb), sizeof(FileBlock));
-    m_col->addBlock(fb);
-  }
-
-  return true;
+  return col;
 }
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 void
@@ -288,7 +265,7 @@ IndexFile::writeBinaryIndexFile(const std::string& outpath)
 void
 IndexFile::writeAsciiIndexFile(std::ostream& os)
 {
-  os << "index :\n{\n";
+  os << "\"index\": {\n";
   os << m_header << ",\n";
 
   auto &blocks = m_col->blocks();
@@ -297,13 +274,12 @@ IndexFile::writeAsciiIndexFile(std::ostream& os)
   }
   os << *blocks[blocks.size()-1] << "\n";
 
-//  for (const std::shared_ptr<FileBlock> b : m_col->blocks()) {
-//    os << *b << ",\n";
-//  }
 
   os << "}\n";
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
 void
 IndexFile::writeAsciiIndexFile(const std::string& outpath)
 {
@@ -320,44 +296,72 @@ IndexFile::writeAsciiIndexFile(const std::string& outpath)
   os.close();
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
 const std::vector<std::shared_ptr<FileBlock>>&
-IndexFile::blocks()
+IndexFile::blocks() const
 {
   return m_col->blocks();
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////
-//void
-//IndexFile::writeBinaryIndexFileHeader(std::ostream& os)
-//{
-//}
+bool
+IndexFile::readBinaryIndexFile()
+{
+  // open index file (binary)
+  std::ifstream is{ m_fileName, std::ios::binary };
+  if (!is.is_open()) {
+    gl_log_err("The file %s could not be opened.", m_fileName.c_str());
+    return false;
+  }
+
+  // read header
+  IndexFileHeader ifh;
+  is.seekg(0, std::ios::beg);
+  is.read(reinterpret_cast<char*>(&ifh), sizeof(IndexFileHeader));
+  m_header = ifh;
+  m_col = IndexFile::make_wrapper(IndexFileHeader::getType(ifh), ifh.num_vox, ifh.numblocks);
+
+  size_t numBlocks{ ifh.numblocks[0] * ifh.numblocks[1] * ifh.numblocks[2] };
+
+  // read many blocks!
+  FileBlock fb;
+  for (size_t i = 0; i<numBlocks; ++i) {
+    is.read(reinterpret_cast<char*>(&fb), sizeof(FileBlock));
+    m_col->addBlock(fb);
+  }
+
+  return true;
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//void
-//IndexFile::writeBinarySingleBlockHeader(std::ostream& os,
-//    const FileBlock& block)
-//{
-//}
+std::string
+FileBlock::to_string() const
+{
+  std::stringstream ss;
+  ss <<
+    "  \"block_" << block_index << "\": {\n"
+    "  \"index\":" << block_index << ",\n"
+    "  \"data_offset\": " << data_offset << ",\n"
+    "  \"voxel_dims\": [" << voxel_dims[0] << ", " << voxel_dims[1] << ", " << voxel_dims[2] << "],\n"
+    "  \"world_pos\": [" << world_pos[0] << ", " << world_pos[1] << ", " << world_pos[2] << "],\n"
+    "  \"min_val\": " << min_val << ",\n"
+    "  \"max_val\": " << max_val << ",\n"
+    "  \"avg_val\": " << avg_val << ",\n"
+    "  \"empty\": " << (is_empty ? "true" : "false") << ",\n"
+    "}";
+
+  return ss.str();
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
 std::ostream&
 operator<<(std::ostream& os, const bd::FileBlock& block)
 {
-  os <<
-      "    block_" << block.block_index << ":\n    {\n"
-         "        index:" << block.block_index <<
-      ",\n        data_offset:" << block.data_offset <<
-      ",\n        voxel_dims:[" << block.voxel_dims[0] << "," << block.voxel_dims[1] << "," << block.voxel_dims[2] << "]"
-      ",\n        world_pos:[" << block.world_pos[0] << "," << block.world_pos[1] << "," << block.world_pos[2] << "]"
-      ",\n        min_val:" << block.min_val <<
-      ",\n        max_val:" << block.max_val <<
-      ",\n        avg_val:" << block.avg_val <<
-      ",\n        empty:" << (block.is_empty ? "true" : "false") <<
-      "\n    }";
-
-  return os;
+  return os << block.to_string();
 }
 
 
@@ -366,17 +370,17 @@ std::ostream&
 operator<<(std::ostream& os, const bd::IndexFileHeader& h)
 {
   os <<
-      "    header:\n    {"
-       "\n        magic:" << h.magic_number <<
-      ",\n        version:" << h.version <<
-      ",\n        header_length:" << h.header_length <<
-      ",\n        num_blocks:[" << h.numblocks[0] << "," << h.numblocks[1] << "," << h.numblocks[2] << "]"
-      ",\n        data_type:" << bd::to_string(IndexFileHeader::getType(h)) <<
-      ",\n        num_vox:[" << h.num_vox[0] << "," << h.num_vox[1] << "," << h.num_vox[2] << "]"
-      ",\n        vol_min:" << h.vol_min <<
-      ",\n        vol_max:" << h.vol_max <<
-      ",\n        vol_avg:" << h.vol_avg <<
-      "\n    }";
+      "\"header\": {\n"
+      "  \"magic\": " << h.magic_number << ",\n"
+      "  \"version\": " << h.version << ",\n"
+      "  \"header_length\": " << h.header_length << ",\n"
+      "  \"num_blocks\": [" << h.numblocks[0] << ", " << h.numblocks[1] << ", " << h.numblocks[2] << "],\n"
+      "  \"data_type\": " << bd::to_string(IndexFileHeader::getType(h)) << ",\n"
+      "  \"num_vox\": [" << h.num_vox[0] << ", " << h.num_vox[1] << ", " << h.num_vox[2] << "],\n"
+      "  \"vol_min\": " << h.vol_min << ",\n"
+      "  \"vol_max\": " << h.vol_max << ",\n"
+      "  \"vol_avg\": " << h.vol_avg << ",\n"
+      "}";
 
   return os;
 }

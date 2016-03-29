@@ -31,9 +31,12 @@ public:
 
   BlockCollection2();
 
+
   BlockCollection2(glm::u64vec3 volDims, glm::u64vec3 numBlocks);
 
+
   ~BlockCollection2();
+
 
   //////////////////////////////////////////////////////////////////////////////
   /// \brief Marks blocks as empty and uploads GL textures if average is outside of [tmin..tmax].
@@ -44,6 +47,7 @@ public:
   //TODO: filterblocks takes Functor for thresholding.
   void filterBlocks(std::istream& rawFile, float tmin = 0.0f, float tmax = 1.0f);
 
+
   //////////////////////////////////////////////////////////////////////////////
   /// \brief Read a single block into buffer \c out.
   /// \param b[in]      The FileBlock for the block that will be read.
@@ -53,6 +57,7 @@ public:
   //////////////////////////////////////////////////////////////////////////////
   void fillBlockData(const FileBlock& b, std::istream& infile, Ty* out);
 
+
   //////////////////////////////////////////////////////////////////////////////
   /// \brief Add a pre-initialized block to this BlockCollection2.
   /// \note  Adds block to non-empty list if block is not empty.
@@ -60,15 +65,18 @@ public:
   //////////////////////////////////////////////////////////////////////////////
   void addBlock(const FileBlock& b);
 
+
   /////////////////////////////////////////////////////////////////////////////////
   /// \brief Set dimensinos of blocks in voxels
   /////////////////////////////////////////////////////////////////////////////////
   void blockDims(const glm::u64vec3& dims);
 
+
   /////////////////////////////////////////////////////////////////////////////////
   /// \brief Get dimensinos of blocks in voxels
   /////////////////////////////////////////////////////////////////////////////////
   glm::u64vec3 blockDims() const;
+
 
   /////////////////////////////////////////////////////////////////////////////////
   /// \brief Get the volume's dimensions in voxels
@@ -87,32 +95,43 @@ public:
   //////////////////////////////////////////////////////////////////////////////
   glm::u64vec3 numBlocks() const;
 
+
   //////////////////////////////////////////////////////////////////////////////
   double volMin() const { return m_volMin; }
 
+
   //////////////////////////////////////////////////////////////////////////////
   double volMax() const { return m_volMax; }
+
 
   //////////////////////////////////////////////////////////////////////////////
   double volAvg() const { return m_volAvg; }
 
   //////////////////////////////////////////////////////////////////////////////
-  const std::vector<std::shared_ptr<FileBlock>>& blocks() const { return m_blocks; }
+  const std::vector<std::shared_ptr<FileBlock>>& 
+  blocks() const
+  {
+    return m_blocks;
+  }
 
   //////////////////////////////////////////////////////////////////////////////
-  const std::vector<std::weak_ptr<FileBlock>>& nonEmptyBlocks() const { return m_nonEmptyBlocks; }
+  const std::vector<std::weak_ptr<FileBlock>>& 
+  nonEmptyBlocks() const
+  {
+    return m_nonEmptyBlocks;
+  }
 
 private:
 
   //////////////////////////////////////////////////////////////////////////////
   /// \brief Initializes \c nb blocks so that they fit within the extent of \c vd.
-  /// \param nb[in]      Number of blocks in x,y,z directions.
-  /// \param vd[in]      Volume dimensions
   //////////////////////////////////////////////////////////////////////////////
   void initBlocks();
 
   //////////////////////////////////////////////////////////////////////////////
-  void computeVolumeStatistics(std::istream&);
+  /// \brief Compute and save a few stats from provided raw file.
+  //////////////////////////////////////////////////////////////////////////////
+  void computeVolumeStatistics(std::istream& raw);
 
   glm::u64vec3 m_blockDims; ///< Dimensions of a block in voxels.
   glm::u64vec3 m_volDims;   ///< Volume dimensions in voxels.
@@ -124,29 +143,30 @@ private:
 
   std::vector<std::shared_ptr<FileBlock>> m_blocks;
   std::vector<std::weak_ptr<FileBlock>> m_nonEmptyBlocks;
+
 };
 
 template<typename Ty>
 BlockCollection2<Ty>::BlockCollection2()
-    : BlockCollection2({ 0, 0, 0 }, { 0, 0, 0 })
+  : BlockCollection2({ 0, 0, 0 }, { 0, 0, 0 })
 {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 BlockCollection2<Ty>::BlockCollection2
-    (
-        glm::u64vec3 volDims,
-        glm::u64vec3 numBlocks
-    )
-    : m_blockDims{ volDims/numBlocks }
-      , m_volDims{ volDims }
-      , m_numBlocks{ numBlocks }
-      , m_volMax{ std::numeric_limits<float>::min() }
-      , m_volMin{ std::numeric_limits<float>::max() }
-      , m_volAvg{ 0.0f }
-      , m_blocks{ }
-      , m_nonEmptyBlocks{ }
+(
+  glm::u64vec3 volDims,
+  glm::u64vec3 numBlocks
+) 
+  : m_blockDims{ volDims/numBlocks }
+  , m_volDims{ volDims }
+  , m_numBlocks{ numBlocks }
+  , m_volMax{ std::numeric_limits<float>::min() }
+  , m_volMin{ std::numeric_limits<float>::max() }
+  , m_volAvg{ 0.0f }
+  , m_blocks{ }
+  , m_nonEmptyBlocks{ }
 {
 }
 
@@ -155,6 +175,7 @@ BlockCollection2<Ty>::BlockCollection2
 template<typename Ty>
 BlockCollection2<Ty>::~BlockCollection2()
 {
+  std::cout << "BlockCollection2 destructor\n";
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -220,15 +241,15 @@ BlockCollection2<Ty>::computeVolumeStatistics(std::istream& infile)
   for (size_t slab{ 0 }; slab<m_volDims.z; ++slab) {
     for (size_t row{ 0 }; row<m_volDims.y; ++row) {
 
-      // Get a row
+      // Get a single row of a block
       infile.read(reinterpret_cast<char*>(rowbuf), rowbytes);
 
       for (size_t col{ 0 }; col<m_volDims.x; ++col) {
         Ty val{ rowbuf[col] };
 
-        m_volMin = std::min<float>(m_volMin, val);
-        m_volMax = std::max<float>(m_volMax, val);
-        m_volAvg += static_cast<float>(val);
+        m_volMin = std::min<decltype(m_volMin)>(m_volMin, val);
+        m_volMax = std::max<decltype(m_volMax)>(m_volMax, val);
+        m_volAvg += static_cast<decltype(m_volAvg)>(val);
 
       } //for col
     } //for row
@@ -241,6 +262,7 @@ BlockCollection2<Ty>::computeVolumeStatistics(std::istream& infile)
 
   infile.seekg(0, std::ios::beg);
 }
+
 
 //////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
@@ -256,6 +278,7 @@ BlockCollection2<Ty>::addBlock(const FileBlock& b)
 
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 glm::u64vec3
@@ -263,6 +286,7 @@ BlockCollection2<Ty>::blockDims() const
 {
   return m_blockDims;
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
@@ -272,6 +296,7 @@ BlockCollection2<Ty>::blockDims(const glm::u64vec3& dims)
   m_blockDims = dims;
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 glm::u64vec3
@@ -279,6 +304,7 @@ BlockCollection2<Ty>::volDims() const
 {
   return m_volDims;
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
@@ -288,6 +314,7 @@ BlockCollection2<Ty>::volDims(const glm::u64vec3& voldims)
   m_volDims = voldims;
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 glm::u64vec3
@@ -296,10 +323,16 @@ BlockCollection2<Ty>::numBlocks() const
   return m_numBlocks;
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 void
-BlockCollection2<Ty>::filterBlocks(std::istream& rawFile, float tmin, float tmax)
+BlockCollection2<Ty>::filterBlocks
+(
+  std::istream& rawFile, 
+  float tmin, 
+  float tmax
+)
 {
   initBlocks();
 
@@ -332,7 +365,7 @@ BlockCollection2<Ty>::filterBlocks(std::istream& rawFile, float tmin, float tmax
     // Normalize values in the block.
     const double diff{ m_volMax-m_volMin };
     std::transform(image, image+numvox, normed,
-        [ this, diff ](Ty blkVal) {
+        [ this, diff ](Ty &blkVal) {
           return (blkVal - this->m_volMin)/diff;
         });
 
@@ -369,8 +402,12 @@ BlockCollection2<Ty>::filterBlocks(std::istream& rawFile, float tmin, float tmax
 
 template<typename Ty>
 void
-BlockCollection2<Ty>::fillBlockData(const FileBlock& b, std::istream& infile,
-    Ty* blockBuffer)
+BlockCollection2<Ty>::fillBlockData
+(
+  const FileBlock& b, 
+  std::istream& infile,
+  Ty* blockBuffer
+)
 {
   // Convert 1D block index to 3D i,j,k indices.
   glm::u64vec3 index{

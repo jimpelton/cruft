@@ -17,10 +17,15 @@ enum class DataType
   Short,
   UnsignedShort,
 
-  Float
+  Float,
+
+  Unknown
 };
 
-extern const std::map<std::string, DataType> DataTypesMap;
+//extern const std::map<std::string, DataType> DataTypesMap;
+
+bd::DataType
+to_dataType(const std::string &typeStr);
 
 std::string
 to_string(bd::DataType);

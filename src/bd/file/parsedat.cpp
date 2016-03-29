@@ -128,7 +128,7 @@ void
 parseFormat(const std::string& s, DatFileData& d)
 {
   const std::string ss{ toLowerCase(s) };
-  d.dataType = bd::DataTypesMap.at(ss);
+  d.dataType = bd::to_dataType(ss);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

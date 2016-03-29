@@ -8,6 +8,7 @@
 
 namespace bd
 {
+
 void
 hsvToRgb(float h, float s, float v, glm::vec3& rgb)
 {
@@ -98,7 +99,7 @@ std::unique_ptr<float []>
 readVolumeData(const std::string& dtype, const std::string& fpath,
     size_t volx, size_t voly, size_t volz)
 {
-  bd::DataType t = bd::DataTypesMap.at(dtype);
+  bd::DataType t = bd::to_dataType(dtype);
   float* rawdata = nullptr;
   switch (t) {
   case bd::DataType::Float:
@@ -126,10 +127,10 @@ readVolumeData(const std::string& dtype, const std::string& fpath,
     break;
   }
 
-  return std::unique_ptr<float []>(rawdata);
+  return std::unique_ptr<float[]>(rawdata);
 }
 
-std::unique_ptr<float []>
+std::unique_ptr<float[]>
 readVolumeData(const std::string& datFilePath, const std::string &filePath)
 {
   bd::DatFileData dat{};
@@ -137,15 +138,11 @@ readVolumeData(const std::string& datFilePath, const std::string &filePath)
   if (! success) {
     return nullptr;
   }
-
-  auto cit = std::find_if(DataTypesMap.begin(), DataTypesMap.end(),
-      [&dat](std::pair<std::string, DataType> p){ return p.second == dat.dataType; });
-  
  
   gl_log("Dat file: %s", dat.to_string().c_str());
-
-  return readVolumeData(cit->first, filePath, dat.rX, dat.rY, dat.rZ);
-
+  
+  std::string typeStr{ bd::to_string(dat.dataType) };
+  return readVolumeData(typeStr, filePath, dat.rX, dat.rY, dat.rZ);
 }
 
 } // namespace bd

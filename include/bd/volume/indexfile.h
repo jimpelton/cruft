@@ -173,25 +173,33 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 class IndexFile
 {
-
-
 public:
 
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Create IndexFile from an existing raw file.
+  /// \param path The path to the raw file.
+  /// \param type The data type in the file (\sa bd::DataType)
+  /// \param numVox number of voxels along x, y, and z axis.
+  /// \param numBlks number of blocks along x, y, and z axis.
+  /// \param nummax The min and max block averages to use for threshold values 
+  ///               when filtering blocks.
   ///////////////////////////////////////////////////////////////////////////////
-  static std::shared_ptr<IndexFile> fromRawFile(
-      const std::string &path,
-      DataType type,
-      const unsigned long long numVox[3],
-      const unsigned long long numBlks[3],
-      const float minmax[2]);
+  static std::shared_ptr<IndexFile> 
+  fromRawFile
+  (
+    const std::string &path, 
+    DataType type,
+    const unsigned long long numVox[3], 
+    const unsigned long long numBlks[3],
+    const float minmax[2]
+  );
 
 
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Create IndexFile from an existing binary index file.
   ///////////////////////////////////////////////////////////////////////////////
-  static std::shared_ptr<IndexFile> fromBinaryIndexFile(const std::string &path);
+  static std::shared_ptr<IndexFile> 
+  fromBinaryIndexFile(const std::string &path);
 
 
   IndexFile();
@@ -214,35 +222,28 @@ public:
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Get the IndexFileHeader for the index file.
   ///////////////////////////////////////////////////////////////////////////////
-  const IndexFileHeader& getHeader() const;
+  const IndexFileHeader& 
+  getHeader() const;
 
-  const std::vector<std::shared_ptr<FileBlock>>& blocks();
+  const std::vector<std::shared_ptr<FileBlock>>&
+  blocks() const;
 
-  static base_collection_wrapper* make_wrapper(DataType type,
-      const unsigned long long num_vox[3], const unsigned long long numblocks[3]);
+  static base_collection_wrapper* 
+  make_wrapper
+  (
+    DataType type, 
+    const unsigned long long num_vox[3], 
+    const unsigned long long numblocks[3]
+  );
 
 
 private:
-
-  ///////////////////////////////////////////////////////////////////////////////
-  /// \brief Write single block binary to \c os.
-  ///////////////////////////////////////////////////////////////////////////////
-//  void writeBinarySingleBlockHeader(std::ostream& os, const FileBlock& block);
-
-  ///////////////////////////////////////////////////////////////////////////////
-  /// \brief Write the binary header for index file.
-  ///////////////////////////////////////////////////////////////////////////////
-//  void writeBinaryIndexFileHeader(std::ostream& os);
-
-
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Read binary index file from \c is and populate \c collection with
   ///        blocks.
   ///////////////////////////////////////////////////////////////////////////////
   bool readBinaryIndexFile();
 
-
-private:
   IndexFileHeader m_header;
   std::string m_fileName;
   base_collection_wrapper *m_col;
