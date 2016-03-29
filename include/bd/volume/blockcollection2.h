@@ -33,8 +33,6 @@ public:
 
   BlockCollection2(glm::u64vec3 volDims, glm::u64vec3 numBlocks);
 
-  BlockCollection2(const BlockCollection2&);
-
   ~BlockCollection2();
 
   //////////////////////////////////////////////////////////////////////////////
@@ -53,7 +51,7 @@ public:
   /// \param infile[in] The raw data file.
   /// \param out[out]   Destination space for block data.
   //////////////////////////////////////////////////////////////////////////////
-  void fillBlockData(FileBlock& b, std::istream& infile, Ty* out);
+  void fillBlockData(const FileBlock& b, std::istream& infile, Ty* out);
 
   //////////////////////////////////////////////////////////////////////////////
   /// \brief Add a pre-initialized block to this BlockCollection2.
@@ -90,13 +88,13 @@ public:
   glm::u64vec3 numBlocks() const;
 
   //////////////////////////////////////////////////////////////////////////////
-  float volMin() const { return m_volMin; }
+  double volMin() const { return m_volMin; }
 
   //////////////////////////////////////////////////////////////////////////////
-  float volMax() const { return m_volMax; }
+  double volMax() const { return m_volMax; }
 
   //////////////////////////////////////////////////////////////////////////////
-  float volAvg() const { return m_volAvg; }
+  double volAvg() const { return m_volAvg; }
 
   //////////////////////////////////////////////////////////////////////////////
   const std::vector<std::shared_ptr<FileBlock>>& blocks() const { return m_blocks; }
@@ -120,9 +118,9 @@ private:
   glm::u64vec3 m_volDims;   ///< Volume dimensions in voxels.
   glm::u64vec3 m_numBlocks; ///< Number of blocks volume is divided into.
 
-  float m_volMax; ///< Max value found in volume.
-  float m_volMin; ///< Min value found in volume.
-  float m_volAvg; ///< Avg value found in volume.
+  double m_volMax; ///< Max value found in volume.
+  double m_volMin; ///< Min value found in volume.
+  double m_volAvg; ///< Avg value found in volume.
 
   std::vector<std::shared_ptr<FileBlock>> m_blocks;
   std::vector<std::weak_ptr<FileBlock>> m_nonEmptyBlocks;
@@ -221,6 +219,8 @@ BlockCollection2<Ty>::computeVolumeStatistics(std::istream& infile)
   infile.seekg(0, std::ios::beg);
   for (size_t slab{ 0 }; slab<m_volDims.z; ++slab) {
     for (size_t row{ 0 }; row<m_volDims.y; ++row) {
+
+      // Get a row
       infile.read(reinterpret_cast<char*>(rowbuf), rowbytes);
 
       for (size_t col{ 0 }; col<m_volDims.x; ++col) {
@@ -309,51 +309,46 @@ BlockCollection2<Ty>::filterBlocks(std::istream& rawFile, float tmin, float tmax
   size_t numvox{ m_blockDims.x*m_blockDims.y*m_blockDims.z };
 
   Ty* image{ new Ty[numvox] };
+  double* normed{ new double[numvox] };
 
-  gl_log("Starting block filtering for %d blocks...",
-      m_numBlocks.x*m_numBlocks.y*m_numBlocks.z);
+  gl_log("Starting block filtering for %d blocks...", m_numBlocks.x*m_numBlocks.y*m_numBlocks.z);
+
   for (std::shared_ptr<FileBlock> b : m_blocks) {
     fillBlockData(*b, rawFile, image);
 
-    // compute block stats
-//    for (size_t i = 0; i < blkPoints; ++i) {
-//      Ty val{ image[i] };
-//      b.max_val  = std::max<float>(b.max_val, val);
-//      b.min_val  = std::min<float>(b.min_val, val);
-//      b.avg_val += static_cast<float>(val);
-//    } // for i
-//    b.avg_val /= blkPoints;
-
     // Find min/max/avg values
-    b->min_val = std::numeric_limits<float>::max();
-    b->max_val = std::numeric_limits<float>::min();
-    b->avg_val = 0.0f;
+    b->min_val = std::numeric_limits<decltype(b->min_val)>::max();
+    b->max_val = std::numeric_limits<decltype(b->max_val)>::min();
+    b->avg_val = 0.0;
     std::for_each(image, image+numvox,
-        [ & ](const Ty& t) {
-          b->min_val = std::min<float>(b->min_val, t);
-          b->max_val = std::max<float>(b->max_val, t);
+        [ &b ](const Ty& t) {
+          b->min_val = std::min<decltype(b->min_val)>(b->min_val, t);
+          b->max_val = std::max<decltype(b->max_val)>(b->max_val, t);
           b->avg_val += t;
         });
     b->avg_val /= numvox;
+
 
     // Normalize values in the block.
-    const float diff{ m_volMax-m_volMin };
-    std::for_each(image, image+numvox,
-        [ this, diff ](Ty& t) {
-          t = (t-this->m_volMin)/diff;
+    const double diff{ m_volMax-m_volMin };
+    std::transform(image, image+numvox, normed,
+        [ this, diff ](Ty blkVal) {
+          return (blkVal - this->m_volMin)/diff;
         });
 
+
     // Now, re-find the new min/max/avg values
-    b->min_val = std::numeric_limits<float>::max();
-    b->max_val = std::numeric_limits<float>::min();
-    b->avg_val = 0.0f;
-    std::for_each(image, image+numvox,
-        [ & ](const Ty& t) {
-          b->max_val = std::max<float>(b->max_val, t);
-          b->min_val = std::min<float>(b->min_val, t);
+    b->min_val = std::numeric_limits<decltype(b->min_val)>::max();
+    b->max_val = std::numeric_limits<decltype(b->max_val)>::min();
+    b->avg_val = 0.0;
+    std::for_each(normed, normed+numvox,
+        [ &b ](float t) {
+          b->max_val = std::max<decltype(b->max_val)>(b->max_val, t);
+          b->min_val = std::min<decltype(b->min_val)>(b->min_val, t);
           b->avg_val += t;
         });
     b->avg_val /= numvox;
+
 
     // TODO: call filter function.
     if (b->avg_val<tmin || b->avg_val>tmax) {
@@ -366,6 +361,7 @@ BlockCollection2<Ty>::filterBlocks(std::istream& rawFile, float tmin, float tmax
   } // for (FileBlock...
 
   delete[] image;
+  delete[] normed;
 
   gl_log("%d/%d blocks marked empty.",
       m_blocks.size()-m_nonEmptyBlocks.size(), m_blocks.size());
@@ -373,7 +369,7 @@ BlockCollection2<Ty>::filterBlocks(std::istream& rawFile, float tmin, float tmax
 
 template<typename Ty>
 void
-BlockCollection2<Ty>::fillBlockData(FileBlock& b, std::istream& infile,
+BlockCollection2<Ty>::fillBlockData(const FileBlock& b, std::istream& infile,
     Ty* blockBuffer)
 {
   // Convert 1D block index to 3D i,j,k indices.

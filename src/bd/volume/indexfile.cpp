@@ -137,6 +137,22 @@ IndexFile::fromRawFile
   // filter the blocks
   idxfile->m_col->filterBlocks(rawFile, minmax[0], minmax[1]);
 
+  idxfile->m_header.magic_number  = MAGIC;
+  idxfile->m_header.version       = VERSION;
+  idxfile->m_header.header_length = HEAD_LEN;
+
+  idxfile->m_header.numblocks[0] = idxfile->m_col->numBlocks().x;
+  idxfile->m_header.numblocks[1] = idxfile->m_col->numBlocks().y;
+  idxfile->m_header.numblocks[2] = idxfile->m_col->numBlocks().z;
+
+  idxfile->m_header.dataType = IndexFileHeader::getTypeInt(type);
+  idxfile->m_header.num_vox[0] = idxfile->m_col->volDims().x;
+  idxfile->m_header.num_vox[1] = idxfile->m_col->volDims().y;
+  idxfile->m_header.num_vox[2] = idxfile->m_col->volDims().z;
+  idxfile->m_header.vol_avg = idxfile->m_col->volAvg();
+  idxfile->m_header.vol_max = idxfile->m_col->volMax();
+  idxfile->m_header.vol_min = idxfile->m_col->volMin();
+
   return idxfile;
 
 }
@@ -243,10 +259,11 @@ IndexFile::readBinaryIndexFile()
 void
 IndexFile::writeBinaryIndexFile(std::ostream& os)
 {
-  writeBinaryIndexFileHeader(os);
-
+  // write header to stream.
+  IndexFileHeader::writeToStream(os, m_header);
+  // read all the blocks
   for (const std::shared_ptr<FileBlock> b : m_col->blocks()) {
-    writeBinarySingleBlockHeader(os, *b);
+    os.write(reinterpret_cast<const char*>(b.get()), sizeof(FileBlock));
   }
 }
 
@@ -271,10 +288,20 @@ IndexFile::writeBinaryIndexFile(const std::string& outpath)
 void
 IndexFile::writeAsciiIndexFile(std::ostream& os)
 {
-  os << m_header << "\n";
-  for (const std::shared_ptr<FileBlock> b : m_col->blocks()) {
-    os << *b << "\n";
+  os << "index :\n{\n";
+  os << m_header << ",\n";
+
+  auto &blocks = m_col->blocks();
+  for (int i=0; i<blocks.size()-1; ++i) {
+    os << *blocks[i] << ",\n";
   }
+  os << *blocks[blocks.size()-1] << "\n";
+
+//  for (const std::shared_ptr<FileBlock> b : m_col->blocks()) {
+//    os << *b << ",\n";
+//  }
+
+  os << "}\n";
 }
 
 void
@@ -283,11 +310,12 @@ IndexFile::writeAsciiIndexFile(const std::string& outpath)
   std::ofstream os;
   os.open(outpath);
   if (! os.is_open()) {
-    std::cerr << outpath << " could not be opened." << std::endl;
+    gl_log_err("%s could not be opened!", outpath.c_str());
     return;
   }
 
   writeAsciiIndexFile(os);
+
   os.flush();
   os.close();
 }
@@ -299,20 +327,18 @@ IndexFile::blocks()
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void
-IndexFile::writeBinaryIndexFileHeader(std::ostream& os)
-{
-  IndexFileHeader::writeToStream(os, m_header);
-}
+//void
+//IndexFile::writeBinaryIndexFileHeader(std::ostream& os)
+//{
+//}
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void
-IndexFile::writeBinarySingleBlockHeader(std::ostream& os,
-    const FileBlock& block)
-{
-  os.write(reinterpret_cast<const char*>(&block), sizeof(FileBlock));
-}
+//void
+//IndexFile::writeBinarySingleBlockHeader(std::ostream& os,
+//    const FileBlock& block)
+//{
+//}
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -320,18 +346,16 @@ std::ostream&
 operator<<(std::ostream& os, const bd::FileBlock& block)
 {
   os <<
-      "{"
-          "\n  Index: " << block.block_index <<
-      "\n  Data Offset: " << block.data_offset <<
-      "\n  Voxel dims: " << block.voxel_dims[0] << "x" << block.voxel_dims[1] << "x"
-      << block.voxel_dims[2] <<
-      "\n  World pos: " << block.world_pos[0] << ", " << block.world_pos[1] << ", "
-      << block.world_pos[2] <<
-      "\n  Min val: " << block.min_val <<
-      "\n  Max val: " << block.max_val <<
-      "\n  Avg val: " << block.avg_val <<
-      "\n  Empty: " << (block.is_empty ? "True" : "False") <<
-      "\n}";
+      "    block_" << block.block_index << ":\n    {\n"
+         "        index:" << block.block_index <<
+      ",\n        data_offset:" << block.data_offset <<
+      ",\n        voxel_dims:[" << block.voxel_dims[0] << "," << block.voxel_dims[1] << "," << block.voxel_dims[2] << "]"
+      ",\n        world_pos:[" << block.world_pos[0] << "," << block.world_pos[1] << "," << block.world_pos[2] << "]"
+      ",\n        min_val:" << block.min_val <<
+      ",\n        max_val:" << block.max_val <<
+      ",\n        avg_val:" << block.avg_val <<
+      ",\n        empty:" << (block.is_empty ? "true" : "false") <<
+      "\n    }";
 
   return os;
 }
@@ -342,16 +366,17 @@ std::ostream&
 operator<<(std::ostream& os, const bd::IndexFileHeader& h)
 {
   os <<
-      "{"
-          "\n  Magic: " << h.magic_number <<
-      "\n  Version: " << h.version <<
-      "\n  Header Length: " << h.header_length <<
-      "\n  Number o' Blocks: " << h.numblocks[0] << "x" << h.numblocks[1] << "x"
-      << h.numblocks[2] <<
-      "\n  Vol Avg: " << h.vol_avg <<
-      "\n  Vol Min: " << h.vol_min <<
-      "\n  Vol Max: " << h.vol_max <<
-      "\n}";
+      "    header:\n    {"
+       "\n        magic:" << h.magic_number <<
+      ",\n        version:" << h.version <<
+      ",\n        header_length:" << h.header_length <<
+      ",\n        num_blocks:[" << h.numblocks[0] << "," << h.numblocks[1] << "," << h.numblocks[2] << "]"
+      ",\n        data_type:" << bd::to_string(IndexFileHeader::getType(h)) <<
+      ",\n        num_vox:[" << h.num_vox[0] << "," << h.num_vox[1] << "," << h.num_vox[2] << "]"
+      ",\n        vol_min:" << h.vol_min <<
+      ",\n        vol_max:" << h.vol_max <<
+      ",\n        vol_avg:" << h.vol_avg <<
+      "\n    }";
 
   return os;
 }

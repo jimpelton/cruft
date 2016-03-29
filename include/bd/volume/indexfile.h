@@ -33,9 +33,9 @@ namespace bd
 ///   Num Vox X           | 8 bytes unsigned
 ///   Num Vox Y           | 8 bytes unsigned
 ///   Num Vox Z           | 8 bytes unsigned
-///   Volume average val  | 4 bytes float
-///   Volume min value    | 4 bytes float
-///   Volume max value    | 4 bytes float
+///   Volume average val  | 8 bytes float
+///   Volume min value    | 8 bytes float
+///   Volume max value    | 8 bytes float
 ///////////////////////////////////////////////////////////////////////////////
 struct IndexFileHeader
 {
@@ -50,10 +50,11 @@ struct IndexFileHeader
   uint32_t dataType;
   uint64_t num_vox[3];                      ///< Dimensions of volume in voxels.
 
-  float vol_avg;
-  float vol_min;
-  float vol_max;
+  double vol_avg;
+  double vol_min;
+  double vol_max;
 
+///////////////////////////////////////////////////////////////////////////////
   static IndexFileHeader fromStream(std::istream&);
   static void writeToStream(std::ostream&, const IndexFileHeader &);
   static DataType getType(const IndexFileHeader &);
@@ -80,8 +81,18 @@ public:
   virtual ~base_collection_wrapper() { }
 
   virtual void addBlock(const FileBlock&) = 0;
+
   virtual const std::vector<std::shared_ptr<FileBlock>>& blocks() = 0;
+
+  virtual const std::vector<std::weak_ptr<FileBlock>>& nonEmptyBlocks() = 0;
+
   virtual void filterBlocks(std::ifstream &, float min, float max) = 0;
+  virtual glm::u64vec3 numBlocks() = 0;
+  virtual glm::u64vec3 volDims() = 0;
+  virtual glm::u64vec3 blockDims() = 0;
+  virtual double volMin() = 0;
+  virtual double volMax() = 0;
+  virtual double volAvg() = 0;
 
 };
 
@@ -109,9 +120,46 @@ public:
     return c.blocks();
   }
 
+
+  const std::vector<std::weak_ptr<FileBlock>>& nonEmptyBlocks() override
+  {
+    return c.nonEmptyBlocks();
+  }
+
+
   void filterBlocks(std::ifstream &rawFile, float min, float max) override
   {
     c.filterBlocks(rawFile, min, max);
+  }
+
+  glm::u64vec3 numBlocks() override
+  {
+    return c.numBlocks();
+  }
+
+  glm::u64vec3 volDims() override
+  {
+    return c.volDims();
+  }
+
+  glm::u64vec3 blockDims() override
+  {
+    return c.blockDims();
+  }
+
+  double volMin() override
+  {
+    return c.volMin();
+  }
+
+  double volMax() override
+  {
+    return c.volMax();
+  }
+
+  double volAvg() override
+  {
+    return c.volAvg();
   }
 
 private:
@@ -179,12 +227,12 @@ private:
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Write single block binary to \c os.
   ///////////////////////////////////////////////////////////////////////////////
-  void writeBinarySingleBlockHeader(std::ostream& os, const FileBlock& block);
+//  void writeBinarySingleBlockHeader(std::ostream& os, const FileBlock& block);
 
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Write the binary header for index file.
   ///////////////////////////////////////////////////////////////////////////////
-  void writeBinaryIndexFileHeader(std::ostream& os);
+//  void writeBinaryIndexFileHeader(std::ostream& os);
 
 
   ///////////////////////////////////////////////////////////////////////////////
