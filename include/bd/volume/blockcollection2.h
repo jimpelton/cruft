@@ -45,7 +45,8 @@ public:
   /// \param tmax[in] max average block value to filter against.
   ///////////////////////////////////////////////////////////////////////////////
   //TODO: filterblocks takes Functor for thresholding.
-  void filterBlocks(std::istream& rawFile, float tmin = 0.0f, float tmax = 1.0f);
+  void filterBlocks(std::istream& rawFile, float tmin = 0.0f, float tmax = 1.0f,
+    bool normalize = true);
 
 
   //////////////////////////////////////////////////////////////////////////////
@@ -331,7 +332,8 @@ BlockCollection2<Ty>::filterBlocks
 (
   std::istream& rawFile, 
   float tmin, 
-  float tmax
+  float tmax,
+  bool normalize
 )
 {
   initBlocks();
@@ -340,54 +342,60 @@ BlockCollection2<Ty>::filterBlocks
 
   // total voxels per block
   size_t numvox{ m_blockDims.x*m_blockDims.y*m_blockDims.z };
+  gl_log("Starting block filtering for %d blocks...", numvox);
 
   Ty* image{ new Ty[numvox] };
-  double* normed{ new double[numvox] };
-
-  gl_log("Starting block filtering for %d blocks...", m_numBlocks.x*m_numBlocks.y*m_numBlocks.z);
+  
+  double *normed{ nullptr };
+  if (normalize) {
+    normed = new double[numvox];
+  }
 
   for (std::shared_ptr<FileBlock> b : m_blocks) {
     fillBlockData(*b, rawFile, image);
 
     // Find min/max/avg values
-    b->min_val = std::numeric_limits<decltype(b->min_val)>::max();
-    b->max_val = std::numeric_limits<decltype(b->max_val)>::min();
-    b->avg_val = 0.0;
-    std::for_each(image, image+numvox,
-        [ &b ](const Ty& t) {
-          b->min_val = std::min<decltype(b->min_val)>(b->min_val, t);
-          b->max_val = std::max<decltype(b->max_val)>(b->max_val, t);
-          b->avg_val += t;
-        });
-    b->avg_val /= numvox;
+    m_b->min_val = std::numeric_limits<decltype(m_b->min_val)>::max();
+    m_b->max_val = std::numeric_limits<decltype(m_b->max_val)>::min();
+    m_b->avg_val = 0.0;
+    std::for_each(image, image + numvox,
+      [&b](const Ty& t) {
+      m_b->min_val = std::min<decltype(m_b->min_val)>(m_b->min_val, t);
+      m_b->max_val = std::max<decltype(m_b->max_val)>(m_b->max_val, t);
+      m_b->avg_val += t;
+    });
+    m_b->avg_val /= numvox;
 
 
-    // Normalize values in the block.
-    const double diff{ m_volMax-m_volMin };
-    std::transform(image, image+numvox, normed,
-        [ this, diff ](Ty &blkVal) {
-          return (blkVal - this->m_volMin)/diff;
-        });
+    // Normalize values in the block, copy to normed
+    if (normalize && normed != nullptr) {
+      const double diff{ m_volMax - m_volMin };
+      std::transform(image, image + numvox, normed,
+        [this, diff](Ty &blkVal) {
+        return (blkVal - this->m_volMin) / diff;
+      });
+    }
 
 
     // Now, re-find the new min/max/avg values
-    b->min_val = std::numeric_limits<decltype(b->min_val)>::max();
-    b->max_val = std::numeric_limits<decltype(b->max_val)>::min();
-    b->avg_val = 0.0;
-    std::for_each(normed, normed+numvox,
-        [ &b ](float t) {
-          b->max_val = std::max<decltype(b->max_val)>(b->max_val, t);
-          b->min_val = std::min<decltype(b->min_val)>(b->min_val, t);
-          b->avg_val += t;
-        });
-    b->avg_val /= numvox;
+    m_b->min_val = std::numeric_limits<decltype(m_b->min_val)>::max();
+    m_b->max_val = std::numeric_limits<decltype(m_b->max_val)>::min();
+    m_b->avg_val = 0.0;
+    std::for_each(normed, normed + numvox,
+      [&b](float t) {
+      m_b->max_val = std::max<decltype(m_b->max_val)>(m_b->max_val, t);
+      m_b->min_val = std::min<decltype(m_b->min_val)>(m_b->min_val, t);
+      m_b->avg_val += t;
+    });
+    m_b->avg_val /= numvox;
 
 
     // TODO: call filter function.
-    if (b->avg_val<tmin || b->avg_val>tmax) {
-      b->is_empty = 1;
-    } else {
-      b->is_empty = 0;
+    if (m_b->avg_val<tmin || m_b->avg_val>tmax) {
+      m_b->is_empty = 1;
+    }
+    else {
+      m_b->is_empty = 0;
       m_nonEmptyBlocks.push_back(b);
     }
 
@@ -427,6 +435,7 @@ BlockCollection2<Ty>::fillBlockData
   const size_t blockRowLength{ m_blockDims.x };
   for (auto slab = start.z; slab<end.z; ++slab) {
     for (auto row = start.y; row<end.y; ++row) {
+
       // seek to start of row
       infile.seekg(offset, infile.beg);
 
@@ -440,6 +449,8 @@ BlockCollection2<Ty>::fillBlockData
     }
   }
 }
+
+
 
 } // namespace bd
 
