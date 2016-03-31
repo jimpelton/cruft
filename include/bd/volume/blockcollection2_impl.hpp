@@ -189,12 +189,12 @@ BlockCollection2<Ty>::numBlocks() const
 template<typename Ty>
 void
 BlockCollection2<Ty>::filterBlocks
-    (
-        std::istream& rawFile,
-        float tmin,
-        float tmax,
-        bool normalize
-    )
+(
+  std::istream& rawFile,
+  float tmin,
+  float tmax,
+  bool normalize
+)
 {
   initBlocks();
 
@@ -271,11 +271,11 @@ BlockCollection2<Ty>::filterBlocks
 template<typename Ty>
 void
 BlockCollection2<Ty>::fillBlockData
-    (
-        const FileBlock& b,
-        std::istream& infile,
-        Ty* blockBuffer
-    )
+(
+  const FileBlock& b,
+  std::istream& infile,
+  Ty* blockBuffer
+) const
 {
   // Convert 1D block index to 3D i,j,k indices.
   glm::u64vec3 index{
@@ -315,14 +315,23 @@ BlockCollection2<Ty>::fillBlockData
 template<typename Ty>
 template<typename RTy>
 void
-BlockCollection2<Ty>::Reader<RTy>::initBuffers(int target)
+BlockCollection2<Ty>::Reader<RTy>::initBuffers(size_t bufSize)
 {
-  m_buffer = new RTy[ target * sizeof(RTy) ];
-
-  // how many rows of blocks can we make
-  int rows{ target / m_bc2->m_numBlocks.x };
-
+  m_bufSize = bufSize;
+  m_buffer = new RTy[ bufSize ];
 }
+
+
+///////////////////////////////////////////////////////////////////////////////
+template<typename Ty>
+template<typename RTy>
+void
+BlockCollection2<Ty>::Reader<RTy>::fillBuffer()
+{
+  m_is.read(reinterpret_cast<char*>(m_buffer), m_bufSize);
+  m_pos += m_bufSize;
+}
+
 
 
 

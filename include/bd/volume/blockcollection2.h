@@ -56,7 +56,7 @@ public:
   /// \param infile[in] The raw data file.
   /// \param out[out]   Destination space for block data.
   //////////////////////////////////////////////////////////////////////////////
-  void fillBlockData(const FileBlock& b, std::istream& infile, Ty* out);
+  void fillBlockData(const FileBlock& b, std::istream& infile, Ty* out) const;
 
 
   //////////////////////////////////////////////////////////////////////////////
@@ -149,6 +149,10 @@ private:
   std::vector<std::shared_ptr<FileBlock>> m_blocks;
   std::vector<std::weak_ptr<FileBlock>> m_nonEmptyBlocks;
 
+
+  ///////////////////////////////////////////////////////////////////////////////
+  /// \brief Read blocks of data
+  ///////////////////////////////////////////////////////////////////////////////
   template<typename RTy=Ty>
   class Reader
   {
@@ -157,10 +161,18 @@ private:
     ///////////////////////////////////////////////////////////////////////////////
     /// \brief Init buffer, trying to target \c target number of blocks.
     ///////////////////////////////////////////////////////////////////////////////
-    void initBuffers(int target);
+    void initBuffers(size_t bufSize);
+
+    void fillBuffer();
+
+
 
   private:
     RTy *m_buffer;
+    size_t m_bufSize;
+    std::size_t m_filePos;
+
+    std::istream *m_is;
 
     BlockCollection2<RTy> *m_bc2;
 
