@@ -85,13 +85,14 @@ IndexFile::fromRawFile
 (
     const std::string& path,
     DataType type,
-    const unsigned long long num_vox[3],
-    const unsigned long long numblocks[3],
+    const uint64_t num_vox[3],
+    const uint64_t numblocks[3],
     const float minmax[2]
 )
 {
   std::shared_ptr<IndexFile> idxfile{ std::make_shared<IndexFile>() };
   idxfile->m_fileName = path;
+
   idxfile->m_col = IndexFile::make_wrapper(type, num_vox, numblocks);
 
 
@@ -197,8 +198,8 @@ base_collection_wrapper*
 IndexFile::make_wrapper
 (
   DataType type,
-  const unsigned long long num_vox[3],
-  const unsigned long long numblocks[3]
+  const uint64_t num_vox[3],
+  const uint64_t numblocks[3]
   )
 {
   base_collection_wrapper *col{ nullptr };
@@ -269,7 +270,7 @@ IndexFile::writeAsciiIndexFile(std::ostream& os)
   os << m_header << ",\n";
 
   auto &blocks = m_col->blocks();
-  for (int i=0; i<blocks.size()-1; ++i) {
+  for (size_t i{ 0 }; i<blocks.size()-1; ++i) {
     os << *blocks[i] << ",\n";
   }
   os << *blocks[blocks.size()-1] << "\n";
@@ -321,6 +322,7 @@ IndexFile::readBinaryIndexFile()
   is.seekg(0, std::ios::beg);
   is.read(reinterpret_cast<char*>(&ifh), sizeof(IndexFileHeader));
   m_header = ifh;
+
   m_col = IndexFile::make_wrapper(IndexFileHeader::getType(ifh), ifh.num_vox, ifh.numblocks);
 
   size_t numBlocks{ ifh.numblocks[0] * ifh.numblocks[1] * ifh.numblocks[2] };

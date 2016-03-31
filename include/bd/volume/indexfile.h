@@ -189,8 +189,8 @@ public:
   (
     const std::string &path, 
     DataType type,
-    const unsigned long long numVox[3], 
-    const unsigned long long numBlks[3],
+    const uint64_t numVox[3],
+    const uint64_t numBlks[3],
     const float minmax[2]
   );
 
@@ -232,8 +232,8 @@ public:
   make_wrapper
   (
     DataType type, 
-    const unsigned long long num_vox[3], 
-    const unsigned long long numblocks[3]
+    const uint64_t num_vox[3],
+    const uint64_t numblocks[3]
   );
 
 

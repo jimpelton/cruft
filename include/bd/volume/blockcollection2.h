@@ -355,16 +355,16 @@ BlockCollection2<Ty>::filterBlocks
     fillBlockData(*b, rawFile, image);
 
     // Find min/max/avg values
-    m_b->min_val = std::numeric_limits<decltype(m_b->min_val)>::max();
-    m_b->max_val = std::numeric_limits<decltype(m_b->max_val)>::min();
-    m_b->avg_val = 0.0;
+    b->min_val = std::numeric_limits<decltype(b->min_val)>::max();
+    b->max_val = std::numeric_limits<decltype(b->max_val)>::min();
+    b->avg_val = 0.0;
     std::for_each(image, image + numvox,
       [&b](const Ty& t) {
-      m_b->min_val = std::min<decltype(m_b->min_val)>(m_b->min_val, t);
-      m_b->max_val = std::max<decltype(m_b->max_val)>(m_b->max_val, t);
-      m_b->avg_val += t;
+      b->min_val = std::min<decltype(b->min_val)>(b->min_val, t);
+      b->max_val = std::max<decltype(b->max_val)>(b->max_val, t);
+      b->avg_val += t;
     });
-    m_b->avg_val /= numvox;
+    b->avg_val /= numvox;
 
 
     // Normalize values in the block, copy to normed
@@ -378,24 +378,24 @@ BlockCollection2<Ty>::filterBlocks
 
 
     // Now, re-find the new min/max/avg values
-    m_b->min_val = std::numeric_limits<decltype(m_b->min_val)>::max();
-    m_b->max_val = std::numeric_limits<decltype(m_b->max_val)>::min();
-    m_b->avg_val = 0.0;
+    b->min_val = std::numeric_limits<decltype(b->min_val)>::max();
+    b->max_val = std::numeric_limits<decltype(b->max_val)>::min();
+    b->avg_val = 0.0;
     std::for_each(normed, normed + numvox,
       [&b](float t) {
-      m_b->max_val = std::max<decltype(m_b->max_val)>(m_b->max_val, t);
-      m_b->min_val = std::min<decltype(m_b->min_val)>(m_b->min_val, t);
-      m_b->avg_val += t;
+      b->max_val = std::max<decltype(b->max_val)>(b->max_val, t);
+      b->min_val = std::min<decltype(b->min_val)>(b->min_val, t);
+      b->avg_val += t;
     });
-    m_b->avg_val /= numvox;
+    b->avg_val /= numvox;
 
 
     // TODO: call filter function.
-    if (m_b->avg_val<tmin || m_b->avg_val>tmax) {
-      m_b->is_empty = 1;
+    if (b->avg_val<tmin || b->avg_val>tmax) {
+      b->is_empty = 1;
     }
     else {
-      m_b->is_empty = 0;
+      b->is_empty = 0;
       m_nonEmptyBlocks.push_back(b);
     }
 
