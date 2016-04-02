@@ -84,6 +84,7 @@ std::shared_ptr<IndexFile>
 IndexFile::fromRawFile
 (
     const std::string& path,
+    size_t bufsz,
     DataType type,
     const uint64_t num_vox[3],
     const uint64_t numblocks[3],
@@ -97,15 +98,15 @@ IndexFile::fromRawFile
 
 
   // open raw file
-  std::ifstream rawFile;
-  rawFile.open(idxfile->m_fileName, std::ios::in | std::ios::binary);
-  if (! rawFile.is_open()) {
-    std::cerr << idxfile->m_fileName << " not found." << std::endl;
-    exit(1);
-  }
+ // std::ifstream rawFile;
+ // rawFile.open(idxfile->m_fileName, std::ios::in | std::ios::binary);
+ // if (! rawFile.is_open()) {
+ //   std::cerr << idxfile->m_fileName << " not found." << std::endl;
+ //   exit(1);
+ // }
 
   // filter the blocks
-  idxfile->m_col->filterBlocks(rawFile, minmax[0], minmax[1]);
+  idxfile->m_col->filterBlocks(idxfile->m_fileName, bufsz, minmax[0], minmax[1]);
 
   idxfile->m_header.magic_number  = MAGIC;
   idxfile->m_header.version       = VERSION;

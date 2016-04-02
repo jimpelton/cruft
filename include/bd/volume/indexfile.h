@@ -81,12 +81,10 @@ public:
   virtual ~base_collection_wrapper() { }
 
   virtual void addBlock(const FileBlock&) = 0;
-
   virtual const std::vector<std::shared_ptr<FileBlock>>& blocks() = 0;
-
   virtual const std::vector<std::weak_ptr<FileBlock>>& nonEmptyBlocks() = 0;
-
-  virtual void filterBlocks(std::ifstream &, float min, float max) = 0;
+  virtual void filterBlocks(const std::string &rawFile, size_t buffSize, float min, float max, bool normalize=true) = 0;
+//  virtual void filterBlocks(std::ifstream &, float min, float max) = 0;
   virtual glm::u64vec3 numBlocks() = 0;
   virtual glm::u64vec3 volDims() = 0;
   virtual glm::u64vec3 blockDims() = 0;
@@ -115,6 +113,7 @@ public:
     c.addBlock(b);
   }
 
+
   const std::vector<std::shared_ptr<FileBlock>>& blocks() override
   {
     return c.blocks();
@@ -127,10 +126,11 @@ public:
   }
 
 
-  void filterBlocks(std::ifstream &rawFile, float min, float max) override
+  void filterBlocks(const std::string &rawFile, size_t buffSize, float min, float max, bool normalize=true) override
   {
-    c.filterBlocks(rawFile, min, max);
+    c.filterBlocks(rawFile, buffSize, min, max, normalize);
   }
+
 
   glm::u64vec3 numBlocks() override
   {
@@ -187,7 +187,8 @@ public:
   static std::shared_ptr<IndexFile> 
   fromRawFile
   (
-    const std::string &path, 
+    const std::string &path,
+    size_t bufsz,
     DataType type,
     const uint64_t numVox[3],
     const uint64_t numBlks[3],
