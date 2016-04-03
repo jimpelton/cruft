@@ -12,8 +12,8 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
-
-#include <sys/stat.h>
+#include <cassert>
+#include <functional>
 
 namespace bd
 {
@@ -44,6 +44,7 @@ public:
 
     ///////////////////////////////////////////////////////////////////////////////
     /// \brief Fill the buffer with data.
+    /// \return The number of elements (not necessarily bytes) in the buffer.
     ///////////////////////////////////////////////////////////////////////////////
     size_t fillBuffer();
 
@@ -51,8 +52,9 @@ public:
     ///////////////////////////////////////////////////////////////////////////////
     /// \brief True if not at end of file.
     ///////////////////////////////////////////////////////////////////////////////
-    bool hasNext() const { return !m_is->eof(); }
+    bool hasNextFill() const { return !(m_is->eof()); }
 
+//    Ty next();
 
     ///////////////////////////////////////////////////////////////////////////////
     /// \brief Reset the reader to the start of the file.
@@ -63,7 +65,7 @@ public:
     ///////////////////////////////////////////////////////////////////////////////
     /// \brief Return pointer to buffer.
     ///////////////////////////////////////////////////////////////////////////////
-    const Ty* buffer() const { return m_buffer; }
+    const Ty* buffer_ptr() const { return m_buffer; }
 
 //    std::ifstream* stream() { return m_is; }
 
@@ -96,10 +98,11 @@ public:
   /// \param tmin[in] min average block value to filter against.
   /// \param tmax[in] max average block value to filter against.
   ///////////////////////////////////////////////////////////////////////////////
+//  template<typename ClassifierFunc>
   void filterBlocks(const std::string &file, size_t bufSize,
+//      ClassifierFunc isEmpty,
       float tmin = 0.0f, float tmax = 1.0f,
-      bool normalize = true);
-  //TODO: filterblocks takes Functor for thresholding.
+      bool normalize = false);
 
 
   //////////////////////////////////////////////////////////////////////////////
@@ -189,6 +192,10 @@ private:
   //////////////////////////////////////////////////////////////////////////////
   void computeVolumeStatistics(Reader &r);
 
+  //////////////////////////////////////////////////////////////////////////////
+  /// \brief Compute and save a few stats for each block.
+  //////////////////////////////////////////////////////////////////////////////
+  void computeBlockStatistics(Reader &r);
 
   glm::u64vec3 m_blockDims; ///< Dimensions of a block in voxels.
   glm::u64vec3 m_volDims;   ///< Volume dimensions in voxels.
@@ -225,9 +232,9 @@ BlockCollection2<Ty>::BlockCollection2
     : m_blockDims{ volDims/numBlocks }
       , m_volDims{ volDims }
       , m_numBlocks{ numBlocks }
-      , m_volMax{ std::numeric_limits<float>::min() }
-      , m_volMin{ std::numeric_limits<float>::max() }
-      , m_volAvg{ 0.0f }
+      , m_volMax{ std::numeric_limits<decltype(m_volMax)>::min() }
+      , m_volMin{ std::numeric_limits<decltype(m_volMin)>::max() }
+      , m_volAvg{ 0.0 }
       , m_blocks{ }
       , m_nonEmptyBlocks{ }
 {
@@ -277,9 +284,9 @@ BlockCollection2<Ty>::initBlocks()
         std::shared_ptr<FileBlock> blk{ std::make_shared<FileBlock>() };
         blk->block_index = bd::to1D(bx, by, bz, nb.x, nb.y);
         blk->data_offset = bd::to1D(startVoxel.x, startVoxel.y, startVoxel.z, m_volDims.x, m_volDims.y)*sizeof(Ty);
-        blk->voxel_dims[0] = static_cast<uint32_t>(m_blockDims.x);
-        blk->voxel_dims[1] = static_cast<uint32_t>(m_blockDims.y);
-        blk->voxel_dims[2] = static_cast<uint32_t>(m_blockDims.z);
+        blk->voxel_dims[0] = static_cast<decltype(blk->voxel_dims[0])>(m_blockDims.x);
+        blk->voxel_dims[1] = static_cast<decltype(blk->voxel_dims[1])>(m_blockDims.y);
+        blk->voxel_dims[2] = static_cast<decltype(blk->voxel_dims[2])>(m_blockDims.z);
         blk->world_pos[0] = blk_origin.x;
         blk->world_pos[1] = blk_origin.y;
         blk->world_pos[2] = blk_origin.z;
@@ -297,16 +304,18 @@ BlockCollection2<Ty>::computeVolumeStatistics(Reader &r)
 {
   gl_log("Computing volume statistics...");
 
-//  size_t rowbytes{ m_volDims.x*sizeof(Ty) };
-//  Ty* rowbuf{ new Ty[rowbytes] };
+//  m_volMin = std::numeric_limits<decltype(m_volMin)>::max();
+//  m_volMax = std::numeric_limits<decltype(m_volMax)>::min();
+//  m_volAvg = 0;
 
   r.reset();
-  while(r.hasNext()) {
+  auto iter = 1;
+  while(r.hasNextFill()) {
 
-//    infile.read(reinterpret_cast<char *>(rowbuf), rowbytes);
-    r.fillBuffer();
-    for (size_t col{ 0 }; col < m_volDims.x; ++col) {
-      Ty val{ r.buffer()[col] };
+    std::cout << "\rBuffer refills: " << iter++;
+    auto elems = r.fillBuffer();
+    for (size_t col{ 0 }; col < elems; ++col) {
+      Ty val{ r.buffer_ptr()[col] };
       m_volMin = std::min<decltype(m_volMin)>(m_volMin, val);
       m_volMax = std::max<decltype(m_volMax)>(m_volMax, val);
       m_volAvg += static_cast<decltype(m_volAvg)>(val);
@@ -316,10 +325,57 @@ BlockCollection2<Ty>::computeVolumeStatistics(Reader &r)
 
   m_volAvg /= m_volDims.x*m_volDims.y*m_volDims.z;
 
+  std::cout << "\nDone computing volume statistics.\n";
   gl_log("Done computing volume statistics: Min: %f, Max: %f, Avg: %f",
          m_volMin, m_volMax, m_volAvg);
 
+}
+
+template<typename Ty>
+void
+BlockCollection2<Ty>::computeBlockStatistics(Reader &r)
+{
+  gl_log("Computing block statistics for %d blocks.", m_blocks.size());
   r.reset();
+  auto iter = 1;
+  auto voxIdx = 0ull;
+  const auto *buf = r.buffer_ptr();
+  while (r.hasNextFill()) {
+    std::cout << "\rBuffer refills: " << iter++;
+    auto elems = r.fillBuffer();
+
+    if (elems <= 0) {
+      std::cout << "\nreadsz: " << elems << " bytes." << std::endl;
+      break;
+    }
+
+    for (size_t i{ 0 }; i < elems; ++i, ++voxIdx) {
+      Ty val{ buf[i] };
+
+      // Determine which block this voxel falls into:         //
+      // 1st compute 3D block index from 1D voxel index,      //
+      // then compute 1D block index from 3D block index      //
+      auto xi = (voxIdx%m_volDims.x)/m_blockDims.x;
+      auto yi = ((voxIdx/m_volDims.x)%m_volDims.y)/m_blockDims.y;
+      auto zi = ((voxIdx/m_volDims.x)/m_volDims.y)/m_blockDims.z;
+      size_t blockIdx{ bd::to1D(xi, yi, zi, m_blockDims.x, m_blockDims.y) };
+
+      // Populate block that this voxel falls into with stats values.
+      std::shared_ptr<FileBlock> b{ m_blocks[blockIdx] };
+      assert(b->block_index == blockIdx && "b->block_index == blockIdx");
+      b->min_val = std::min<decltype(b->min_val)>(b->min_val, val);
+      b->max_val = std::max<decltype(b->max_val)>(b->max_val, val);
+      b->avg_val += val;
+
+    } // for(...
+  } // while(
+
+  for(auto b : m_blocks) {
+    b->avg_val /= b->voxel_dims[0] * b->voxel_dims[1] * b->voxel_dims[2];
+  }
+
+  std::cout << "\nDone computing block statistics.\n";
+  gl_log("Done computing block statistics for %d blocks.", m_blocks.size());
 }
 
 
@@ -385,11 +441,13 @@ BlockCollection2<Ty>::numBlocks() const
 
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
+//template<typename ClassifierFunc>
 void
 BlockCollection2<Ty>::filterBlocks
 (
     const std::string &file,
     size_t bufSize,
+//    ClassifierFunc isEmpty,
     float tmin,
     float tmax,
     bool normalize
@@ -400,94 +458,73 @@ BlockCollection2<Ty>::filterBlocks
   Reader r(this, file, bufSize);
 
   computeVolumeStatistics(r);
-  r.reset();
-
-  while (r.hasNext()) {
-    auto readsz = r.fillBuffer();
-    auto voxIdx = 0ull;
-
-    while (voxIdx < readsz){
-      Ty val{ r.buffer()[voxIdx] };
-      // compute 3D block index from 1D voxel index.
-      auto xi = (voxIdx%m_volDims.x)/m_blockDims.x;
-      auto yi = ((voxIdx/m_volDims.x)%m_volDims.y)/m_blockDims.y;
-      auto zi = ((voxIdx/m_volDims.x)/m_volDims.y)/m_blockDims.z;
-      // compute 1D block index from 3D block index
-      size_t blockIdx{ bd::to1D(xi, yi, zi, m_volDims.x, m_volDims.y) };
-
-      std::shared_ptr<FileBlock> b{ m_blocks[blockIdx] };
-
-
-      ++voxIdx;
-    }
-
-
-
-  }
+  computeBlockStatistics(r);
 
   // total voxels per block
-  size_t numvox{ m_blockDims.x*m_blockDims.y*m_blockDims.z };
-  gl_log("Starting block filtering for %d blocks...", numvox);
+//  size_t numvox{ m_blockDims.x*m_blockDims.y*m_blockDims.z };
+//  gl_log("Starting block filtering for %d blocks...", numvox);
 
-  Ty* image{ new Ty[numvox] };
+//  Ty* image{ new Ty[numvox] };
 
-  double *normed{ nullptr };
-  if (normalize) {
-    normed = new double[numvox];
-  }
+//  double *normed{ nullptr };
+//  if (normalize) {
+//    normed = new double[numvox];
+//  }
 
-  for (std::shared_ptr<FileBlock> b : m_blocks) {
+//  for (std::shared_ptr<FileBlock> b : m_blocks) {
 //    fillBlockData(*b, rawFile, image);
 
-    // Find min/max/avg values
-    b->min_val = std::numeric_limits<decltype(b->min_val)>::max();
-    b->max_val = std::numeric_limits<decltype(b->max_val)>::min();
-    b->avg_val = 0.0;
-    std::for_each(image, image + numvox,
-        [&b](const Ty& t) {
-          b->min_val = std::min<decltype(b->min_val)>(b->min_val, t);
-          b->max_val = std::max<decltype(b->max_val)>(b->max_val, t);
-          b->avg_val += t;
-        });
-    b->avg_val /= numvox;
+  // Find min/max/avg values
+//    b->min_val = std::numeric_limits<decltype(b->min_val)>::max();
+//    b->max_val = std::numeric_limits<decltype(b->max_val)>::min();
+//    b->avg_val = 0.0;
+//    std::for_each(image, image + numvox,
+//        [&b](const Ty& t) {
+//          b->min_val = std::min<decltype(b->min_val)>(b->min_val, t);
+//          b->max_val = std::max<decltype(b->max_val)>(b->max_val, t);
+//          b->avg_val += t;
+//        });
+//    b->avg_val /= numvox;
 
 
-    // Normalize values in the block, copy to normed
-    if (normalize && normed != nullptr) {
-      const double diff{ m_volMax - m_volMin };
-      std::transform(image, image + numvox, normed,
-         [this, diff](Ty &blkVal) {
-           return (blkVal - this->m_volMin) / diff;
-         });
-    }
+  // Normalize values in the block, copy to normed
+//    if (normalize && normed != nullptr) {
+//      const double diff{ m_volMax - m_volMin };
+//      std::transform(image, image + numvox, normed,
+//         [this, diff](Ty &blkVal) {
+//           return (blkVal - this->m_volMin) / diff;
+//         });
+//    }
+//
+//
+//    // Now, re-find the new min/max/avg values
+//    b->min_val = std::numeric_limits<decltype(b->min_val)>::max();
+//    b->max_val = std::numeric_limits<decltype(b->max_val)>::min();
+//    b->avg_val = 0.0;
+//    std::for_each(normed, normed + numvox,
+//        [&b](float t) {
+//          b->max_val = std::max<decltype(b->max_val)>(b->max_val, t);
+//          b->min_val = std::min<decltype(b->min_val)>(b->min_val, t);
+//          b->avg_val += t;
+//        });
+//    b->avg_val /= numvox;
+//
+//
 
-
-    // Now, re-find the new min/max/avg values
-    b->min_val = std::numeric_limits<decltype(b->min_val)>::max();
-    b->max_val = std::numeric_limits<decltype(b->max_val)>::min();
-    b->avg_val = 0.0;
-    std::for_each(normed, normed + numvox,
-        [&b](float t) {
-          b->max_val = std::max<decltype(b->max_val)>(b->max_val, t);
-          b->min_val = std::min<decltype(b->min_val)>(b->min_val, t);
-          b->avg_val += t;
-        });
-    b->avg_val /= numvox;
-
-
-    // TODO: call filter function.
-    if (b->avg_val<tmin || b->avg_val>tmax) {
-      b->is_empty = 1;
-    }
-    else {
-      b->is_empty = 0;
+  for (auto b : m_blocks){
+//    if (isEmpty(b)){
+    if (b->avg_val > tmin && b->avg_val < tmax) {
+      b->is_empty =  1; //true
+    } else {
+      b->is_empty = 0; //false
       m_nonEmptyBlocks.push_back(b);
     }
-
-  } // for (FileBlock...
-
-  delete[] image;
-  delete[] normed;
+  }
+//
+//  } // for (FileBlock...
+//
+//  delete[] image;
+//  delete[] normed;
 
   gl_log("%d/%d blocks marked empty.",
          m_blocks.size()-m_nonEmptyBlocks.size(), m_blocks.size());
@@ -577,14 +614,15 @@ BlockCollection2<Ty>::Reader::fillBuffer()
   m_is->read(reinterpret_cast<char*>(m_buffer), m_bufSize);
   std::streampos amount{ m_is->gcount() };
   m_filePos += amount;
-  return static_cast<size_t>(amount);
+  return static_cast<size_t>(amount/sizeof(Ty));
 }
 
 
 template<typename Ty>
 void BlockCollection2<Ty>::Reader::reset()
 {
-  m_is->seekg(0);
+  m_is->clear();
+  m_is->seekg(0, std::ios::beg);
   m_filePos = 0;
 }
 

@@ -126,7 +126,7 @@ public:
   }
 
 
-  void filterBlocks(const std::string &rawFile, size_t buffSize, float min, float max, bool normalize=true) override
+  void filterBlocks(const std::string &rawFile, size_t buffSize, float min, float max, bool normalize=false) override
   {
     c.filterBlocks(rawFile, buffSize, min, max, normalize);
   }
