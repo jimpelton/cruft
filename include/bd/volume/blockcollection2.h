@@ -45,7 +45,7 @@ public:
     ///////////////////////////////////////////////////////////////////////////////
     /// \brief Fill the buffer with data.
     ///////////////////////////////////////////////////////////////////////////////
-    std::streampos fillBuffer();
+    size_t fillBuffer();
 
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -400,6 +400,30 @@ BlockCollection2<Ty>::filterBlocks
   Reader r(this, file, bufSize);
 
   computeVolumeStatistics(r);
+  r.reset();
+
+  while (r.hasNext()) {
+    auto readsz = r.fillBuffer();
+    auto voxIdx = 0ull;
+
+    while (voxIdx < readsz){
+      Ty val{ r.buffer()[voxIdx] };
+      // compute 3D block index from 1D voxel index.
+      auto xi = (voxIdx%m_volDims.x)/m_blockDims.x;
+      auto yi = ((voxIdx/m_volDims.x)%m_volDims.y)/m_blockDims.y;
+      auto zi = ((voxIdx/m_volDims.x)/m_volDims.y)/m_blockDims.z;
+      // compute 1D block index from 3D block index
+      size_t blockIdx{ bd::to1D(xi, yi, zi, m_volDims.x, m_volDims.y) };
+
+      std::shared_ptr<FileBlock> b{ m_blocks[blockIdx] };
+
+
+      ++voxIdx;
+    }
+
+
+
+  }
 
   // total voxels per block
   size_t numvox{ m_blockDims.x*m_blockDims.y*m_blockDims.z };
@@ -547,13 +571,13 @@ BlockCollection2<Ty>::Reader::~Reader()
 
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
-std::streampos
+size_t
 BlockCollection2<Ty>::Reader::fillBuffer()
 {
   m_is->read(reinterpret_cast<char*>(m_buffer), m_bufSize);
   std::streampos amount{ m_is->gcount() };
   m_filePos += amount;
-  return amount;
+  return static_cast<size_t>(amount);
 }
 
 
