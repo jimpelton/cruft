@@ -12,8 +12,8 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <stdexcept>
 #include <cassert>
-#include <functional>
 
 namespace bd
 {
@@ -38,9 +38,10 @@ public:
   public:
 
     ////////////////////////////////////////////////////////////////////////////////
-    Reader(BlockCollection2<Ty> *bc2, const std::string &path, size_t bufSize);
+    Reader(BlockCollection2<Ty> *bc2, size_t bufSize);
     ~Reader();
 
+    bool open(const std::string &path);
 
     ///////////////////////////////////////////////////////////////////////////////
     /// \brief Fill the buffer with data.
@@ -310,12 +311,13 @@ BlockCollection2<Ty>::computeVolumeStatistics(Reader &r)
 
   r.reset();
   auto iter = 1;
+  auto ptr = r.buffer_ptr();
   while(r.hasNextFill()) {
 
     std::cout << "\rBuffer refills: " << iter++;
-    auto elems = r.fillBuffer();
+    size_t elems = r.fillBuffer();
     for (size_t col{ 0 }; col < elems; ++col) {
-      Ty val{ r.buffer_ptr()[col] };
+      Ty val{ ptr[col] };
       m_volMin = std::min<decltype(m_volMin)>(m_volMin, val);
       m_volMax = std::max<decltype(m_volMax)>(m_volMax, val);
       m_volAvg += static_cast<decltype(m_volAvg)>(val);
@@ -362,7 +364,9 @@ BlockCollection2<Ty>::computeBlockStatistics(Reader &r)
 
       // Populate block that this voxel falls into with stats values.
       std::shared_ptr<FileBlock> b{ m_blocks[blockIdx] };
+
       assert(b->block_index == blockIdx && "b->block_index == blockIdx");
+
       b->min_val = std::min<decltype(b->min_val)>(b->min_val, val);
       b->max_val = std::max<decltype(b->max_val)>(b->max_val, val);
       b->avg_val += val;
@@ -455,7 +459,10 @@ BlockCollection2<Ty>::filterBlocks
 {
   initBlocks();
 
-  Reader r(this, file, bufSize);
+  Reader r(this, bufSize);
+  if (! r.open(file)) {
+    throw std::runtime_error("Could not open file" + file);
+  }
 
   computeVolumeStatistics(r);
   computeBlockStatistics(r);
@@ -578,22 +585,19 @@ template<typename Ty>
 BlockCollection2<Ty>::Reader::Reader
   (
     BlockCollection2<Ty> *bc2,
-    const std::string &path,
     size_t bufSize
   )
   : m_buffer{ nullptr }
   , m_bufSize{ bufSize }
   , m_filePos{ 0 }
-  , m_path{ path }
+  , m_path{ }
   , m_is{ nullptr }
   , m_bc2{ bc2 }
 {
 //  stat64 fstats;
 //  stat64(path.c_str(), &fstats);
 //  m_fileSize = fstats.st_size;
-  m_is = new std::ifstream();
-  m_is->open(path, std::ios::binary);
-  m_buffer = new Ty[ bufSize ];
+
 }
 
 
@@ -605,6 +609,23 @@ BlockCollection2<Ty>::Reader::~Reader()
   if (m_buffer) delete [] m_buffer;
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
+template<typename Ty>
+bool
+BlockCollection2<Ty>::Reader::open(const std::string& path)
+{
+  m_path = path;
+  m_is = new std::ifstream();
+  m_is->open(path, std::ios::binary);
+
+  if (m_is->is_open()) {
+    m_buffer = new Ty[m_bufSize];
+    return true;
+  }
+
+  return false;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
