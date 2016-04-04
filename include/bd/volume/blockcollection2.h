@@ -313,8 +313,9 @@ BlockCollection2<Ty>::computeVolumeStatistics(Reader &r)
   auto iter = 1;
   auto ptr = r.buffer_ptr();
   while(r.hasNextFill()) {
-
-    std::cout << "\rBuffer refills: " << iter++;
+    if (iter % 5 == 0) {
+      std::cout << "\rBuffer refills: " << iter++ << std::flush;
+    }
     size_t elems = r.fillBuffer();
     for (size_t col{ 0 }; col < elems; ++col) {
       Ty val{ ptr[col] };
@@ -343,7 +344,9 @@ BlockCollection2<Ty>::computeBlockStatistics(Reader &r)
   auto voxIdx = 0ull;
   const auto *buf = r.buffer_ptr();
   while (r.hasNextFill()) {
-    std::cout << "\rBuffer refills: " << iter++;
+    if (iter % 10 == 0) {
+      std::cout << "\rBuffer refills: " << iter++ << std::flush;
+    }
     auto elems = r.fillBuffer();
 
     if (elems <= 0) {
@@ -363,7 +366,7 @@ BlockCollection2<Ty>::computeBlockStatistics(Reader &r)
       size_t blockIdx{ bd::to1D(xi, yi, zi, m_blockDims.x, m_blockDims.y) };
 
       // Populate block that this voxel falls into with stats values.
-      std::shared_ptr<FileBlock> b{ m_blocks[blockIdx] };
+      std::shared_ptr<FileBlock> b{ m_blocks.at(blockIdx) };
 
       assert(b->block_index == blockIdx && "b->block_index == blockIdx");
 
@@ -464,7 +467,7 @@ BlockCollection2<Ty>::filterBlocks
     throw std::runtime_error("Could not open file" + file);
   }
 
-  computeVolumeStatistics(r);
+//  computeVolumeStatistics(r);
   computeBlockStatistics(r);
 
   // total voxels per block
