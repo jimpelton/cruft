@@ -5,6 +5,7 @@
 
 #include <bd/util/util.h>
 #include <bd/log/gl_log.h>
+#include <bd/volume/bufferedreader.h>
 
 #include <glm/glm.hpp>
 
@@ -29,57 +30,6 @@ template<typename Ty>
 class BlockCollection2
 {
 public:
-
-  ///////////////////////////////////////////////////////////////////////////////
-  /// \brief Read blocks of data
-  ///////////////////////////////////////////////////////////////////////////////
-  class BufferedReader
-  {
-  public:
-
-    ////////////////////////////////////////////////////////////////////////////////
-    BufferedReader(BlockCollection2<Ty> *bc2, size_t bufSize);
-    ~BufferedReader();
-
-    bool open(const std::string &path);
-
-    ///////////////////////////////////////////////////////////////////////////////
-    /// \brief Fill the buffer with data.
-    /// \return The number of elements (not necessarily bytes) in the buffer.
-    ///////////////////////////////////////////////////////////////////////////////
-    size_t fillBuffer();
-
-
-    ///////////////////////////////////////////////////////////////////////////////
-    /// \brief True if not at end of file.
-    ///////////////////////////////////////////////////////////////////////////////
-    bool hasNextFill() const { return !(m_is->eof()); }
-
-//    Ty next();
-
-    ///////////////////////////////////////////////////////////////////////////////
-    /// \brief Reset the reader to the start of the file.
-    ///////////////////////////////////////////////////////////////////////////////
-    void reset();
-
-
-    ///////////////////////////////////////////////////////////////////////////////
-    /// \brief Return pointer to buffer.
-    ///////////////////////////////////////////////////////////////////////////////
-    const Ty* buffer_ptr() const { return m_buffer; }
-
-//    std::ifstream* stream() { return m_is; }
-
-  private:
-    Ty *m_buffer;
-    size_t m_bufSize;
-    std::streamsize fileSize;
-    std::size_t m_filePos;
-    std::string m_path;
-    std::ifstream *m_is;
-    BlockCollection2<Ty> *m_bc2;
-
-  };  // class Reader
 
 
 public:
@@ -191,14 +141,14 @@ private:
   //////////////////////////////////////////////////////////////////////////////
   /// \brief Compute and save a few stats from provided raw file.
   //////////////////////////////////////////////////////////////////////////////
-  void computeVolumeStatistics(BufferedReader &r);
+  void computeVolumeStatistics(BufferedReader<Ty> &r);
+
 
   //////////////////////////////////////////////////////////////////////////////
   /// \brief Compute and save a few stats for each block.
   //////////////////////////////////////////////////////////////////////////////
-  void computeBlockStatistics(BufferedReader &r);
+  void computeBlockStatistics(BufferedReader<Ty> &r);
 
-  size_t nextBlockIndex(const FileBlock &currentBlock, size_t current, size_t vol_idx);
 
   glm::u64vec3 m_blockDims; ///< Dimensions of a block in voxels.
   glm::u64vec3 m_volDims;   ///< Volume dimensions in voxels.
@@ -316,6 +266,7 @@ BlockCollection2<Ty>::computeVolumeStatistics(BufferedReader &r)
 
   r.reset();
   const Ty *ptr = r.buffer_ptr();
+
   while(r.hasNextFill()) {
     size_t elems = r.fillBuffer();
 
@@ -376,9 +327,18 @@ BlockCollection2<Ty>::computeBlockStatistics(BufferedReader &r)
       uint64_t voxelsInBlockRow{ currBlock->voxel_dims[0] };
       size_t vox{ 0 };
       for(; vox < voxelsInBlockRow; ++vox ) {
+        Ty val{ buf[vox] };
 
+        currBlock->->min_val = std::min<
+            decltype(currBlock->->min_val)>(currBlock->->min_val, val);
+
+        currBlock->->max_val = std::max<
+            decltype(currBlock->->max_val)>(currBlock->->max_val, val);
+
+        currBlock->avg_val += vox;
 
       }
+
       vol_idx += vox;
       ++buf_idx;
     }
@@ -428,26 +388,6 @@ BlockCollection2<Ty>::computeBlockStatistics(BufferedReader &r)
 
   std::cout << "\nDone computing block statistics.\n";
   gl_log("Done computing block statistics for %d blocks.", m_blocks.size());
-}
-
-template<typename Ty>
-size_t BlockCollection2<Ty>::nextBlockIndex(const FileBlock &currBlock, size_t current, size_t vol_idx)
-{
-
-
-  if (dist_to_right_block_edge == 0) {        // if at right edge of block
-    if (vol_idx%m_volDims.x==0) {         // if at volume right edge
-      if(dist_to_bottom_block_edge == 0){     // if at bottom edge of block
-        if ((vol_idx/m_volDims.x) % m_volDims.y == 0){ // if at volume bottom
-          if ((vol_idx/m_volDims.x) / m_volDims.y == 0) { // if at volume back
-
-          } // vol back
-        } // vol bottom
-      } // blk bottom
-      blk_idx = blk_idx - m_numBlocks.x;
-    } // vol right
-    blk_idx += 1;
-  }
 }
 
 
@@ -527,7 +467,7 @@ BlockCollection2<Ty>::filterBlocks
 {
   initBlocks();
 
-  BufferedReader r(this, bufSize);
+  BufferedReader<Ty> r(bufSize);
   if (! r.open(file)) {
     throw std::runtime_error("Could not open file" + file);
   }
@@ -648,73 +588,6 @@ BlockCollection2<Ty>::fillBlockData
     }
   }
 }
-
-template<typename Ty>
-BlockCollection2<Ty>::BufferedReader::BufferedReader
-  (
-    BlockCollection2<Ty> *bc2,
-    size_t bufSize
-  )
-  : m_buffer{ nullptr }
-  , m_bufSize{ bufSize }
-  , m_filePos{ 0 }
-  , m_path{ }
-  , m_is{ nullptr }
-  , m_bc2{ bc2 }
-{
-//  stat64 fstats;
-//  stat64(path.c_str(), &fstats);
-//  m_fileSize = fstats.st_size;
-
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
-BlockCollection2<Ty>::BufferedReader::~BufferedReader()
-{
-  if (m_is) delete m_is;
-  if (m_buffer) delete [] m_buffer;
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
-bool
-BlockCollection2<Ty>::BufferedReader::open(const std::string& path)
-{
-  m_path = path;
-  m_is = new std::ifstream();
-  m_is->open(path, std::ios::binary);
-
-  if (m_is->is_open()) {
-    m_buffer = new Ty[m_bufSize];
-    return true;
-  }
-
-  return false;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
-size_t
-BlockCollection2<Ty>::BufferedReader::fillBuffer()
-{
-  m_is->read(reinterpret_cast<char*>(m_buffer), m_bufSize);
-  std::streampos amount{ m_is->gcount() };
-  m_filePos += amount;
-  return static_cast<size_t>(amount/sizeof(Ty));
-}
-
-
-template<typename Ty>
-void BlockCollection2<Ty>::BufferedReader::reset()
-{
-  m_is->clear();
-  m_is->seekg(0, std::ios::beg);
-  m_filePos = 0;
-}
-
 
 
 
