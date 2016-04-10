@@ -60,3 +60,8 @@ install(TARGETS crufterly ARCHIVE
 
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/bd/"
         DESTINATION "include/crufterly/bd" FILES_MATCHING PATTERN "*.h")
+
+add_custom_target(install_${PROJECT_NAME}
+                  make install
+                  DEPENDS ${PROJECT_NAME}
+                  COMMENT "Installing ${PROJECT_NAME}")

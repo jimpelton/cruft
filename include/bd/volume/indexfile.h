@@ -81,8 +81,8 @@ public:
   virtual ~base_collection_wrapper() { }
 
   virtual void addBlock(const FileBlock&) = 0;
-  virtual const std::vector<std::shared_ptr<FileBlock>>& blocks() = 0;
-  virtual const std::vector<std::weak_ptr<FileBlock>>& nonEmptyBlocks() = 0;
+  virtual const std::vector<FileBlock*>& blocks() = 0;
+  virtual const std::vector<FileBlock*>& nonEmptyBlocks() = 0;
   virtual void filterBlocks(const std::string &rawFile, size_t buffSize, float min, float max, bool normalize=true) = 0;
 //  virtual void filterBlocks(std::ifstream &, float min, float max) = 0;
   virtual glm::u64vec3 numBlocks() = 0;
@@ -114,13 +114,13 @@ public:
   }
 
 
-  const std::vector<std::shared_ptr<FileBlock>>& blocks() override
+  const std::vector<FileBlock*>& blocks() override
   {
     return c.blocks();
   }
 
 
-  const std::vector<std::weak_ptr<FileBlock>>& nonEmptyBlocks() override
+  const std::vector<FileBlock*>& nonEmptyBlocks() override
   {
     return c.nonEmptyBlocks();
   }
@@ -226,7 +226,7 @@ public:
   const IndexFileHeader& 
   getHeader() const;
 
-  const std::vector<std::shared_ptr<FileBlock>>&
+  const std::vector<FileBlock*>&
   blocks() const;
 
   static base_collection_wrapper* 

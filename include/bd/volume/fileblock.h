@@ -49,8 +49,8 @@ struct FileBlock
       , data_offset{ 0 }
       , voxel_dims{ 0 }
       , world_pos{ 0 }
-      , min_val{ 0.0f }
-      , max_val{ 0.0f }
+      , min_val{ std::numeric_limits<decltype(min_val)>::max() }
+      , max_val{ std::numeric_limits<decltype(max_val)>::min() }
       , avg_val{ 0.0f }
       , is_empty{ 0 }
   { }

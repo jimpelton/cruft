@@ -206,16 +206,29 @@ IndexFile::make_wrapper
   base_collection_wrapper *col{ nullptr };
 
   switch (type) {
+
   case bd::DataType::UnsignedCharacter:
     col = new collection_wrapper<unsigned char>
     { { num_vox[0], num_vox[1], num_vox[2] },
     { numblocks[0], numblocks[1], numblocks[2] } };
     break;
 
+  case bd::DataType::Character:
+    col = new collection_wrapper<char>
+        { { num_vox[0], num_vox[1], num_vox[2] },
+          { numblocks[0], numblocks[1], numblocks[2] } };
+    break;
+
   case bd::DataType::UnsignedShort:
     col = new collection_wrapper<unsigned short>
     { { num_vox[0], num_vox[1], num_vox[2] },
     { numblocks[0], numblocks[1], numblocks[2] } };
+    break;
+
+  case bd::DataType::Short:
+    col = new collection_wrapper<short>
+        { { num_vox[0], num_vox[1], num_vox[2] },
+          { numblocks[0], numblocks[1], numblocks[2] } };
     break;
 
   case bd::DataType::Float:
@@ -241,8 +254,8 @@ IndexFile::writeBinaryIndexFile(std::ostream& os)
   // write header to stream.
   IndexFileHeader::writeToStream(os, m_header);
   // read all the blocks
-  for (const std::shared_ptr<FileBlock> b : m_col->blocks()) {
-    os.write(reinterpret_cast<const char*>(b.get()), sizeof(FileBlock));
+  for (FileBlock *b : m_col->blocks()) {
+    os.write(reinterpret_cast<const char*>(b), sizeof(FileBlock));
   }
 }
 
@@ -270,7 +283,7 @@ IndexFile::writeAsciiIndexFile(std::ostream& os)
   os << "\"index\": {\n";
   os << m_header << ",\n";
 
-  auto &blocks = m_col->blocks();
+  auto blocks = m_col->blocks();
   for (size_t i{ 0 }; i<blocks.size()-1; ++i) {
     os << *blocks[i] << ",\n";
   }
@@ -300,7 +313,7 @@ IndexFile::writeAsciiIndexFile(const std::string& outpath)
 
 
 ///////////////////////////////////////////////////////////////////////////////
-const std::vector<std::shared_ptr<FileBlock>>&
+const std::vector<FileBlock*>&
 IndexFile::blocks() const
 {
   return m_col->blocks();
@@ -353,7 +366,7 @@ FileBlock::to_string() const
     "  \"min_val\": " << min_val << ",\n"
     "  \"max_val\": " << max_val << ",\n"
     "  \"avg_val\": " << avg_val << ",\n"
-    "  \"empty\": " << (is_empty ? "true" : "false") << ",\n"
+    "  \"empty\": " << (is_empty ? "true" : "false") << "\n"
     "}";
 
   return ss.str();
@@ -378,11 +391,11 @@ operator<<(std::ostream& os, const bd::IndexFileHeader& h)
       "  \"version\": " << h.version << ",\n"
       "  \"header_length\": " << h.header_length << ",\n"
       "  \"num_blocks\": [" << h.numblocks[0] << ", " << h.numblocks[1] << ", " << h.numblocks[2] << "],\n"
-      "  \"data_type\": " << bd::to_string(IndexFileHeader::getType(h)) << ",\n"
+      "  \"data_type\": \"" << bd::to_string(IndexFileHeader::getType(h)) << "\",\n"
       "  \"num_vox\": [" << h.num_vox[0] << ", " << h.num_vox[1] << ", " << h.num_vox[2] << "],\n"
       "  \"vol_min\": " << h.vol_min << ",\n"
       "  \"vol_max\": " << h.vol_max << ",\n"
-      "  \"vol_avg\": " << h.vol_avg << ",\n"
+      "  \"vol_avg\": " << h.vol_avg << "\n"
       "}";
 
   return os;

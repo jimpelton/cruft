@@ -33,13 +33,13 @@ public:
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Read blocks of data
   ///////////////////////////////////////////////////////////////////////////////
-  class Reader
+  class BufferedReader
   {
   public:
 
     ////////////////////////////////////////////////////////////////////////////////
-    Reader(BlockCollection2<Ty> *bc2, size_t bufSize);
-    ~Reader();
+    BufferedReader(BlockCollection2<Ty> *bc2, size_t bufSize);
+    ~BufferedReader();
 
     bool open(const std::string &path);
 
@@ -166,7 +166,7 @@ public:
   double volAvg() const { return m_volAvg; }
 
   //////////////////////////////////////////////////////////////////////////////
-  const std::vector<std::shared_ptr<FileBlock>>& 
+  const std::vector<FileBlock*>&
   blocks() const
   {
     return m_blocks;
@@ -174,7 +174,7 @@ public:
 
 
   //////////////////////////////////////////////////////////////////////////////
-  const std::vector<std::weak_ptr<FileBlock>>& 
+  const std::vector<FileBlock*>&
   nonEmptyBlocks() const
   {
     return m_nonEmptyBlocks;
@@ -191,12 +191,14 @@ private:
   //////////////////////////////////////////////////////////////////////////////
   /// \brief Compute and save a few stats from provided raw file.
   //////////////////////////////////////////////////////////////////////////////
-  void computeVolumeStatistics(Reader &r);
+  void computeVolumeStatistics(BufferedReader &r);
 
   //////////////////////////////////////////////////////////////////////////////
   /// \brief Compute and save a few stats for each block.
   //////////////////////////////////////////////////////////////////////////////
-  void computeBlockStatistics(Reader &r);
+  void computeBlockStatistics(BufferedReader &r);
+
+  size_t nextBlockIndex(const FileBlock &currentBlock, size_t current, size_t vol_idx);
 
   glm::u64vec3 m_blockDims; ///< Dimensions of a block in voxels.
   glm::u64vec3 m_volDims;   ///< Volume dimensions in voxels.
@@ -206,8 +208,8 @@ private:
   double m_volMin; ///< Min value found in volume.
   double m_volAvg; ///< Avg value found in volume.
 
-  std::vector<std::shared_ptr<FileBlock>> m_blocks;
-  std::vector<std::weak_ptr<FileBlock>> m_nonEmptyBlocks;
+  std::vector<FileBlock*> m_blocks;
+  std::vector<FileBlock*> m_nonEmptyBlocks;
 
 
 }; // class BlockCollection2
@@ -258,7 +260,10 @@ void
 BlockCollection2<Ty>::initBlocks()
 {
   const glm::u64vec3& nb = m_numBlocks;
+  // reset volume dimensions based on number of blocks.
+  m_volDims = m_blockDims * m_numBlocks;
   const glm::u64vec3& vd = m_volDims;
+
 
   // block world dims
   glm::vec3 wld_dims{ 1.0f/glm::vec3(nb) };
@@ -282,7 +287,7 @@ BlockCollection2<Ty>::initBlocks()
         // voxel start of block within volume
         const glm::u64vec3 startVoxel{ blkId*m_blockDims };
 
-        std::shared_ptr<FileBlock> blk{ std::make_shared<FileBlock>() };
+        FileBlock *blk = new FileBlock(); // { std::make_shared<FileBlock>() };
         blk->block_index = bd::to1D(bx, by, bz, nb.x, nb.y);
         blk->data_offset = bd::to1D(startVoxel.x, startVoxel.y, startVoxel.z, m_volDims.x, m_volDims.y)*sizeof(Ty);
         blk->voxel_dims[0] = static_cast<decltype(blk->voxel_dims[0])>(m_blockDims.x);
@@ -301,7 +306,7 @@ BlockCollection2<Ty>::initBlocks()
 //////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 void
-BlockCollection2<Ty>::computeVolumeStatistics(Reader &r)
+BlockCollection2<Ty>::computeVolumeStatistics(BufferedReader &r)
 {
   gl_log("Computing volume statistics...");
 
@@ -310,13 +315,10 @@ BlockCollection2<Ty>::computeVolumeStatistics(Reader &r)
 //  m_volAvg = 0;
 
   r.reset();
-  auto iter = 1;
-  auto ptr = r.buffer_ptr();
+  const Ty *ptr = r.buffer_ptr();
   while(r.hasNextFill()) {
-    if (iter % 5 == 0) {
-      std::cout << "\rBuffer refills: " << iter++ << std::flush;
-    }
     size_t elems = r.fillBuffer();
+
     for (size_t col{ 0 }; col < elems; ++col) {
       Ty val{ ptr[col] };
       m_volMin = std::min<decltype(m_volMin)>(m_volMin, val);
@@ -334,55 +336,118 @@ BlockCollection2<Ty>::computeVolumeStatistics(Reader &r)
 
 }
 
+////////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 void
-BlockCollection2<Ty>::computeBlockStatistics(Reader &r)
+BlockCollection2<Ty>::computeBlockStatistics(BufferedReader &r)
 {
   gl_log("Computing block statistics for %d blocks.", m_blocks.size());
   r.reset();
-  auto iter = 1;
-  auto voxIdx = 0ull;
-  const auto *buf = r.buffer_ptr();
-  while (r.hasNextFill()) {
-    if (iter % 10 == 0) {
-      std::cout << "\rBuffer refills: " << iter++ << std::flush;
-    }
-    auto elems = r.fillBuffer();
 
-    if (elems <= 0) {
-      std::cout << "\nreadsz: " << elems << " bytes." << std::endl;
+  const Ty *buf{ r.buffer_ptr() };
+
+  // voxel index within the entire volume
+  size_t vol_idx = 0;
+
+  // the 1D block index of current block
+  size_t blk_idx = 0;
+  FileBlock *currBlock{ m_blocks[blk_idx] };
+
+  // the number of voxels read last fill.
+  size_t voxels_read = r.fillBuffer();
+
+
+  uint64_t dist_to_right_block_edge = currBlock->voxel_dims[0];
+  uint64_t dist_to_bottom_block_edge = currBlock->voxel_dims[0];
+
+  uint64_t block_edge = 0 + dist_to_right_block_edge;
+  while (r.hasNextFill()) {
+
+    if (voxels_read <= 0) {
+      std::cout << "\nreadsz: " << voxels_read << " bytes." << std::endl;
       break;
     }
 
-    for (size_t i{ 0 }; i < elems; ++i, ++voxIdx) {
-      Ty val{ buf[i] };
+    // index into current buffer
+    size_t buf_idx = 0;
+    // loop through buffer
+    while(buf_idx < voxels_read) {
+      currBlock = m_blocks[blk_idx];
+      uint64_t voxelsInBlockRow{ currBlock->voxel_dims[0] };
+      size_t vox{ 0 };
+      for(; vox < voxelsInBlockRow; ++vox ) {
 
-      // Determine which block this voxel falls into:         //
-      // 1st compute 3D block index from 1D voxel index,      //
-      // then compute 1D block index from 3D block index      //
-      auto xi = (voxIdx%m_volDims.x)/m_blockDims.x;
-      auto yi = ((voxIdx/m_volDims.x)%m_volDims.y)/m_blockDims.y;
-      auto zi = ((voxIdx/m_volDims.x)/m_volDims.y)/m_blockDims.z;
-      size_t blockIdx{ bd::to1D(xi, yi, zi, m_blockDims.x, m_blockDims.y) };
 
-      // Populate block that this voxel falls into with stats values.
-      std::shared_ptr<FileBlock> b{ m_blocks.at(blockIdx) };
+      }
+      vol_idx += vox;
+      ++buf_idx;
+    }
 
-      assert(b->block_index == blockIdx && "b->block_index == blockIdx");
 
-      b->min_val = std::min<decltype(b->min_val)>(b->min_val, val);
-      b->max_val = std::max<decltype(b->max_val)>(b->max_val, val);
-      b->avg_val += val;
 
+    // Determine which block this voxel falls into:         //
+    // 1st compute 3D block index from 1D voxel index,      //
+    // then compute 1D block index from 3D block index      //
+    auto vX = (vol_idx%m_volDims.x);
+    auto vY = ((vol_idx/m_volDims.x)%m_volDims.y);
+    auto vZ = ((vol_idx/m_volDims.x)/m_volDims.y);
+    size_t blockIdx{
+        bd::to1D(
+            vX/m_blockDims.x,
+            vY/m_blockDims.y,
+            vZ/m_blockDims.z,
+            m_numBlocks.x,
+            m_numBlocks.y) };
+
+    for (size_t buf_idx{ 0 }; buf_idx < elems; ++buf_idx, ++vol_idx) {
+      Ty voxel =  buf[buf_idx];
+
+
+//      blockIndexFile << xi << "," << yi << ","  << zi << "," << blockIdx << "\n";
+
+      try {
+        // Populate block that this voxel falls into with stats values.
+        FileBlock *b{ m_blocks.at(blockIdx) };
+
+        b->min_val = std::min<decltype(b->min_val)>(b->min_val, voxel);
+        b->max_val = std::max<decltype(b->max_val)>(b->max_val, voxel);
+        b->avg_val += voxel;
+
+      } catch (std::out_of_range e) {
+        std::cerr << e.what() << std::endl;
+//        blockIndexFile.flush();
+//        blockIndexFile.close();
+        return;
+      }
     } // for(...
   } // while(
 
-  for(auto b : m_blocks) {
+  for(FileBlock* b : m_blocks) {
     b->avg_val /= b->voxel_dims[0] * b->voxel_dims[1] * b->voxel_dims[2];
   }
 
   std::cout << "\nDone computing block statistics.\n";
   gl_log("Done computing block statistics for %d blocks.", m_blocks.size());
+}
+
+template<typename Ty>
+size_t BlockCollection2<Ty>::nextBlockIndex(const FileBlock &currBlock, size_t current, size_t vol_idx)
+{
+
+
+  if (dist_to_right_block_edge == 0) {        // if at right edge of block
+    if (vol_idx%m_volDims.x==0) {         // if at volume right edge
+      if(dist_to_bottom_block_edge == 0){     // if at bottom edge of block
+        if ((vol_idx/m_volDims.x) % m_volDims.y == 0){ // if at volume bottom
+          if ((vol_idx/m_volDims.x) / m_volDims.y == 0) { // if at volume back
+
+          } // vol back
+        } // vol bottom
+      } // blk bottom
+      blk_idx = blk_idx - m_numBlocks.x;
+    } // vol right
+    blk_idx += 1;
+  }
 }
 
 
@@ -391,7 +456,7 @@ template<typename Ty>
 void
 BlockCollection2<Ty>::addBlock(const FileBlock& b)
 {
-  std::shared_ptr<FileBlock> ptr{ std::make_shared<FileBlock>(b) };
+  FileBlock* ptr{ new FileBlock(b) }; //{ std::make_shared<FileBlock>(b) };
   m_blocks.push_back(ptr);
 
   if (!b.is_empty) {
@@ -462,12 +527,12 @@ BlockCollection2<Ty>::filterBlocks
 {
   initBlocks();
 
-  Reader r(this, bufSize);
+  BufferedReader r(this, bufSize);
   if (! r.open(file)) {
     throw std::runtime_error("Could not open file" + file);
   }
 
-//  computeVolumeStatistics(r);
+  computeVolumeStatistics(r);
   computeBlockStatistics(r);
 
   // total voxels per block
@@ -481,7 +546,7 @@ BlockCollection2<Ty>::filterBlocks
 //    normed = new double[numvox];
 //  }
 
-//  for (std::shared_ptr<FileBlock> b : m_blocks) {
+//  for (FileBlock b : m_blocks) {
 //    fillBlockData(*b, rawFile, image);
 
   // Find min/max/avg values
@@ -521,7 +586,7 @@ BlockCollection2<Ty>::filterBlocks
 //
 //
 
-  for (auto b : m_blocks){
+  for (auto &b : m_blocks){
 //    if (isEmpty(b)){
     if (b->avg_val > tmin && b->avg_val < tmax) {
       b->is_empty =  1; //true
@@ -585,7 +650,7 @@ BlockCollection2<Ty>::fillBlockData
 }
 
 template<typename Ty>
-BlockCollection2<Ty>::Reader::Reader
+BlockCollection2<Ty>::BufferedReader::BufferedReader
   (
     BlockCollection2<Ty> *bc2,
     size_t bufSize
@@ -606,7 +671,7 @@ BlockCollection2<Ty>::Reader::Reader
 
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
-BlockCollection2<Ty>::Reader::~Reader()
+BlockCollection2<Ty>::BufferedReader::~BufferedReader()
 {
   if (m_is) delete m_is;
   if (m_buffer) delete [] m_buffer;
@@ -616,7 +681,7 @@ BlockCollection2<Ty>::Reader::~Reader()
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 bool
-BlockCollection2<Ty>::Reader::open(const std::string& path)
+BlockCollection2<Ty>::BufferedReader::open(const std::string& path)
 {
   m_path = path;
   m_is = new std::ifstream();
@@ -633,7 +698,7 @@ BlockCollection2<Ty>::Reader::open(const std::string& path)
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 size_t
-BlockCollection2<Ty>::Reader::fillBuffer()
+BlockCollection2<Ty>::BufferedReader::fillBuffer()
 {
   m_is->read(reinterpret_cast<char*>(m_buffer), m_bufSize);
   std::streampos amount{ m_is->gcount() };
@@ -643,7 +708,7 @@ BlockCollection2<Ty>::Reader::fillBuffer()
 
 
 template<typename Ty>
-void BlockCollection2<Ty>::Reader::reset()
+void BlockCollection2<Ty>::BufferedReader::reset()
 {
   m_is->clear();
   m_is->seekg(0, std::ios::beg);
