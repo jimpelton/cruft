@@ -9,12 +9,16 @@
 
 #include <glm/glm.hpp>
 
+#include <thrust/host_vector.h>
+#include <thrust/extrema.h>
+
 #include <fstream>
 #include <iostream>
 #include <vector>
 #include <algorithm>
 #include <stdexcept>
 #include <cassert>
+#include <iterator>
 
 namespace bd
 {
@@ -256,26 +260,34 @@ BlockCollection2<Ty>::initBlocks()
 //////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 void
-BlockCollection2<Ty>::computeVolumeStatistics(BufferedReader &r)
+BlockCollection2<Ty>::computeVolumeStatistics(BufferedReader<Ty> &r)
 {
   gl_log("Computing volume statistics...");
 
-//  m_volMin = std::numeric_limits<decltype(m_volMin)>::max();
-//  m_volMax = std::numeric_limits<decltype(m_volMax)>::min();
-//  m_volAvg = 0;
 
   r.reset();
   const Ty *ptr = r.buffer_ptr();
 
+  thrust::host_vector<Ty> h_vec;
+  h_vec.reserve(r.bufferSizeElements());
+
   while(r.hasNextFill()) {
     size_t elems = r.fillBuffer();
+    //auto start = std::begin(r.buffer_ptr());
+    h_vec.assign(ptr, ptr+elems);
 
-    for (size_t col{ 0 }; col < elems; ++col) {
-      Ty val{ ptr[col] };
-      m_volMin = std::min<decltype(m_volMin)>(m_volMin, val);
-      m_volMax = std::max<decltype(m_volMax)>(m_volMax, val);
-      m_volAvg += static_cast<decltype(m_volAvg)>(val);
-    }
+    thrust::pair<Ty, Ty> minmax = thrust::minmax_element(h_vec.begin(), h_vec.end());
+    auto sum = thrust::reduce(h_vec.begin(), h_vec.end());
+    m_volAvg += sum;
+    m_volMin = std::min<decltype(m_volMin)>(m_volMin, minmax.first);
+    m_volMax = std::max<decltype(m_volMax)>(m_volMax, minmax.second);
+
+//    for (size_t col{ 0 }; col < elems; ++col) {
+//      Ty val{ ptr[col] };
+//      m_volMin = std::min<decltype(m_volMin)>(m_volMin, val);
+//      m_volMax = std::max<decltype(m_volMax)>(m_volMax, val);
+//      m_volAvg += static_cast<decltype(m_volAvg)>(val);
+//    }
 
   }
 
@@ -290,7 +302,7 @@ BlockCollection2<Ty>::computeVolumeStatistics(BufferedReader &r)
 ////////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 void
-BlockCollection2<Ty>::computeBlockStatistics(BufferedReader &r)
+BlockCollection2<Ty>::computeBlockStatistics(BufferedReader<Ty> &r)
 {
   gl_log("Computing block statistics for %d blocks.", m_blocks.size());
   r.reset();
@@ -304,45 +316,44 @@ BlockCollection2<Ty>::computeBlockStatistics(BufferedReader &r)
   size_t blk_idx = 0;
   FileBlock *currBlock{ m_blocks[blk_idx] };
 
-  // the number of voxels read last fill.
-  size_t voxels_read = r.fillBuffer();
 
+//  uint64_t dist_to_right_block_edge = currBlock->voxel_dims[0];
+//  uint64_t dist_to_bottom_block_edge = currBlock->voxel_dims[0];
+//  uint64_t block_edge = 0 + dist_to_right_block_edge;
 
-  uint64_t dist_to_right_block_edge = currBlock->voxel_dims[0];
-  uint64_t dist_to_bottom_block_edge = currBlock->voxel_dims[0];
-
-  uint64_t block_edge = 0 + dist_to_right_block_edge;
   while (r.hasNextFill()) {
 
-    if (voxels_read <= 0) {
+    // the number of voxels read last fill.
+    size_t voxels_read = r.fillBuffer();
+
+    if (voxels_read<=0) {
       std::cout << "\nreadsz: " << voxels_read << " bytes." << std::endl;
       break;
     }
 
-    // index into current buffer
-    size_t buf_idx = 0;
     // loop through buffer
-    while(buf_idx < voxels_read) {
-      currBlock = m_blocks[blk_idx];
-      uint64_t voxelsInBlockRow{ currBlock->voxel_dims[0] };
-      size_t vox{ 0 };
-      for(; vox < voxelsInBlockRow; ++vox ) {
-        Ty val{ buf[vox] };
+    currBlock = m_blocks[blk_idx];
+    uint64_t voxelsInBlockRow{ currBlock->voxel_dims[0] };
+    size_t vox{ 0 };
 
-        currBlock->->min_val = std::min<
-            decltype(currBlock->->min_val)>(currBlock->->min_val, val);
+    for (; vox < voxelsInBlockRow; ++vox) {
+      Ty val{ buf[vox] };
 
-        currBlock->->max_val = std::max<
-            decltype(currBlock->->max_val)>(currBlock->->max_val, val);
+      currBlock->min_val = std::min<
+          decltype(currBlock->min_val)>(currBlock->min_val, val);
 
-        currBlock->avg_val += vox;
+      currBlock->max_val = std::max<
+          decltype(currBlock->max_val)>(currBlock->max_val, val);
 
-      }
+      currBlock->avg_val += vox;
 
-      vol_idx += vox;
-      ++buf_idx;
     }
 
+    //TODO: compute next block index
+
+    vol_idx += vox;
+
+  } // while(r.hasNext...
 
 
     // Determine which block this voxel falls into:         //
@@ -359,28 +370,28 @@ BlockCollection2<Ty>::computeBlockStatistics(BufferedReader &r)
             m_numBlocks.x,
             m_numBlocks.y) };
 
-    for (size_t buf_idx{ 0 }; buf_idx < elems; ++buf_idx, ++vol_idx) {
-      Ty voxel =  buf[buf_idx];
-
-
-//      blockIndexFile << xi << "," << yi << ","  << zi << "," << blockIdx << "\n";
-
-      try {
-        // Populate block that this voxel falls into with stats values.
-        FileBlock *b{ m_blocks.at(blockIdx) };
-
-        b->min_val = std::min<decltype(b->min_val)>(b->min_val, voxel);
-        b->max_val = std::max<decltype(b->max_val)>(b->max_val, voxel);
-        b->avg_val += voxel;
-
-      } catch (std::out_of_range e) {
-        std::cerr << e.what() << std::endl;
-//        blockIndexFile.flush();
-//        blockIndexFile.close();
-        return;
-      }
-    } // for(...
-  } // while(
+//    for (size_t buf_idx{ 0 }; buf_idx < elems; ++buf_idx, ++vol_idx) {
+//      Ty voxel =  buf[buf_idx];
+//
+//
+////      blockIndexFile << xi << "," << yi << ","  << zi << "," << blockIdx << "\n";
+//
+//      try {
+//        // Populate block that this voxel falls into with stats values.
+//        FileBlock *b{ m_blocks.at(blockIdx) };
+//
+//        b->min_val = std::min<decltype(b->min_val)>(b->min_val, voxel);
+//        b->max_val = std::max<decltype(b->max_val)>(b->max_val, voxel);
+//        b->avg_val += voxel;
+//
+//      } catch (std::out_of_range e) {
+//        std::cerr << e.what() << std::endl;
+////        blockIndexFile.flush();
+////        blockIndexFile.close();
+//        return;
+//      }
+//    } // for(...
+//  } // while(
 
   for(FileBlock* b : m_blocks) {
     b->avg_val /= b->voxel_dims[0] * b->voxel_dims[1] * b->voxel_dims[2];

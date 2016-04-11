@@ -13,7 +13,6 @@ find_package(OpenGL REQUIRED)
 find_package(GLFW REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(GLM REQUIRED)
-find_package(THRUST REQUIRED)
 
 # Windows requires a few extra definitions.
 if (WIN32)
@@ -43,9 +42,10 @@ include_directories("${GLFW_INCLUDE_DIRS}")
 project(crufterly CXX)
 
 # Enables gl_check() macros.
-add_definitions(-DBD_DEBUG)
+add_definitions(-DBD_DEBUG -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP )
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/thrust")
 
 add_subdirectory("include/bd")
 add_subdirectory("src/bd")

@@ -59,8 +59,9 @@ public:
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Return pointer to buffer.
   ///////////////////////////////////////////////////////////////////////////////
-  const Ty *buffer_ptr() const { return m_buffer; }
+  Ty *buffer_ptr() const { return m_buffer; }
 
+  size_t bufferSizeElements() { return m_bufSize/sizeof(Ty); }
 
 private:
   Ty *m_buffer;
@@ -75,7 +76,7 @@ private:
 
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
-BufferedReader::BufferedReader
+BufferedReader<Ty>::BufferedReader
 (
   size_t bufSize
 )
