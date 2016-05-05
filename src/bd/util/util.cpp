@@ -105,21 +105,21 @@ readVolumeData(const std::string& dtype, const std::string& fpath,
   case bd::DataType::Float:
     {
       bd::DataReader<float, float> reader;
-      reader.loadRaw3d(fpath, volx, voly, volz);
+      reader.loadRaw3d(fpath, volx, voly, volz, false);
       rawdata = reader.takeOwnership();
       break;
     }
   case bd::DataType::UnsignedCharacter:
     {
       bd::DataReader<unsigned char, float> reader;
-      reader.loadRaw3d(fpath, volx, voly, volz);
+      reader.loadRaw3d(fpath, volx, voly, volz, false);
       rawdata = reader.takeOwnership();
       break;
     }
   case bd::DataType::UnsignedShort:
     {
       DataReader<unsigned short, float> reader;
-      reader.loadRaw3d(fpath, volx, voly, volz);
+      reader.loadRaw3d(fpath, volx, voly, volz, false);
       rawdata = reader.takeOwnership();
       break;
     }

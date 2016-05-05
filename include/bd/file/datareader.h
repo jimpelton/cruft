@@ -211,7 +211,14 @@ DataReader<ExternTy, InternTy>::loadRaw3d
     delete [] raw;
     raw = nullptr;
   } else {
-    m_data = reinterpret_cast<InternTy *>(raw);
+    InternTy* internal = new InternTy[m_numVoxels];
+    for(size_t i{ 0 }; i < szbytes; ++i) {
+      internal[i] = static_cast<InternTy>(raw[i]);
+    }
+
+    m_data = internal;
+    delete [] raw;
+    raw = nullptr;
   }
 
   return m_numVoxels;
