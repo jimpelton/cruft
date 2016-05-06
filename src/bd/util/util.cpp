@@ -1,3 +1,4 @@
+#include <bd/log/logger.h>
 #include <bd/util/util.h>
 #include <bd/file/datareader.h>
 #include <bd/file/datatypes.h>
@@ -139,7 +140,7 @@ readVolumeData(const std::string& datFilePath, const std::string &filePath)
     return nullptr;
   }
  
-  gl_log("Dat file: %s", dat.to_string().c_str());
+  Info() << "Dat file: " << dat.to_string();
   
   std::string typeStr{ bd::to_string(dat.dataType) };
   return readVolumeData(typeStr, filePath, dat.rX, dat.rY, dat.rZ);

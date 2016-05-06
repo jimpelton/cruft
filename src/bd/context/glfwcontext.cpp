@@ -1,5 +1,6 @@
 #include <GL/glew.h>
 
+#include <bd/log/logger.h>
 #include <bd/log/gl_log.h>
 #include <bd/context/glfwcontext.h>
 
@@ -28,7 +29,7 @@ GlfwContext::init(int width, int height)
 {
   m_window = nullptr;
   if (!glfwInit()) {
-    gl_log_err("could not start GLFW3");
+    Err() << "could not start GLFW3";
     //return nullptr;
     return false;
   }
@@ -44,7 +45,7 @@ GlfwContext::init(int width, int height)
 
   m_window = glfwCreateWindow(width, height, "Minimal", NULL, NULL);
   if (!m_window) {
-    gl_log_err("ERROR: could not open window with GLFW3");
+    Err() << "ERROR: could not open window with GLFW3";
     glfwTerminate();
     return false;
   }
@@ -58,13 +59,13 @@ GlfwContext::init(int width, int height)
   glewExperimental = GL_TRUE;
   GLenum error = glewInit();
   if (error) {
-    gl_log_err("could not init glew %s", glewGetErrorString(error));
+    Err() << "could not init glew " << glewGetErrorString(error);
     return false;
   }
 
   subscribe_debug_callbacks();
 
-  gl_log("GLFWContext initialized...");
+  Info() << "GLFWContext initialized...";
 
   return true;
 }
@@ -109,7 +110,7 @@ GlfwContext::window() const
 void
 GlfwContext::glfw_error_callback(int error, const char* description)
 {
-  gl_log("GLFW ERROR: code %i msg: %s", error, description);
+  Err() << "GLFW ERROR: code " << error << " msg: " << description;
 }
 
 

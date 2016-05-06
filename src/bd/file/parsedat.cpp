@@ -1,5 +1,6 @@
 #include <bd/file/parsedat.h>
 #include <bd/util/ordinal.h>
+#include <bd/log/logger.h>
 
 #include <algorithm>
 #include <functional>
@@ -158,7 +159,7 @@ parseDat(const std::string& datfile, DatFileData& data)
     ss << f.rdbuf();
     f.close();
   } catch (std::ifstream::failure e) {
-    std::cerr << "Opening/reading/closing the dat file failed: " << e.what() << std::endl;
+    Err() << "Opening/reading/closing the dat file failed: " << e.what() << std::endl;
     return false;
   }
 

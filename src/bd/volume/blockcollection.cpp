@@ -1,6 +1,7 @@
 #include <bd/volume/blockcollection.h>
 
 #include <bd/log/gl_log.h>
+#include <bd/log/logger.h>
 #include <bd/util/util.h>
 
 namespace bd
@@ -64,11 +65,14 @@ BlockCollection::initBlocks(glm::u64vec3 nb, glm::u64vec3 vd)
   // block world dims
   glm::vec3 wld_dims{ 1.0f / glm::vec3(nb) };
 
-  gl_log("Starting block init: Number of blocks: %dx%dx%d, "
-    "Volume dimensions: %dx%dx%d Block dimensions: %.2f,%.2f,%.2f",
-    nb.x, nb.y, nb.z,
-    vd.x, vd.y, vd.z,
-    wld_dims.x, wld_dims.y, wld_dims.z)  ;
+
+  Dbg() << "Starting block init: "
+      "Number of blocks: " <<
+      nb.x << ", " << nb.y << ", " << nb.z <<
+      " Volume dimensions: "
+          <<  vd.x << ", " << vd.y << ", " << vd.z <<
+      " Block dimensions: "
+          << ", " << wld_dims.x << ", " << wld_dims.y << ", " << wld_dims.z;
 
   // Loop through all our blocks (identified by <bx,by,bz>) and populate block fields.
   for (auto bz = 0ull; bz < nb.z; ++bz)
@@ -85,7 +89,7 @@ BlockCollection::initBlocks(glm::u64vec3 nb, glm::u64vec3 vd)
         m_blocks.push_back(blk);
       }
 
-  gl_log("Finished block init: total blocks is %d.", m_blocks.size());
+  Dbg() << "Finished block init: total blocks is " << m_blocks.size();
 }
 
 
@@ -118,8 +122,8 @@ void BlockCollection::filterBlocks(const float* data, /*unsigned int sampler,*/
          m_blockDims.x, m_blockDims.y, m_blockDims.z);
 
       if (b.texture().id() == 0) {
-        gl_log_err("failed to allocate a gl texture, for block (%d,%d,%d).",
-          ijk.x, ijk.y, ijk.z);
+        Err() << "Failed to allocate a gl texture for block ("
+            << ijk.x << ", " << ijk.y << ", " << ijk.z << ").";
       }
 
       m_nonEmptyBlocks.push_back(&b);
@@ -127,8 +131,8 @@ void BlockCollection::filterBlocks(const float* data, /*unsigned int sampler,*/
   } // for auto
 
   delete[] image;
-  gl_log("%d/%d blocks marked empty.",
-    m_blocks.size() - m_nonEmptyBlocks.size(), m_blocks.size());
+  Info() << m_blocks.size() - m_nonEmptyBlocks.size() << "/"
+      << m_blocks.size() << " blocks marked empty.";
 }
 
 

@@ -22,7 +22,8 @@ static const std::array<GLenum, 3> gl_target{
 } // namespace
 
 Texture::Texture(Target textureType)
-  : m_id{ 0 }, /*m_samplerUniform{0}, m_unit{0},*/ m_type{ textureType }
+  : m_id{ 0 }
+  , m_type{ textureType }
 {
 }
 

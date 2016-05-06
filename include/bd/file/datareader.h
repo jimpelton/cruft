@@ -1,7 +1,8 @@
-#ifndef datareader_h__
-#define datareader_h__
+#ifndef cruft_datareader_h__
+#define cruft_datareader_h__
 
-#include <bd/log/gl_log.h>
+
+#include <bd/log/logger.h>
 
 #include <limits>
 #include <fstream>
@@ -164,15 +165,15 @@ DataReader<ExternTy, InternTy>::loadRaw3d
   using std::ifstream;
   using std::filebuf;
 
-  gl_log("Opening %s, normalize=%d", imagepath.c_str(), normalize);
+  //gl_log("Opening %s, normalize=%d", imagepath.c_str(), normalize);
+  Info() << "Opening " << imagepath.c_str() << ", normalize=" << normalize;
 
   ifstream rawfile;
   rawfile.exceptions(ifstream::failbit | ifstream::badbit);
   try {
     rawfile.open(imagepath, ifstream::in | ifstream::binary);
   } catch (std::exception& err) {
-    gl_log_err("Could not open file %s. Message was: %s",
-      imagepath.c_str(), err.what());
+    Err() << "Could not open file " << imagepath << "Message was: " << err.what();
     return 0;
   }
 
@@ -180,19 +181,18 @@ DataReader<ExternTy, InternTy>::loadRaw3d
   size_t szbytes = volsize(pbuf);
   m_numVoxels = szbytes / sizeof(ExternTy);
   if (m_numVoxels < width * height * depth) {
-    gl_log_err("File size does not jive with the given dimensions and/or data type.\n"
-      "\tActual Size: %ld bytes (= %ld voxels)\n"
-      "\tYou gave dimensions (WxHxD): %dx%dx%d",
-      szbytes, m_numVoxels, width, height, depth);
+    Err() << "File size does not jive with the given dimensions and/or data type.\n"
+      "\tActual Size: " << szbytes << " bytes (= " << m_numVoxels << " voxels)\n"
+      "\tYou gave dimensions (WxHxD): " << width << "x" << height << "x" << depth;
     return 0;
   }
 
   if (m_numVoxels > width * height * depth) {
-    gl_log("File size is larger than given dimensions. Reading anyway.");
+    Info() << "File size is larger than given dimensions. Reading anyway.";
   }
 
-  gl_log("Reading %ld bytes (=%ld voxels) WxHxD: %dx%dx%d.",
-    szbytes, m_numVoxels, width, height, depth);
+  Info() << "Reading " << szbytes << " bytes (=" << m_numVoxels << " voxels) WxHxD: " <<
+      width << "x" << height << "x" << depth;
 
   // read file buffer
   char* raw = new char[szbytes];
@@ -259,7 +259,7 @@ DataReader<ExternTy, InternTy>::minMax
   const ExternTy* image
 )
 {
-  gl_log("Calculating min and max.");
+  Info() << "Calculating min and max.";
 
   double avg{ 0.0 };
   for (size_t idx = 0; idx < m_numVoxels; ++idx) {
@@ -270,7 +270,7 @@ DataReader<ExternTy, InternTy>::minMax
   }
   avg /= m_numVoxels;
 
-  gl_log("Max: %f, Min: %f, Mean: %f", m_max, m_min, avg);
+  Info() << "Max: " << m_max << " Min: " << m_min << "Mean: " << avg;
 }
 
 template <typename ExternTy, typename InternTy>
@@ -281,7 +281,7 @@ DataReader<ExternTy, InternTy>::normalize_copy
   InternTy* internal
 )
 {
-  gl_log("Normalizing data");
+  Info() << "Normalizing data";
 
   double min = std::numeric_limits<InternTy>::max();
   double max = std::numeric_limits<InternTy>::lowest();
@@ -302,10 +302,10 @@ DataReader<ExternTy, InternTy>::normalize_copy
   m_min = min;
   avg /= m_numVoxels;
 
-  gl_log("Max: %f, Min: %f, Mean: %f", m_max, m_min, avg);
+  Info() << "Max: "<< m_max << " Min: " << m_min << "Mean: " << avg;
 }
 } // namespace bd
 
-#endif // datareader_h__
+#endif // cruft_datareader_h__
 
 

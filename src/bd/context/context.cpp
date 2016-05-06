@@ -1,4 +1,5 @@
 #include <bd/log/gl_log.h>
+#include <bd/log/logger.h>
 #include <bd/context/context.h>
 #include <bd/context/glfwcontext.h>
 
@@ -42,17 +43,17 @@ Context::~Context()
 void
 Context::startLoop()
 {
-  gl_log("Context initializing renderloop.");
+  Info() << "Context initializing renderloop.";
   m_loop->initialize(*this);
 
-  gl_log("Starting render loop.");
+  Info() << "Starting render loop.";
   do {
     m_loop->render();
     swapBuffers();
     pollEvents();
   } while (!windowShouldClose());
 
-  gl_log("Renderloop exited.");
+  Info() << "Renderloop exited.";
 }
 
 

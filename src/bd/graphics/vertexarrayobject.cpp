@@ -2,6 +2,7 @@
 
 #include <bd/graphics/vertexarrayobject.h>
 #include <bd/log/gl_log.h>
+#include <bd/log/logger.h>
 
 namespace bd
 {
@@ -18,7 +19,7 @@ VertexArrayObject::VertexArrayObject()
 ///////////////////////////////////////////////////////////////////////////////
 VertexArrayObject::~VertexArrayObject()
 {
-  gl_log("Deleting %ull vertex buffers.", m_bufIds.size());
+  Dbg() << "Deleting " << m_bufIds.size() << " vertex buffers.";
 
   for (unsigned int u : m_bufIds) {
     glDeleteBuffers(1, &u);
@@ -32,7 +33,7 @@ VertexArrayObject::create()
 {
   if (m_id == 0) {
     gl_check(glGenVertexArrays(1, &m_id));
-    gl_log("Created vertex array object, id=%d", m_id);
+    Dbg() << "Created vertex array object id=" << m_id;
   }
 
   return m_id;
@@ -194,12 +195,11 @@ VertexArrayObject::gen_vbo(const float* verts,
   //unbind();
 
   if (vbo == 0) {
-    gl_log_err("Unable to add vertex buffer to vertex buffer object."
-      "(The returned id for the generated vertex buffer was 0)");
+    Err() << "Unable to add vertex buffer to vertex buffer object."
+      "(The returned id for the generated vertex buffer was 0)";
   } else {
     m_bufIds.push_back(vbo);
-    gl_log("Created VBO, id=%d, verticies=%d", vbo,
-      length/elements_per_vertex)    ;
+    Dbg() << "Created VBO, id=" << vbo << ", verticies=" << length/elements_per_vertex;
   }
 
   return vbo;
@@ -226,12 +226,12 @@ VertexArrayObject::gen_ibo(const unsigned short* indices,
   unbind();
 
   if (ibo == 0) {
-    gl_log_err("Unable to set index buffer. (The returned id for the generated "
-      "element buffer was 0)");
+    Err() << "Unable to set index buffer. (The returned id for the generated "
+      "element buffer was 0)";
   } else {
     m_idxBufId = ibo;
     m_numEle = length;
-    gl_log("Created IBO, id=%d, elements=%d", ibo, length);
+    Dbg() << "Created IBO, id=" << ibo << " elements=" << length;
   }
 
   return ibo;

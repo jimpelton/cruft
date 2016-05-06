@@ -1,7 +1,8 @@
+#include <bd/log/logger.h>
+#include <bd/log/gl_log.h>
 #include <bd/graphics/shader.h>
 #include <bd/util/gl_strings.h>
 #include <bd/util/ordinal.h>
-#include <bd/log/gl_log.h>
 
 #include <GL/glew.h>
 
@@ -49,7 +50,7 @@ Compiler::compile(Shader& shader, const char* code)
   if (infoLogLength > 1) {
     std::vector<char> msg(infoLogLength + 1);
     gl_check(glGetShaderInfoLog(shaderId, infoLogLength, nullptr, &msg[0]));
-    gl_log("%s", &msg[0]);
+    Gl_Dbg() << &msg[0];
   }
 
   return result == GL_TRUE;
@@ -71,7 +72,7 @@ Shader::Shader(ShaderType t, const std::string& name)
 
 Shader::~Shader()
 {
-  gl_log("Destructing shader: Type: %s, GLid: %d", typeString(), m_id);
+  Dbg() << "Destructing shader: Type: " << typeString() << " GLid: " << m_id;
 }
 
 
@@ -81,8 +82,7 @@ Shader::create()
   GLenum gl_type{ gl_target[ordinal<ShaderType>(m_type)] };
   GLuint shaderId = gl_check(glCreateShader(gl_type));
 
-  gl_log("glCreateShader for type=%s returned id=%d",
-    bd::gl_to_string(gl_type), shaderId);
+  Dbg() << "glCreateShader for type=" << bd::gl_to_string(gl_type) << " returned id=" << shaderId;
 
   return m_id = shaderId;
 }
@@ -94,7 +94,7 @@ Shader::loadFromFile(const std::string& filepath)
   //GLuint shaderId = 0;
   std::ifstream file(filepath.c_str());
   if (!file.is_open()) {
-    gl_log_err("Couldn't open %s", filepath.c_str());
+    Err() << "Couldn't open " << filepath;
     return;
   }
   std::stringstream shaderCode;
@@ -172,8 +172,7 @@ ShaderProgram::ShaderProgram(Shader* vert, Shader* frag)
 ShaderProgram::~ShaderProgram()
 {
   //TODO: cleanup opengl shaders ... glDelete?
-  gl_log_err(
-    "I might be a memory/resource leak (no cleanup in shader destructor).");
+  Err() << "I might be a memory/resource leak (no cleanup in shader destructor).";
 }
 
 
@@ -196,13 +195,13 @@ ShaderProgram::linkProgram()
   }
 
   if (m_stages.empty()) {
-    gl_log_err("When linking program, there were no shaders to link! Cannot "
-      "create shader program.");
+    Err() << "When linking program, there were no shaders to link! Cannot "
+      "create shader program.";
     return 0;
   }
 
   if (m_programId != 0) {
-    gl_log("Relinking shader program id=%d", m_programId);
+    Dbg() << "Relinking shader program id=" << m_programId;
   } else {
     // have GL make a program and bail out if no success.
     createNewProgram();
@@ -210,7 +209,7 @@ ShaderProgram::linkProgram()
     if (m_programId == 0)
       return 0;
 
-    gl_log("Linking shader program id=%d", m_programId);
+    Dbg() << "Linking shader program id=" <<  m_programId;
   }
 
   gl_check(glLinkProgram(m_programId));
@@ -228,7 +227,7 @@ ShaderProgram::linkProgram()
       InfoLogLength,
       nullptr,
       &programErrorMessage[0]));
-    gl_log("%s", &programErrorMessage[0]);
+    Dbg() << &programErrorMessage[0];
   }
 
   return m_programId;
@@ -390,7 +389,7 @@ ShaderProgram::validateProgram()
   if (logLength > 0) {
     std::vector<char> msg(logLength);
     gl_check(glGetProgramInfoLog(id, logLength, NULL, &msg[0]));
-    gl_log("%s", &msg[0]);
+    Dbg() <<  &msg[0];
   }
 
   return val == GL_TRUE;
@@ -407,9 +406,7 @@ ShaderProgram::addStage(Shader* stage)
 {
   m_stages.push_back(stage);
   unsigned int id{ stage->id() };
-  gl_log("Added shader %s", stage->to_string().c_str()); // with id=%d",
-  //         gl_to_string(gl_target[static_cast<unsigned>(stage->type())]),
-  //         id);
+  Dbg() << "Added shader " << stage->to_string();
 
   return id;
 }
@@ -422,13 +419,12 @@ ShaderProgram::createNewProgram()
   GLuint programId = gl_check(glCreateProgram());
   if (programId == 0) {
 
-    gl_log_err(
-      "Unable to create shader program with glCreateProgram(). "
-      "Returned id was 0.");
+    Err() << "Unable to create shader program with glCreateProgram(). "
+      "Returned id was 0.";
 
   } else {
 
-    gl_log("Created program id: %d", programId);
+    Dbg() << "Created program id: " << programId;
     for (const Shader* stage : m_stages) {
       gl_check(glAttachShader(programId, stage->id()));
     }
@@ -447,17 +443,14 @@ ShaderProgram::checkBuilt()
 
   while (rval && shader != m_stages.end()) {
     rval = (*shader)->isBuilt();
-    gl_log("Checking if shader %s is built: is built=%s",
-      (*shader)->to_string().c_str(),
-      rval ? "true" : "false")    ;
+    Dbg() << "Shader " << (*shader)->to_string() << "is built: "
+        << (rval ? "true" : "false");
     ++shader;
   }
 
   if (!rval && shader != m_stages.end()) {
-    gl_log_err("While linking shader program %d, I found "
-      "that shader %s was not built, cannot link program.",
-      m_programId,
-      (*shader)->to_string().c_str())    ;
+    Err() << "Error Linking shader program " << m_programId
+        << ": Shader " <<  (*shader)->to_string() << " was not built.";
   }
 
   return rval;

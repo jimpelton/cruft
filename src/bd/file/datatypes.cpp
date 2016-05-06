@@ -1,7 +1,7 @@
 #include <bd/file/datatypes.h>
+#include <bd/log/logger.h>
 #include <algorithm>
 #include <iostream>
-#include <bd/log/gl_log.h>
 
 namespace bd
 {
@@ -37,7 +37,7 @@ to_dataType(const std::string &typeStr)
     return DataTypesMap.at(typeStr);
   } catch (std::out_of_range &e) {
     std::cerr << e.what() << std::endl;
-    gl_log_err("%s is unknown datatype!", typeStr.c_str());
+    Err() << typeStr << " is unknown datatype!";
     return DataType::Unknown;
   }
 }
