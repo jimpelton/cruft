@@ -41,7 +41,7 @@ public:
      * to programatically identify which shader this is.
      *
      * \param shaderType One of GL_VERTEX_SHADER or GL_FRAGMENT_SHADER.
-     * \param path The path to the file containing the shader code.
+     * \param path The path to the io containing the shader code.
      * \param desc A human readable description of the shader.
      */
 	ShaderStage(ShaderType type, const std::string &desc);

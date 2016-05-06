@@ -5562,7 +5562,7 @@ namespace Catch {
 
     private:
         void openStream() {
-            // Open output file, if specified
+            // Open output io, if specified
             if( !m_config->getFilename().empty() ) {
                 m_ofs.open( m_config->getFilename().c_str() );
                 if( m_ofs.fail() ) {
@@ -7044,7 +7044,7 @@ namespace Catch {
 
     std::ostream& operator << ( std::ostream& os, SourceLineInfo const& info ) {
 #ifndef __GNUG__
-        os << info.file << "(" << info.line << ")";
+        os << info.io << "(" << info.line << ")";
 #else
         os << info.file << ":" << info.line;
 #endif

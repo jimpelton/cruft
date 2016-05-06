@@ -77,8 +77,8 @@ Texture::genGLTex1d(float* img, Format ity, Format ety, size_t w)
 }
 
 
-unsigned int Texture::genGLTex2d(float* img, Format ity, Format ety,
-                                 size_t w, size_t h)
+unsigned int
+Texture::genGLTex2d(float* img, Format ity, Format ety, size_t w, size_t h)
 {
   GLuint texId{ 0 };
   gl_check(glGenTextures(1, &texId));
@@ -108,8 +108,9 @@ unsigned int Texture::genGLTex2d(float* img, Format ity, Format ety,
 }
 
 
-unsigned int Texture::genGLTex3d(float* img, Format ity,
-                                 Format ety, size_t w, size_t h, size_t d)
+unsigned int
+Texture::genGLTex3d(float* img, Format ity, Format ety,
+                    size_t w, size_t h, size_t d)
 {
   GLuint texId{ 0 };
   gl_check(glGenTextures(1, &texId));

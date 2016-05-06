@@ -1,5 +1,5 @@
 #
-#  include/file/CMakeLists.txt
+#  include/io/CMakeLists.txt
 #
 
 set(file_HEADERS

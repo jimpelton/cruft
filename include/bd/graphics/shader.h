@@ -63,15 +63,15 @@ public:
   unsigned int create();
 
   //////////////////////////////////////////////////////////////////////////
-  /// \brief Compile the shader in given file.
-  /// \param A string containing the path to the file containing the shader.
+  /// \brief Compile the shader in given io.
+  /// \param A string containing the path to the io containing the shader.
   /// \return The non-zero gl identifier of the compiled shader, 0 on error.
   //////////////////////////////////////////////////////////////////////////
   void loadFromFile(const std::string& filepath);
 
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Compile the shader in given string.
-  ///  \param A string containing the path to the file containing the shader.
+  ///  \param A string containing the path to the io containing the shader.
   ///  \return The non-zero gl identifier of the compiled shader, 0 on error.
   ///////////////////////////////////////////////////////////////////////////////
   void loadFromString(const std::string& shaderString);
@@ -136,7 +136,7 @@ public:
 
 
   //////////////////////////////////////////////////////////////////////////
-  /// \brief Add the Shader in the file at \c shaderPath as a stage in
+  /// \brief Add the Shader in the io at \c shaderPath as a stage in
   /// this program.
   /// \returns I can't remember.
   //////////////////////////////////////////////////////////////////////////

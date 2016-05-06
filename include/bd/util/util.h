@@ -32,9 +32,9 @@ unsigned long long vecCompMult(glm::u64vec3 v);
 
 
 ///////////////////////////////////////////////////////////////////////////////
-/// \brief A convenience method for reading an entire data file into memory.
+/// \brief A convenience method for reading an entire data io into memory.
 /// \param[in] dtype The data type as a string
-/// \param[in] path The file path
+/// \param[in] path The io path
 /// \param[in] volx Number of samples in the x dim
 /// \param[in] voly Number of samples in the y dim
 /// \param[in] volz Number of samples in the z dim

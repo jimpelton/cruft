@@ -1,8 +1,8 @@
 #include <bd/log/logger.h>
 #include <bd/util/util.h>
-#include <bd/file/datareader.h>
-#include <bd/file/datatypes.h>
-#include <bd/file/parsedat.h>
+#include <bd/io/datareader.h>
+#include <bd/io/datatypes.h>
+#include <bd/io/parsedat.h>
 
 #include <glm/glm.hpp>
 #include <algorithm>

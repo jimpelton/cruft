@@ -16,7 +16,7 @@ namespace bd
 /**
  * \brief Read data and convert from ExternTy to InternTy.
  * Optionally, normalize to [0..1] range.
- * \tparam ExternTy Type read from file.
+ * \tparam ExternTy Type read from io.
  * \tparam InternTy Type data is converted to.
  */
 template <typename ExternTy, typename InternTy>
@@ -39,14 +39,14 @@ public:
   }
 
   /**
-  * \brief Load the raw file at path \c imagepath. The external representation
-  * in the file is expected to be ExternTy. The data is converted to InternTy.
+  * \brief Load the raw io at path \c imagepath. The external representation
+  * in the io is expected to be ExternTy. The data is converted to InternTy.
   *
   *  Note: constraint classes do not exist to prevent incompatible types so it
   *  is assumed that a natural conversion already exists between
   *  ExternalTy and InternalTy.
   *
-  * \param imagepath The path to the raw file to open.
+  * \param imagepath The path to the raw io to open.
   * \param width The width in voxels of the volume.
   * \param height The height in voxels of the volume.
   * \param depth The depth in voxels of the volume.
@@ -129,7 +129,7 @@ public:
   }
 
 private:
-  /** \brief calculate and return file size in bytes */
+  /** \brief calculate and return io size in bytes */
   size_t volsize(std::filebuf* pbuf);
 
   /** \brief compute and return fabs(m_min) */
@@ -194,7 +194,7 @@ DataReader<ExternTy, InternTy>::loadRaw3d
   Info() << "Reading " << szbytes << " bytes (=" << m_numVoxels << " voxels) WxHxD: " <<
       width << "x" << height << "x" << depth;
 
-  // read file buffer
+  // read io buffer
   char* raw = new char[szbytes];
   pbuf->sgetn(raw, szbytes);
   rawfile.close();
@@ -212,7 +212,7 @@ DataReader<ExternTy, InternTy>::loadRaw3d
     raw = nullptr;
   } else {
     InternTy* internal = new InternTy[m_numVoxels];
-    for(size_t i{ 0 }; i < szbytes; ++i) {
+    for(size_t i{ 0 }; i < m_numVoxels; ++i) {
       internal[i] = static_cast<InternTy>(raw[i]);
     }
 

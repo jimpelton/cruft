@@ -1,7 +1,7 @@
 #ifndef parsedat_h__
 #define parsedat_h__
 
-#include <bd/file/datatypes.h>
+#include <bd/io/datatypes.h>
 #include <bd/util/ordinal.h>
 
 #include <string>
@@ -28,10 +28,10 @@ struct DatFileData
   unsigned int rY;
   unsigned int rZ;
 
-  // file name of raw file
+  // io name of raw io
   std::string volumeFileName;
 
-  // data type of raw file
+  // data type of raw io
   bd::DataType dataType;
 
   std::string 

@@ -77,11 +77,6 @@ public:
     return m_id;
   }
 
-  //  unsigned int samplerLocation() const { return m_samplerUniform; }
-  //  void samplerLocation(unsigned int loc) { m_samplerUniform = loc; }
-
-  //  unsigned int textureUnit() const { return m_unit; }
-  //  void textureUnit(unsigned int unit) { m_unit = unit; }
 
   Target
   target() const

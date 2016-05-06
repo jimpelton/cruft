@@ -144,16 +144,16 @@ namespace bd
 
 namespace
 {
-const char* logFileName = "gl.log";
-const char* glDebugFileName = "gl_debug.log";
-const char* glCallbackLogFileName = "gl_callback.log";
-FILE* file = NULL;
-
-FILE* glDebugFile = NULL;
-
-const char* ogl = "OGL";
-const char* gcb = "GCB";
-const char* err = "ERR";
+//const char* logFileName = "gl.log";
+//const char* glDebugFileName = "gl_debug.log";
+//const char* glCallbackLogFileName = "gl_callback.log";
+//FILE* io = NULL;
+//
+//FILE* glDebugFile = NULL;
+//
+//const char* ogl = "OGL";
+//const char* gcb = "GCB";
+//const char* err = "ERR";
 //const char *log = "LOG";
 } // namespace
 
@@ -165,8 +165,11 @@ void gl_debug_message_callback(GLenum source, GLenum type, GLuint id,
   const char* sev = gl_debug_severity_str(severity);
   const char* typ = gl_debug_type_str(type);
   const char* src = gl_debug_source_str(source);
-  gl_log_err_fcn(gcb, "Source: %s,\n\tType: %s,\n\tId %u,\n\tSeverity %s,\n\t'%s'",
-    src, typ, id, sev, message);
+  Gl_Dbg() << "Source: " << src
+      << "\n\tType: " << typ
+      << "\n\tId: " << id
+      <<  "\n\tSeverity: " << sev
+      << "\n\t" << message;
 }
 
 
@@ -205,23 +208,23 @@ checkForAndLogGlError(const char* file, const char* func, int line)
 //bool
 //gl_log_close()
 //{
-//  if (!file) {
-//    fprintf(stderr, "Error: not closing gl log file %s because it was not"
+//  if (!io) {
+//    fprintf(stderr, "Error: not closing gl log io %s because it was not"
 //      " opened.\n", logFileName);
 //  }
 //  if (!glDebugFile) {
-//    fprintf(stderr, "Error: not closing gl debug log file %s because it "
+//    fprintf(stderr, "Error: not closing gl debug log io %s because it "
 //      "was not opened.\n", logFileName);
 //  }
 //
-//  if (!file || !glDebugFile)
+//  if (!io || !glDebugFile)
 //    return false;
 //
 //  time_t now = time(NULL);
 //  char* date = ctime(&now);
-//  fprintf(file, "------------------------\nClosing gl_log file. local time %s\n", date);
+//  fprintf(io, "------------------------\nClosing gl_log io. local time %s\n", date);
 //
-//  fclose(file);
+//  fclose(io);
 //  fclose(glDebugFile);
 //
 //  return true;
@@ -234,18 +237,18 @@ checkForAndLogGlError(const char* file, const char* func, int line)
 //  if (!glDebugFile) {
 //    glDebugFile = fopen(glDebugFileName, "a");
 //  } else {
-//    fprintf(stderr, "GL debug log file was already opened.\n");
+//    fprintf(stderr, "GL debug log io was already opened.\n");
 //    return true;
 //  }
 //
 //  if (!glDebugFile) {
-//    fprintf(stderr, "ERROR: could not open GL debug output log file %s for writing\n", glDebugFileName);
+//    fprintf(stderr, "ERROR: could not open GL debug output log io %s for writing\n", glDebugFileName);
 //    return false;
 //  }
 //
 //  std::time_t now = std::time(NULL);
 //  char* date = ctime(&now);
-//  fprintf(file, "\n------------------------\n"
+//  fprintf(io, "\n------------------------\n"
 //    "GL debug output log. local time %s\n", date);
 //
 //  return true;
@@ -255,21 +258,21 @@ checkForAndLogGlError(const char* file, const char* func, int line)
 //bool
 //gl_log_restart()
 //{
-//  if (!file) {
-//    file = fopen(logFileName, "a");
+//  if (!io) {
+//    io = fopen(logFileName, "a");
 //  } else {
-//    fprintf(stderr, "Log file %s was already opened.\n", logFileName);
+//    fprintf(stderr, "Log io %s was already opened.\n", logFileName);
 //    return true;
 //  }
 //
-//  if (!file) {
+//  if (!io) {
 //    fprintf(stderr, "Could not open %s for writing, will use stdout/stderr instead.\n", logFileName);
 //    return false;
 //  }
 //
 //  std::time_t now = std::time(NULL);
 //  char* date = ctime(&now);
-//  fprintf(file, "\n-------------BEGIN LOG---------\n"
+//  fprintf(io, "\n-------------BEGIN LOG---------\n"
 //    "logFileName log. local time %s\n", date);
 //
 //  return true;
@@ -281,9 +284,9 @@ checkForAndLogGlError(const char* file, const char* func, int line)
 //{
 //  va_list argptr;
 //
-//  // print to stdout if no file open.
-//  if (!file) {
-//    fprintf(stderr, "Log file %s is not open for appending\n", logFileName);
+//  // print to stdout if no io open.
+//  if (!io) {
+//    fprintf(stderr, "Log io %s is not open for appending\n", logFileName);
 //
 //    fprintf(stdout, "(LOG): ");
 //
@@ -296,13 +299,13 @@ checkForAndLogGlError(const char* file, const char* func, int line)
 //    return true;
 //  }
 //
-//  fprintf(file, "(LOG): ");
+//  fprintf(io, "(LOG): ");
 //
 //  va_start(argptr, message);
-//  vfprintf(file, message, argptr);
+//  vfprintf(io, message, argptr);
 //  va_end(argptr);
-//  fprintf(file, "\n");
-//  fflush(file);
+//  fprintf(io, "\n");
+//  fflush(io);
 //
 //  return true;
 //}
@@ -317,13 +320,13 @@ checkForAndLogGlError(const char* file, const char* func, int line)
 //
 //  va_list argptr;
 //
-//  if (file) {
-//    fprintf(file, "(%s): ", prefix);
+//  if (io) {
+//    fprintf(io, "(%s): ", prefix);
 //    va_start(argptr, message);
-//    vfprintf(file, message, argptr);
+//    vfprintf(io, message, argptr);
 //    va_end(argptr);
-//    fprintf(file, "\n");
-//    fflush(file);
+//    fprintf(io, "\n");
+//    fflush(io);
 //  }
 //
 //  fprintf(stderr, "(%s): ", prefix);
@@ -336,7 +339,7 @@ checkForAndLogGlError(const char* file, const char* func, int line)
 //
 //  return true;
 //}
-t
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //void

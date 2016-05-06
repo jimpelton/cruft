@@ -13,8 +13,6 @@ RenderLoop* Context::m_loop = nullptr;
 Context*
 Context::InitializeContext(RenderLoop* cc)
 {
-  gl_log_restart();
-  gl_debug_log_restart();
 
   Context* context = new GlfwContext(cc);
   bool success = context->init(1280, 720);

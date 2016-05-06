@@ -42,7 +42,7 @@ include_directories("${GLFW_INCLUDE_DIRS}")
 project(crufterly CXX)
 
 # Enables gl_check() macros.
-add_definitions(-DBD_DEBUG -DTHRUST_DEVICE_SYSTEM=THRUST_DEVICE_SYSTEM_OMP )
+add_definitions(-DBD_DEBUG)
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/thrust")

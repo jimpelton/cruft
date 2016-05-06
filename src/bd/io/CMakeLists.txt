@@ -1,5 +1,5 @@
 #
-# shared/src/file/CMakeLists.txt
+# shared/src/io/CMakeLists.txt
 #
 
 set(file_SOURCES
