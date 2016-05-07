@@ -1,5 +1,6 @@
 #include <bd/io/datatypes.h>
 #include <bd/log/logger.h>
+
 #include <algorithm>
 #include <iostream>
 
@@ -29,7 +30,7 @@ namespace
 } // namespace
 
 
-bd::DataType
+DataType
 to_dataType(const std::string &typeStr)
 {
  
@@ -37,13 +38,13 @@ to_dataType(const std::string &typeStr)
     return DataTypesMap.at(typeStr);
   } catch (std::out_of_range &e) {
     std::cerr << e.what() << std::endl;
-    Err() << typeStr << " is unknown datatype!";
+    Err()<< typeStr << " is unknown datatype!";
     return DataType::Unknown;
   }
 }
 
 std::string
-to_string(bd::DataType type)
+to_string(DataType type)
 {
   try {
     // convert data type to string.

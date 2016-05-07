@@ -19,7 +19,7 @@ struct DatFileData
     , rY{ 0 }
     , rZ{ 0 }
     , volumeFileName("")
-    , dataType{ bd::DataType::Float }
+    , dataType{ DataType::Float }
   {
   }
 
@@ -28,11 +28,11 @@ struct DatFileData
   unsigned int rY;
   unsigned int rZ;
 
-  // io name of raw io
+  // file name of raw file
   std::string volumeFileName;
 
-  // data type of raw io
-  bd::DataType dataType;
+  // data type of raw file
+  DataType dataType;
 
   std::string 
   to_string() const

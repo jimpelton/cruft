@@ -6,6 +6,7 @@
 
 namespace bd
 {
+
 enum class DataType
 {
   Integer,
@@ -24,11 +25,11 @@ enum class DataType
 
 //extern const std::map<std::string, DataType> DataTypesMap;
 
-bd::DataType
+DataType
 to_dataType(const std::string &typeStr);
 
 std::string
-to_string(bd::DataType);
+to_string(DataType);
 
 } /* namespace bd */
 

@@ -151,11 +151,9 @@ public:
   void start_line()
   {
     std::thread::id tid = std::this_thread::get_id();
-    //std::stringstream ss;
     m_out << "- " << now() << " (" << std::hex << tid << std::dec << ") "
         << m_levelString << ":\t";
 
-    //m_out << ss.str();
   }
 
   /////////////////////////////////////////////////////////////////////////////

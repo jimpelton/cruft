@@ -14,7 +14,7 @@ add_subdirectory(volume)
 
 set(bd_HEADERS
     "${context_HEADERS}"
-    "${file_HEADERS}"
+    "${io_HEADERS}"
     "${geo_HEADERS}"
     "${graphics_HEADERS}"
     "${log_HEADERS}"

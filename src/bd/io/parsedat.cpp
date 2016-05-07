@@ -1,6 +1,5 @@
 #include <bd/io/parsedat.h>
 #include <bd/util/ordinal.h>
-#include <bd/log/logger.h>
 
 #include <algorithm>
 #include <functional>
@@ -129,7 +128,7 @@ void
 parseFormat(const std::string& s, DatFileData& d)
 {
   const std::string ss{ toLowerCase(s) };
-  d.dataType = bd::to_dataType(ss);
+  d.dataType = to_dataType(ss);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -159,7 +158,7 @@ parseDat(const std::string& datfile, DatFileData& data)
     ss << f.rdbuf();
     f.close();
   } catch (std::ifstream::failure e) {
-    Err() << "Opening/reading/closing the dat file failed: " << e.what() << std::endl;
+    std::cerr << "Opening/reading/closing the dat file failed: " << e.what() << std::endl;
     return false;
   }
 
