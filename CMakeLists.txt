@@ -3,8 +3,11 @@
 #
 
 cmake_minimum_required(VERSION 2.8)
-#### T h i r d   P a r t y  ################################################
 
+#### P r o j e c t   D e f i n i t i o n  ##################################
+project(crufterly CXX)
+
+#### T h i r d   P a r t y  ################################################
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake
     ${CMAKE_MODULE_PATH}
 )
@@ -21,7 +24,12 @@ if (WIN32)
 endif (WIN32)
 
 if (UNIX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -Wno-missing-braces -fdiagnostics-color=auto")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
+              -std=c++14 \
+              -Wall \
+              -Wno-missing-braces \
+              -pthread \
+              -fdiagnostics-color=auto")
 endif (UNIX)
 
 ###########################################################################
@@ -32,14 +40,16 @@ endif(UNIX)
 
 # Resource directory is for test code only.
 set(CRUFT_RESOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/res")
-message("Cruft resource directory: ${CRUFT_RESOURCE_DIR}")
+#message("Cruft resource directory: ${CRUFT_RESOURCE_DIR}")
 
-include_directories("${GLEW_INCLUDE_DIR}")
-include_directories("${GLM_INCLUDE_DIR}")
-include_directories("${GLFW_INCLUDE_DIRS}")
+include_directories(
+        "${GLEW_INCLUDE_DIR}"
+        "${GLM_INCLUDE_DIR}"
+        "${GLFW_INCLUDE_DIRS}"
 
-#### P r o j e c t   D e f i n i t i o n  ##################################
-project(crufterly CXX)
+    )
+
+
 
 # Enables gl_check() macros.
 add_definitions(-DBD_DEBUG)
@@ -53,7 +63,12 @@ add_subdirectory("src/bd")
 # bd_SOURCES and bd_HEADERS are created in subdirectories and passed up
 # to this cmake scope--kinda dirty i think.
 add_library(crufterly STATIC "${bd_SOURCES}" "${bd_HEADERS}" )
-target_link_libraries(crufterly "${GLEW_LIBRARIES}" "${OPENGL_LIBRARIES}" "${GLFW_LIBRARIES}")
+target_link_libraries(crufterly
+    "${GLEW_LIBRARIES}"
+    "${OPENGL_LIBRARIES}"
+    "${GLFW_LIBRARIES}"
+    "/usr/lib/libtbb.so"
+    )
 add_subdirectory("test")
 
 install(TARGETS crufterly ARCHIVE

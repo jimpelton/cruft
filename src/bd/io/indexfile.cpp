@@ -82,15 +82,8 @@ IndexFileHeader::getTypeInt(DataType ty)
 
 //std::shared_ptr<IndexFile>
 IndexFile*
-IndexFile::fromRawFile
-(
-    const std::string& path,
-    size_t bufsz,
-    DataType type,
-    const uint64_t num_vox[3],
-    const uint64_t numblocks[3],
-    const float minmax[2]
-)
+IndexFile::fromRawFile(const std::string& path, size_t bufsz, DataType type,
+    const uint64_t num_vox[3], const uint64_t numblocks[3], const float minmax[2])
 {
 
   IndexFile *idxfile{ new IndexFile() };
