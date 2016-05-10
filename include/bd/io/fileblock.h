@@ -51,26 +51,30 @@ struct FileBlock
       : block_index{ 0 }
       , data_offset{ 0 }
       , voxel_dims{ 0 }
-      , world_pos{ 0 }
-      , min_val{ std::numeric_limits<decltype(min_val)>::max() }
-      , max_val{ std::numeric_limits<decltype(max_val)>::min() }
+      , world_oigin{ 0 }
+      , min_val{ std::numeric_limits< decltype(min_val) >::max() }
+      , max_val{ std::numeric_limits< decltype(max_val) >::min() }
       , avg_val{ 0.0 }
       , total_val{ 0.0 }
       , is_empty{ 0 }
   { }
 
-  std::string 
-  to_string() const;
+
+  FileBlock(const FileBlock& other) = default;
+
+
+  std::string to_string() const;
+
 
   uint64_t block_index;    ///< The 1D idx of this block (derived from the i,j,k block-grid coordinates).
   uint64_t data_offset;    ///< Offset into the raw file that the block data starts.
   uint64_t voxel_dims[3];  ///< Dimensions of this block in voxels.
-  double world_pos[3];      ///< Cordinates within canonical cube.
-  double min_val;           ///< The min value found in this block.
-  double max_val;           ///< The largest value found in this block.
-  double avg_val;           ///< Average value within this block.
-  double total_val;
-  uint32_t is_empty;        ///< If this block is empty or not.
+  double world_oigin[3];   ///< Center coordinates within canonical cube.
+  double min_val;          ///< The min value found in this block.
+  double max_val;          ///< The largest value found in this block.
+  double avg_val;          ///< Average value within this block.
+  double total_val;        ///< The total value of the block voxels.
+  uint32_t is_empty;       ///< If this block is empty or not.
 
 }; // struct FileBlock
 

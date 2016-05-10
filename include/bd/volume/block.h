@@ -2,10 +2,10 @@
 #define block_h__
 
 #include <bd/graphics/texture.h>
+#include <bd/io/fileblock.h>
+//#include <bd/scene/transformable.h>
 
-#include <bd/scene/transformable.h>
-
-#include <glm/fwd.hpp>
+#include <glm/glm.hpp>
 
 #include <string>
 #include <vector>
@@ -14,6 +14,7 @@
 
 namespace bd
 {
+
 class ShaderProgram;
 
 
@@ -23,7 +24,7 @@ class ShaderProgram;
 /// 3D world space. The block's texture contains the GL id/name of the 3D
 /// texture that should be sampled by the proxy geometry.
 //////////////////////////////////////////////////////////////////////////
-class Block : public bd::Transformable
+class Block : public bd::BDObj
 {
 public:
 
@@ -35,43 +36,47 @@ public:
   /// \param[in] origin Center of this block in world coords
   ///            (or whatever coords you want...maybe...sigh...whatevs).
   ///////////////////////////////////////////////////////////////////////////////
-  Block(const glm::u64vec3& ijk, const glm::vec3& dims,
-        const glm::vec3& origin);
+  Block(const glm::u64vec3& ijk, const FileBlock &fb);
 
   virtual ~Block();
 
 
   /// \brief Get the ijk location of this block.
-  glm::u64vec3 ijk() const;
+  const glm::u64vec3 & ijk() const;
   /// \brief Set the ijk location of this block.
   void ijk(const glm::u64vec3& ijk);
 
 
   /// \brief Set/get if this block is marked empty.
-  void empty(bool);
+//  void empty(bool);
   /// \brief Set/get if this block is marked empty.
   bool empty() const;
 
 
   /// \brief Set/get the average value of this here block.
-  void avg(float);
+//  void avg(float);
   /// \brief Set/get the average value of this here block.
-  float avg() const;
+  double avg() const;
 
+  /// \brief Get the center coordinates of this block.
+  glm::vec3 origin() const;
 
   /// \brief Get the texture assoc'd with this block.
-  bd::Texture& texture();
+  bd::Texture& texture() const;
 
 
   /// \brief String rep. of this blockeroo.
   virtual std::string to_string() const override;
 
 private:
-  glm::u64vec3 m_ijk; ///< Block's location in block coordinates.
-  bool m_empty; ///< True if this block was determined empty.
-  float m_avg; ///< Avg. val. of this block.
-  Texture m_tex; ///< Texture data assoc'd with this block.
-};
+  FileBlock m_fb;
+  glm::u64vec3 m_ijk;   ///< Block's location in block coordinates.
+  Texture m_tex;        ///< Texture data assoc'd with this block.
+//  glm::vec3 m_origin;   ///< Center of block in world coordinates.
+//  bool m_empty;       ///< True if this block was determined empty.
+//  float m_avg;          ///< Avg. val. of this block.
+
+}; // class Block
 
 std::ostream& operator<<(std::ostream& os, const Block& b);
 } // namespace bd

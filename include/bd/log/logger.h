@@ -131,7 +131,7 @@ public:
   {
     if (s_instance == nullptr) {
       s_instance = new logger();
-      s_instance->do_log("Logger initialized.");
+      s_instance->do_log("Logger initialized.\n");
     }
 
     s_instance->m_levelString = level;

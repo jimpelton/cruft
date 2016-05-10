@@ -8,6 +8,7 @@ set(io_HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/bufferpool.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/datareader.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/datatypes.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/fileblock.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/indexfile.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/parsedat.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/readerworker.h"

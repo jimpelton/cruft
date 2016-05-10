@@ -82,15 +82,8 @@ IndexFileHeader::getTypeInt(DataType ty)
 
 //std::shared_ptr<IndexFile>
 IndexFile*
-IndexFile::fromRawFile
-(
-    const std::string& path,
-    size_t bufsz,
-    DataType type,
-    const uint64_t num_vox[3],
-    const uint64_t numblocks[3],
-    const float minmax[2]
-)
+IndexFile::fromRawFile(const std::string& path, size_t bufsz, DataType type,
+    const uint64_t num_vox[3], const uint64_t numblocks[3], const float minmax[2])
 {
 
   IndexFile *idxfile{ new IndexFile() };
@@ -147,7 +140,11 @@ IndexFile::fromBinaryIndexFile(const std::string& path)
   //std::shared_ptr<IndexFile> idxfile{ std::make_shared<IndexFile>() };
   IndexFile *idxfile{ new IndexFile() };
   idxfile->m_fileName = path;
-  idxfile->readBinaryIndexFile();
+  bool success = idxfile->readBinaryIndexFile();
+  if (! success){
+    delete idxfile;
+    return nullptr;
+  }
 
   return idxfile;
 }
@@ -349,7 +346,7 @@ FileBlock::to_string() const
     "      \"index\":" << block_index << ",\n"
     "      \"data_offset\": " << data_offset << ",\n"
     "      \"voxel_dims\": [" << voxel_dims[0] << ", " << voxel_dims[1] << ", " << voxel_dims[2] << "],\n"
-    "      \"world_pos\": [" << world_pos[0] << ", " << world_pos[1] << ", " << world_pos[2] << "],\n"
+    "      \"world_oigin\": [" << world_oigin[0] << ", " << world_oigin[1] << ", " << world_oigin[2] << "],\n"
     "      \"min_val\": " << min_val << ",\n"
     "      \"max_val\": " << max_val << ",\n"
     "      \"avg_val\": " << avg_val << ",\n"

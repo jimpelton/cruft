@@ -26,8 +26,8 @@ public:
   void name(const std::string&);
 
   ////////////////////////////////////////////////////////////////////////////////
-  /// \brief Return a string representation of this BDObj. The base class to_string()
-  ///        just returns the name.
+  /// \brief Return a string representation of this BDObj. The base class
+  ///        to_string() just returns the name.
   ////////////////////////////////////////////////////////////////////////////////
   virtual std::string to_string() const;
 

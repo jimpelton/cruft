@@ -1,7 +1,7 @@
 #ifndef blockaveragefilter_h__
 #define blockaveragefilter_h__
 
-#include "fileblock.h"
+#include "bd/io/fileblock.h"
 
 
 namespace bd

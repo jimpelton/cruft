@@ -37,7 +37,7 @@ to_dataType(const std::string &typeStr)
   try {
     return DataTypesMap.at(typeStr);
   } catch (std::out_of_range &e) {
-    std::cerr << e.what() << std::endl;
+    //std::cerr << e.what() << std::endl;
     Err()<< typeStr << " is unknown datatype!";
     return DataType::Unknown;
   }
@@ -62,7 +62,7 @@ to_string(DataType type)
     
 
   } catch (std::exception &e) {
-    std::cerr << e.what() << std::endl;
+    Err() << "Unknown data type in to_string(DataType). "; //<< e.what() << std::endl;
     return "unknown";
   }
 }

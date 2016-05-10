@@ -1,7 +1,7 @@
 #ifndef indexfile_h__
 #define indexfile_h__
 
-#include <bd/volume/fileblock.h>
+#include <bd/io/fileblock.h>
 #include <bd/volume/blockcollection2.h>
 #include <bd/io/datatypes.h>
 
@@ -54,10 +54,17 @@ struct IndexFileHeader
   double vol_min;
   double vol_max;
 
+
 ///////////////////////////////////////////////////////////////////////////////
   static IndexFileHeader fromStream(std::istream&);
-  static void writeToStream(std::ostream&, const IndexFileHeader &);
-  static DataType getType(const IndexFileHeader &);
+
+
+  static void writeToStream(std::ostream&, const IndexFileHeader&);
+
+
+  static DataType getType(const IndexFileHeader&);
+
+
   static uint32_t getTypeInt(DataType);
 };
 
@@ -71,29 +78,39 @@ const uint32_t HEAD_LEN{ sizeof(IndexFileHeader) };
 ///////////////////////////////////////////////////////////////////////////////
 std::ostream& operator<<(std::ostream& os, const IndexFileHeader& h);
 
+
 ///////////////////////////////////////////////////////////////////////////////
 /// \brief Allows using the BlockCollection2 template without
 ///        exposing the templated-ness of BlockCollection2, since we don't
 ///        know what type of BC2 we need until runtime.
 ///////////////////////////////////////////////////////////////////////////////
-class collection_wrapper_base {
+class collection_wrapper_base
+{
 public:
-  virtual ~collection_wrapper_base() { }
+  virtual ~collection_wrapper_base()
+  { }
+
 
   virtual void addBlock(const FileBlock&) = 0;
-  virtual const std::vector<FileBlock*>& blocks() = 0;
-  virtual const std::vector<FileBlock*>& nonEmptyBlocks() = 0;
 
-  virtual void filterBlocks(const std::string &rawFile, size_t buffSize) = 0 ;
+
+  virtual const std::vector< FileBlock * >& blocks() = 0;
+
+
+  virtual const std::vector< FileBlock * >& nonEmptyBlocks() = 0;
+
+
+  virtual void filterBlocks(const std::string& rawFile, size_t buffSize) = 0;
+
+
   virtual const Volume& volume() = 0;
 
 };
 
-
 ///////////////////////////////////////////////////////////////////////////////
 /// \sa base_collection_wrapper
 ///////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
+template< typename Ty >
 class collection_wrapper : public collection_wrapper_base
 {
 public:
@@ -103,21 +120,29 @@ public:
   {
   }
 
-  void filterBlocks(const std::string &rawFile, size_t buffSize) override
-  {
-    c.filterBlocks(rawFile, buffSize);
-  }
 
-  void addBlock(const FileBlock &b) override { c.addBlock(b); }
+  void filterBlocks(const std::string& rawFile, size_t buffSize) override
+  { c.filterBlocks(rawFile, buffSize); }
 
-  const Volume& volume() override { return c.volume(); }
 
-  const std::vector<FileBlock*>& blocks() override { return c.blocks(); }
+  void addBlock(const FileBlock& b) override
+  { c.addBlock(b); }
 
-  const std::vector<FileBlock*>& nonEmptyBlocks() override { return c.nonEmptyBlocks(); }
+
+  const Volume& volume() override
+  { return c.volume(); }
+
+
+  const std::vector< FileBlock * >& blocks() override
+  { return c.blocks(); }
+
+
+  const std::vector< FileBlock * >& nonEmptyBlocks() override
+  { return c.nonEmptyBlocks(); }
+
 
 private:
-  BlockCollection2<Ty> c;
+  BlockCollection2< Ty > c;
 
 };
 
@@ -138,20 +163,24 @@ public:
   /// \param nummax The min and max block averages to use for threshold values 
   ///               when filtering blocks.
   ///////////////////////////////////////////////////////////////////////////////
-  static IndexFile*
-  fromRawFile(const std::string &path, size_t bufsz, DataType type,
-    const uint64_t numVox[3], const uint64_t numBlks[3], const float minmax[2]);
+  static IndexFile * fromRawFile(const std::string& path,
+                                 size_t bufsz,
+                                 DataType type,
+                                 const uint64_t numVox[3],
+                                 const uint64_t numBlks[3],
+                                 const float minmax[2]);
 
 
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Create IndexFile from an existing binary index file.
   ///////////////////////////////////////////////////////////////////////////////
   //static std::shared_ptr<IndexFile> 
-  static IndexFile*
-  fromBinaryIndexFile(const std::string &path);
+  static IndexFile * fromBinaryIndexFile(const std::string& path);
 
 
   IndexFile();
+
+
   ~IndexFile();
 
 
@@ -159,26 +188,32 @@ public:
   /// \brief Write binary index file to ostream \c os.
   ///////////////////////////////////////////////////////////////////////////////
   void writeBinaryIndexFile(std::ostream& os);
+
+
   void writeBinaryIndexFile(const std::string& outpath);
+
 
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Write ascii index file to ostream \c os.
   ///////////////////////////////////////////////////////////////////////////////
   void writeAsciiIndexFile(std::ostream& os);
+
+
   void writeAsciiIndexFile(const std::string& outpath);
 
 
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Get the IndexFileHeader for the index file.
   ///////////////////////////////////////////////////////////////////////////////
-  const IndexFileHeader& 
-  getHeader() const;
+  const IndexFileHeader& getHeader() const;
 
-  const std::vector<FileBlock*>&
-  blocks() const;
 
-  static collection_wrapper_base*
-  make_wrapper(DataType type, const uint64_t num_vox[3], const uint64_t numblocks[3]);
+  const std::vector< FileBlock * >& blocks() const;
+
+
+  static collection_wrapper_base * make_wrapper(DataType type,
+                                                const uint64_t num_vox[3],
+                                                const uint64_t numblocks[3]);
 
 
 private:
@@ -188,9 +223,10 @@ private:
   ///////////////////////////////////////////////////////////////////////////////
   bool readBinaryIndexFile();
 
+
   IndexFileHeader m_header;
   std::string m_fileName;
-  collection_wrapper_base *m_col;
+  collection_wrapper_base * m_col;
 
 };
 

@@ -25,7 +25,7 @@ hsvToRgb(float h, float s, float v, glm::vec3& rgb)
   } else if (s <= 0.0f) {
     rgb.r = rgb.g = rgb.b = v;
   } else {
-    float chroma = v * s;
+//    float chroma = v * s;
     float H = h / 60.0f;
     int thang = int(H);
     float wat = H - thang;
@@ -91,7 +91,7 @@ to1D(size_t col, size_t row, size_t slab, size_t maxCols, size_t maxRows)
 
 ///////////////////////////////////////////////////////////////////////////////
 unsigned long long
-vecCompMult(glm::u64vec3 v)
+vecCompMult(const glm::u64vec3 &v)
 {
   return v.x * v.y * v.z;
 }

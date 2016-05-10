@@ -22,16 +22,11 @@ namespace bd
 
 
 ///////////////////////////////////////////////////////////////////////////////
-Block::Block(const glm::u64vec3& ijk, const glm::vec3& dims,
-             const glm::vec3& origin)
-  : m_ijk{ ijk }
-    , m_empty{ false }
-    , m_avg{ 0.0f }
-    , m_tex{ bd::Texture::Target::Tex3D }
+Block::Block(const glm::u64vec3& ijk, const FileBlock &fb)
+  : m_fb{ fb }
+  , m_ijk{ ijk }
+  , m_tex{ bd::Texture::Target::Tex3D }
 {
-  transform().scale(dims);
-  transform().origin(origin);
-  update();
 }
 
 
@@ -40,13 +35,9 @@ Block::~Block()
 {
 }
 
-//void Block::draw()
-//{
-//
-//}
 
 ///////////////////////////////////////////////////////////////////////////////
-glm::u64vec3
+const glm::u64vec3&
 Block::ijk() const
 {
   return m_ijk;
@@ -65,35 +56,28 @@ Block::ijk(const glm::u64vec3& ijk)
 bool
 Block::empty() const
 {
-  return m_empty;
+  return m_fb.is_empty == 1;
 }
 
 
-///////////////////////////////////////////////////////////////////////////////
-void
-Block::empty(bool b)
+glm::vec3
+Block::origin() const
 {
-  m_empty = b;
+  return { m_fb.world_oigin[0], m_fb.world_oigin[1], m_fb.world_oigin[2] };
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-float
+double
 Block::avg() const
 {
-  return m_avg;
+  return m_fb.avg_val;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void
-Block::avg(float a)
-{
-  m_avg = a;
-}
-
 bd::Texture&
-Block::texture()
+Block::texture() const
 {
   return m_tex;
 }
@@ -104,12 +88,15 @@ std::string
 Block::to_string() const
 {
   std::stringstream ss;
-  ss << "{ ijk: (" << m_ijk.x << ',' << m_ijk.y << ',' << m_ijk.z << ")\n"
-      "Origin: {" << m_transform.origin().x <<
-      ',' << m_transform.origin().y <<
-      ',' << m_transform.origin().z <<
-      "}, Empty: " << (m_empty ? "True " : "False ") << "\n"
-      "Texture: " << m_tex << " }";
+  ss << "{ ijk: ("
+      << m_ijk.x << ',' << m_ijk.y << ',' << m_ijk.z << "),\n"
+      "Origin: ("
+      << m_fb.world_oigin[0] << ',' << m_fb.world_oigin[1] << ','
+      << m_fb.world_oigin[2] << "),\n"
+      "Empty: "
+      << (empty() ? "True" : "False") << "\n"
+      "Texture: "
+      << m_tex << " }";
 
   return ss.str();
 }

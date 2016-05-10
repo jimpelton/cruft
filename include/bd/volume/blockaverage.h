@@ -1,7 +1,7 @@
 #ifndef blockaverage_h__
 #define blockaverage_h__
 
-#include <bd/volume/fileblock.h>
+#include <bd/io/fileblock.h>
 #include <bd/volume/volume.h>
 #include <bd/io/buffer.h>
 
@@ -13,6 +13,10 @@
 namespace bd
 {
 
+//////////////////////////////////////////////////////////////////////////
+/// \brief Use Intel TBB to compute the average voxel value within
+///        each block.
+//////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 class BlockAverage{
 
@@ -55,6 +59,7 @@ public:
         uint64_t blockIdx{ bI + bcX * (bJ + bK * bcY) };
         FileBlock *b = blks[blockIdx];
 
+        //TODO: Make writes to FileBlock data thread safe.
         // Accumulate block-specific values.
         if (val < b->min_val) { b->min_val = val; }
         if (val > b->max_val) { b->max_val = val; }
