@@ -94,7 +94,7 @@ IndexFile::fromRawFile(const std::string& path, size_t bufsz, DataType type,
 
 
   // build the block collection
-  idxfile->m_col->filterBlocks(idxfile->m_fileName, bufsz);
+  idxfile->m_col->create(idxfile->m_fileName, bufsz);
 
   // filter the blocks
   BlockAverageFilter filter(minmax[0], minmax[1]);

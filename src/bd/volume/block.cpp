@@ -77,7 +77,7 @@ Block::avg() const
 
 ///////////////////////////////////////////////////////////////////////////////
 bd::Texture&
-Block::texture() const
+Block::texture()
 {
   return m_tex;
 }

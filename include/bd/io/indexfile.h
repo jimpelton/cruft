@@ -100,7 +100,7 @@ public:
   virtual const std::vector< FileBlock * >& nonEmptyBlocks() = 0;
 
 
-  virtual void filterBlocks(const std::string& rawFile, size_t buffSize) = 0;
+  virtual void create(const std::string& rawFile, size_t buffSize) = 0;
 
 
   virtual const Volume& volume() = 0;
@@ -121,8 +121,8 @@ public:
   }
 
 
-  void filterBlocks(const std::string& rawFile, size_t buffSize) override
-  { c.filterBlocks(rawFile, buffSize); }
+  void create(const std::string& rawFile, size_t buffSize) override
+  { c.create(rawFile, buffSize); }
 
 
   void addBlock(const FileBlock& b) override

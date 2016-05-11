@@ -62,7 +62,7 @@ public:
   glm::vec3 origin() const;
 
   /// \brief Get the texture assoc'd with this block.
-  bd::Texture& texture() const;
+  bd::Texture& texture();
 
 
   /// \brief String rep. of this blockeroo.
