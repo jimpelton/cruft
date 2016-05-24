@@ -9,7 +9,7 @@
 namespace bd
 {
 
-/// \brief Describes a region of uniformly sized blocks
+/// \brief Describes a region of uniformly sized blocks.
 class Region
 {
 public:
@@ -46,9 +46,9 @@ public:
   void vox_start(const glm::u64vec3& m);
 
 private:
-  glm::u64vec3 m_blockDims; ///< Dimensions of a block, in voxels.
-  glm::u64vec3 m_count; ///< Number of blocks Region is divided into.
-  glm::u64vec3 m_voxStart; ///< col,row,slab of the voxel start of these blocks.
+  glm::u64vec3 m_blockDims;  ///< Dimensions of a block in this region, in voxels.
+  glm::u64vec3 m_count;      ///< Number of blocks Region is divided into.
+  glm::u64vec3 m_voxStart;   ///< col,row,slab of the voxel start of these blocks.
 
 };
 
@@ -62,6 +62,7 @@ public:
   Volume(const glm::u64vec3 &volDims, const glm::u64vec3 &numBlocks)
     : m_lowerRegion{ volDims / numBlocks, numBlocks }
     , m_volDims{ volDims }
+    , m_volEmptyVoxels{  }
     , m_volMax{ std::numeric_limits<double>::min() }
     , m_volMin{ std::numeric_limits<double>::max() }
     , m_volAvg{ 0.0 }
@@ -81,6 +82,8 @@ public:
   void max(double);
   double avg() const;
   void avg(double);
+  uint64_t emptyVoxels() const;
+  void emptyVoxels(uint64_t);
 
   const Region & lower() const;
   Region& lower();
@@ -99,7 +102,8 @@ private:
   ///        the blocks of the lower volume.
   //Region m_upperRegion;
 
-  glm::u64vec3 m_volDims;   ///< Volume dimensions in voxels.
+  glm::u64vec3 m_volDims;    ///< Volume dimensions in voxels.
+  uint64_t m_volEmptyVoxels; ///< Number of non-relevant voxels.
   double m_volMax;          ///< Max value found in volume.
   double m_volMin;          ///< Min value found in volume.
   double m_volAvg;          ///< Avg value found in volume.

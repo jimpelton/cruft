@@ -29,7 +29,9 @@ public:
   {
     if (m_is) delete m_is;
   }
-  size_t operator()(const std::atomic_bool &quit)
+
+  long long
+  operator()(const std::atomic_bool &quit)
   {
     if (! open()) {
         Err() << "RW: Could not open file " << m_path << 
@@ -79,14 +81,16 @@ public:
   }
 
     
-  void setPath(const std::string &path)
+  void
+  setPath(const std::string &path)
   {
     m_path = path;
   }
 
 
 private:
-  bool open() 
+  bool
+  open()
   {
     m_is = new std::ifstream();
     m_is->open(m_path, std::ios::binary);

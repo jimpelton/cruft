@@ -52,6 +52,7 @@ struct FileBlock
       , data_offset{ 0 }
       , voxel_dims{ 0 }
       , world_oigin{ 0 }
+      , empty_voxels{ 0 }
       , min_val{ std::numeric_limits< decltype(min_val) >::max() }
       , max_val{ std::numeric_limits< decltype(max_val) >::min() }
       , avg_val{ 0.0 }
@@ -70,6 +71,7 @@ struct FileBlock
   uint64_t data_offset;    ///< Offset into the raw file that the block data starts.
   uint64_t voxel_dims[3];  ///< Dimensions of this block in voxels.
   double world_oigin[3];   ///< Center coordinates within canonical cube.
+  uint64_t empty_voxels;   ///< Number of empty (ie, irrelevent) voxels in this block.
   double min_val;          ///< The min value found in this block.
   double max_val;          ///< The largest value found in this block.
   double avg_val;          ///< Average value within this block.

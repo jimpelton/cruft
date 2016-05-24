@@ -124,6 +124,7 @@ IndexFile::fromRawFile(const std::string& path, size_t bufsz, DataType type,
   idxfile->m_header.num_vox[0] = idxfile->m_col->volume().dims().x;
   idxfile->m_header.num_vox[1] = idxfile->m_col->volume().dims().y;
   idxfile->m_header.num_vox[2] = idxfile->m_col->volume().dims().z;
+  idxfile->m_header.vol_empty_voxels = idxfile->m_col->volume().emptyVoxels();
   idxfile->m_header.vol_avg = idxfile->m_col->volume().avg();
   idxfile->m_header.vol_max = idxfile->m_col->volume().max();
   idxfile->m_header.vol_min = idxfile->m_col->volume().min();

@@ -30,7 +30,7 @@ Region::block_dims()
 
 ///////////////////////////////////////////////////////////////////////////////
 void
-Region::block_dims(const glm::u64vec3 &dims)
+Region::block_dims(const glm::u64vec3& dims)
 {
   m_blockDims = dims;
 }
@@ -46,7 +46,7 @@ Region::block_count() const
 
 ///////////////////////////////////////////////////////////////////////////////
 void
-Region::block_count(const glm::u64vec3 &nb)
+Region::block_count(const glm::u64vec3& nb)
 {
   m_count = nb;
 }
@@ -62,7 +62,7 @@ Region::vox_start() const
 
 ///////////////////////////////////////////////////////////////////////////////
 void
-Region::vox_start(const glm::u64vec3 &m)
+Region::vox_start(const glm::u64vec3& m)
 {
   m_voxStart = m;
 }
@@ -75,51 +75,93 @@ Region::vox_start(const glm::u64vec3 &m)
 
 
 ///////////////////////////////////////////////////////////////////////////////
-const glm::u64vec3 & Volume::dims() const { return m_volDims; }
+const glm::u64vec3& Volume::dims() const
+{
+  return m_volDims;
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void Volume::dims(const glm::u64vec3 &voldims) { m_volDims = voldims; }
+void Volume::dims(const glm::u64vec3& voldims)
+{
+  m_volDims = voldims;
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
-double Volume::min() const { return m_volMin; }
+double Volume::min() const
+{
+  return m_volMin;
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void Volume::min(double min) { m_volMin = min; }
+void Volume::min(double min)
+{
+  m_volMin = min;
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
-double Volume::max() const { return m_volMax; }
+double Volume::max() const
+{
+  return m_volMax;
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void Volume::max(double max) { m_volMax = max; }
+void Volume::max(double max)
+{
+  m_volMax = max;
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
-double Volume::avg() const { return m_volAvg; }
+double Volume::avg() const
+{
+  return m_volAvg;
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void Volume::avg(double avg) { m_volAvg = avg; }
+void Volume::avg(double avg)
+{
+  m_volAvg = avg;
+}
 
-const Region&
-Volume::lower() const
+
+///////////////////////////////////////////////////////////////////////////////
+void Volume::emptyVoxels(uint64_t empty)
+{
+  m_volEmptyVoxels = empty;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+uint64_t Volume::emptyVoxels() const
+{
+  return m_volEmptyVoxels;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+const Region& Volume::lower() const
 {
   return m_lowerRegion;
 }
 
-Region&
-Volume::lower()
+
+///////////////////////////////////////////////////////////////////////////////
+Region& Volume::lower()
 {
   return m_lowerRegion;
 }
 
-void
-Volume::lower(const Region &lower)
+
+///////////////////////////////////////////////////////////////////////////////
+void Volume::lower(const Region& lower)
 {
   m_lowerRegion = lower;
 }
+
 } // namespace bd

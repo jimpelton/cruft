@@ -55,7 +55,6 @@ include_directories(
 add_definitions(-DBD_DEBUG)
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/3rdParty/thrust")
 
 add_subdirectory("include/bd")
 add_subdirectory("src/bd")
@@ -67,7 +66,7 @@ target_link_libraries(crufterly
     "${GLEW_LIBRARIES}"
     "${OPENGL_LIBRARIES}"
     "${GLFW_LIBRARIES}"
-    "/usr/lib/libtbb.so"
+    "/usr/local/lib/libtbb.dylib"
     )
 add_subdirectory("test")
 

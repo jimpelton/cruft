@@ -39,34 +39,44 @@ namespace bd
 ///////////////////////////////////////////////////////////////////////////////
 struct IndexFileHeader
 {
+  ///////////////////////////////////////////////////////////////////////////////
+  // IndexFileHeader Data
+  ///////////////////////////////////////////////////////////////////////////////
   uint16_t magic_number;
   uint16_t version;
   uint32_t header_length;
 
   // Block metadata
-  uint64_t numblocks[3];
+  uint64_t numblocks[3];        ///< Num blocks along each coordinate axis.
+
+  uint32_t dataType;            ///< Int representing the data type of elements (char, short, etc).
+  uint64_t num_vox[3];          ///< Dimensions of volume in voxels.
 
   // Volume statistics
-  uint32_t dataType;
-  uint64_t num_vox[3];                      ///< Dimensions of volume in voxels.
-
+  uint64_t vol_empty_voxels;    ///< Num voxels determined empty (ie, irrelevent voxels).
   double vol_avg;
   double vol_min;
   double vol_max;
 
 
-///////////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////
+  // IndexFileHeader Methods
+  ///////////////////////////////////////////////////////////////////////////////
+
+  /// \brief Generate an IndexFileHeader from an input stream of binary data.
   static IndexFileHeader fromStream(std::istream&);
 
 
+  /// \brief Write an existing IndexFileHeader to a binary ostream.
   static void writeToStream(std::ostream&, const IndexFileHeader&);
 
-
+  /// \brief Convert the dataType value to a bd::DataType.
   static DataType getType(const IndexFileHeader&);
 
-
+  /// \brief Convert the given bd::DataType to the integer rep used in IFH's.
   static uint32_t getTypeInt(DataType);
-};
+
+}; // struct IndexFileHeader
 
 namespace
 {
@@ -163,7 +173,7 @@ public:
   /// \param nummax The min and max block averages to use for threshold values 
   ///               when filtering blocks.
   ///////////////////////////////////////////////////////////////////////////////
-  static IndexFile * fromRawFile(const std::string& path,
+  static IndexFile* fromRawFile(const std::string& path,
                                  size_t bufsz,
                                  DataType type,
                                  const uint64_t numVox[3],
@@ -175,7 +185,7 @@ public:
   /// \brief Create IndexFile from an existing binary index file.
   ///////////////////////////////////////////////////////////////////////////////
   //static std::shared_ptr<IndexFile> 
-  static IndexFile * fromBinaryIndexFile(const std::string& path);
+  static IndexFile* fromBinaryIndexFile(const std::string& path);
 
 
   IndexFile();
@@ -190,6 +200,9 @@ public:
   void writeBinaryIndexFile(std::ostream& os);
 
 
+  ///////////////////////////////////////////////////////////////////////////////
+  /// \brief Write binary index file to the file at \c outpath.
+  ///////////////////////////////////////////////////////////////////////////////
   void writeBinaryIndexFile(const std::string& outpath);
 
 
@@ -199,6 +212,9 @@ public:
   void writeAsciiIndexFile(std::ostream& os);
 
 
+  ///////////////////////////////////////////////////////////////////////////////
+  /// \brief Write ascii index file to the file at \c outpath.
+  ///////////////////////////////////////////////////////////////////////////////
   void writeAsciiIndexFile(const std::string& outpath);
 
 
@@ -211,16 +227,13 @@ public:
   const std::vector< FileBlock * >& blocks() const;
 
 
-  static collection_wrapper_base * make_wrapper(DataType type,
-                                                const uint64_t num_vox[3],
-                                                const uint64_t numblocks[3]);
+  static collection_wrapper_base* make_wrapper(DataType type,
+                                               const uint64_t num_vox[3],
+                                               const uint64_t numblocks[3]);
 
 
 private:
-  ///////////////////////////////////////////////////////////////////////////////
-  /// \brief Read binary index file from \c is and populate \c collection with
-  ///        blocks.
-  ///////////////////////////////////////////////////////////////////////////////
+  /// \brief Read binary index file and populate \c a collection with blocks
   bool readBinaryIndexFile();
 
 

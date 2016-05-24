@@ -6,8 +6,8 @@
 #include <bd/io/buffer.h>
 #include <bd/log/logger.h>
 #include <bd/util/util.h>
-#include <bd/volume/minmax.h>
-#include <bd/volume/blockaverage.h>
+#include <bd/tbb/parallelminmax.h>
+#include <bd/tbb/parallelblockaverage.h>
 #include <bd/volume/volume.h>
 
 #include <tbb/parallel_reduce.h>
@@ -306,13 +306,13 @@ BlockCollection2< Ty >::computeVolumeStatistics(BufferedReader< Ty >& r)
 
   while (r.hasNext()) {
     Buffer< Ty > * buf = r.waitNext();
-    Info() << "CO: Got buffer of " << buf->elements() << " elements.";
+    Dbg() << "CO: Got buffer of " << buf->elements() << " elements.";
 
     // Sum values in this buffer
     volsum += doBufferSum(buf);
 
     // Compute the min/max values of the volume and a bunch of work on each block.
-    Info() << "CO: Finding min/max for this buffer.";
+    Dbg() << "CO: Finding min/max for this buffer.";
     tbb::blocked_range< size_t > range(0, buf->elements());
     ParallelMinMax< Ty > mm(buf);
     tbb::parallel_reduce(range, mm);
@@ -325,16 +325,16 @@ BlockCollection2< Ty >::computeVolumeStatistics(BufferedReader< Ty >& r)
       vol_max = mm.max_value;
     }
 
-    Info() << "CO: Averaging blocks for this buffer.";
+    Dbg() << "CO: Averaging blocks for this buffer.";
     tbb::blocked_range< size_t > range2(0, buf->elements());
     BlockAverage< Ty > ba(buf, &m_volume, m_blocks.data());
     tbb::parallel_for(range2, ba);
 
-    Info() << "CO: Returning empty buffer.";
+    Dbg() << "CO: Returning empty buffer.";
     r.waitReturn(buf);
 
 
-//    Info() << "bufMin: " << double(mm.min_value) << " bufMax: " << double(mm.max_value)
+//    Dbg() << "bufMin: " << double(mm.min_value) << " bufMax: " << double(mm.max_value)
 //           << " volMin: " << double(vol_min) << " volMax: " << double(vol_max);
 
     total_bytes_processed += buf->elements() * sizeof(Ty);
@@ -378,7 +378,7 @@ BlockCollection2< Ty >::create(const std::string& file, size_t bufSize)
 {
   BufferedReader< Ty > r{ bufSize };
   if (!r.open(file)) {
-    throw std::runtime_error("Could not open file" + file);
+    throw std::runtime_error("Could not open file " + file);
   }
 
   r.start();
