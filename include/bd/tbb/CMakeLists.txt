@@ -3,7 +3,7 @@
 #
 
 set(tbb_HEADERS
-    "${CMAKE_CURRENT_SOURCE_DIR}/parallelblockaverage.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/parallelminmax.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/parallelblockstats.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/parallelvolumestats.h"
     PARENT_SCOPE
     )

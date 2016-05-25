@@ -14,11 +14,6 @@ namespace bd
 {
 
 ///////////////////////////////////////////////////////////////////////////////
-// I n d e x F i l e H e a d e r    C l a s s
-///////////////////////////////////////////////////////////////////////////////
-
-
-///////////////////////////////////////////////////////////////////////////////
 IndexFileHeader
 IndexFileHeader::fromStream(std::istream& is)
 {
@@ -74,13 +69,6 @@ IndexFileHeader::getTypeInt(DataType ty)
 }
 
 
-///////////////////////////////////////////////////////////////////////////////
-// I n d e x F i l e   c l a s s
-///////////////////////////////////////////////////////////////////////////////
-
-
-
-//std::shared_ptr<IndexFile>
 IndexFile*
 IndexFile::fromRawFile(const std::string& path, size_t bufsz, DataType type,
     const uint64_t num_vox[3], const uint64_t numblocks[3], const float minmax[2])
@@ -94,7 +82,7 @@ IndexFile::fromRawFile(const std::string& path, size_t bufsz, DataType type,
 
 
   // build the block collection
-  idxfile->m_col->create(idxfile->m_fileName, bufsz);
+  idxfile->m_col->create(idxfile->m_fileName, bufsz, minmax);
 
   // filter the blocks
   BlockAverageFilter filter(minmax[0], minmax[1]);
@@ -121,10 +109,18 @@ IndexFile::fromRawFile(const std::string& path, size_t bufsz, DataType type,
 
 
   idxfile->m_header.dataType = IndexFileHeader::getTypeInt(type);
-  idxfile->m_header.num_vox[0] = idxfile->m_col->volume().dims().x;
-  idxfile->m_header.num_vox[1] = idxfile->m_col->volume().dims().y;
-  idxfile->m_header.num_vox[2] = idxfile->m_col->volume().dims().z;
+
+  idxfile->m_header.volume_extent[0] = idxfile->m_col->volume().dims().x;
+  idxfile->m_header.volume_extent[1] = idxfile->m_col->volume().dims().y;
+  idxfile->m_header.volume_extent[2] = idxfile->m_col->volume().dims().z;
+
+  glm::u64vec3 blkExt = idxfile->m_col->volume().lower().extent();
+  idxfile->m_header.blocks_extent[0] = blkExt.x;
+  idxfile->m_header.blocks_extent[1] = blkExt.y;
+  idxfile->m_header.blocks_extent[2] = blkExt.z;
+
   idxfile->m_header.vol_empty_voxels = idxfile->m_col->volume().emptyVoxels();
+
   idxfile->m_header.vol_avg = idxfile->m_col->volume().avg();
   idxfile->m_header.vol_max = idxfile->m_col->volume().max();
   idxfile->m_header.vol_min = idxfile->m_col->volume().min();
@@ -322,7 +318,7 @@ IndexFile::readBinaryIndexFile()
   is.read(reinterpret_cast<char*>(&ifh), sizeof(IndexFileHeader));
   m_header = ifh;
 
-  m_col = IndexFile::make_wrapper(IndexFileHeader::getType(ifh), ifh.num_vox, ifh.numblocks);
+  m_col = IndexFile::make_wrapper(IndexFileHeader::getType(ifh), ifh.volume_extent, ifh.numblocks);
 
   size_t numBlocks{ ifh.numblocks[0] * ifh.numblocks[1] * ifh.numblocks[2] };
 
@@ -348,6 +344,7 @@ FileBlock::to_string() const
     "      \"data_offset\": " << data_offset << ",\n"
     "      \"voxel_dims\": [" << voxel_dims[0] << ", " << voxel_dims[1] << ", " << voxel_dims[2] << "],\n"
     "      \"world_oigin\": [" << world_oigin[0] << ", " << world_oigin[1] << ", " << world_oigin[2] << "],\n"
+    "      \"empty_voxels\": " << empty_voxels << ",\n"
     "      \"min_val\": " << min_val << ",\n"
     "      \"max_val\": " << max_val << ",\n"
     "      \"avg_val\": " << avg_val << ",\n"
@@ -360,6 +357,7 @@ FileBlock::to_string() const
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// FileBlock operator<<
 std::ostream&
 operator<<(std::ostream& os, const bd::FileBlock& block)
 {
@@ -368,6 +366,7 @@ operator<<(std::ostream& os, const bd::FileBlock& block)
 
 
 ///////////////////////////////////////////////////////////////////////////////
+// IndexFileHeader operator<<
 std::ostream&
 operator<<(std::ostream& os, const bd::IndexFileHeader& h)
 {
@@ -376,10 +375,11 @@ operator<<(std::ostream& os, const bd::IndexFileHeader& h)
       "  \"magic\": " << h.magic_number << ",\n"
       "  \"version\": " << h.version << ",\n"
       "  \"header_length\": " << h.header_length << ",\n"
-      //TODO: add upper and lower volume boundaries.
       "  \"num_blocks\": [" << h.numblocks[0] << ", " << h.numblocks[1] << ", " << h.numblocks[2] << "],\n"
       "  \"data_type\": \"" << bd::to_string(IndexFileHeader::getType(h)) << "\",\n"
-      "  \"num_vox\": [" << h.num_vox[0] << ", " << h.num_vox[1] << ", " << h.num_vox[2] << "],\n"
+      "  \"volume_extent\": [" << h.volume_extent[0] << ", " << h.volume_extent[1] << ", " << h.volume_extent[2] << "],\n"
+      "  \"blocks_extent\": [" << h.blocks_extent[0] << ", " << h.blocks_extent[1] << ", " << h.blocks_extent[2] << "],\n"
+      "  \"vol_empty_voxels\": " << h.vol_empty_voxels << ",\n"
       "  \"vol_min\": " << h.vol_min << ",\n"
       "  \"vol_max\": " << h.vol_max << ",\n"
       "  \"vol_avg\": " << h.vol_avg << "\n"

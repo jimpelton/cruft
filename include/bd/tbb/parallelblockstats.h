@@ -9,6 +9,8 @@
 #include <tbb/parallel_for.h>
 #include <tbb/blocked_range.h>
 
+#include <functional>
+
 
 namespace bd
 {
@@ -18,16 +20,21 @@ namespace bd
 ///        each block.
 //////////////////////////////////////////////////////////////////////////
 template<typename Ty>
-class BlockAverage{
+class ParallelBlockStats{
 
 private:
+
+
   const Ty * const data;
   FileBlock** blocks;
+
 
   const uint64_t vdX, vdY;         // volume dims along X, Y axis
   const uint64_t bdX, bdY, bdZ;    // block dims along X, Y, Z axis
   const uint64_t bcX, bcY, bcZ;    // block count along X, Y, Z axis
   const uint64_t voxel_start;      // global voxel index this buffer starts at.
+
+  std::function<bool(Ty)> isEmpty;
 
 public:
 
@@ -59,7 +66,11 @@ public:
         uint64_t blockIdx{ bI + bcX * (bJ + bK * bcY) };
         FileBlock *b = blks[blockIdx];
 
-        //TODO: Make writes to FileBlock data thread safe.
+        if (isEmpty(val))
+          b->empty_voxels += 1;
+
+        //TODO: Make writes to FileBlock data thread safe (need thread-local storage).
+
         // Accumulate block-specific values.
         if (val < b->min_val) { b->min_val = val; }
         if (val > b->max_val) { b->max_val = val; }
@@ -69,7 +80,7 @@ public:
 
   }
 
-  BlockAverage(const BlockAverage<Ty> &o) 
+  ParallelBlockStats(const ParallelBlockStats<Ty> &o)
       : data{ o.data }
       , blocks{ o.blocks }
       , vdX{ o.vdX }
@@ -81,9 +92,11 @@ public:
       , bcY{ o.bcY }
       , bcZ{ o.bcZ }
       , voxel_start{ o.voxel_start }
+      , isEmpty{ o.isEmpty }
   { }
 
-  BlockAverage(Buffer<Ty> *b, const Volume *v, FileBlock** blocks) 
+  ParallelBlockStats(Buffer<Ty> *b, const Volume *v, FileBlock** blocks,
+      std::function<bool(Ty)> isEmpty)
       : data{ b->ptr() }
       , blocks{ blocks }
       , vdX{ v->dims().x }
@@ -95,9 +108,10 @@ public:
       , bcY{ v->lower().block_count().y }
       , bcZ{ v->lower().block_count().z }
       , voxel_start{ b->index() }
+      , isEmpty{ isEmpty }
   { }
 
-}; // class BlockAverage
+}; // class ParallelBlockStats
 
 } // namespace preproc
 

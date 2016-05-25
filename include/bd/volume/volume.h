@@ -37,7 +37,8 @@ public:
   //////////////////////////////////////////////////////////////////////////////
   const glm::u64vec3& block_count() const;
   void block_count(const glm::u64vec3 &);
-//  glm::u64vec3& block_count();
+
+  glm::u64vec3 extent() const;
 
   //////////////////////////////////////////////////////////////////////////////
   /// \brief Get/Set the starting voxel.
@@ -47,7 +48,7 @@ public:
 
 private:
   glm::u64vec3 m_blockDims;  ///< Dimensions of a block in this region, in voxels.
-  glm::u64vec3 m_count;      ///< Number of blocks Region is divided into.
+  glm::u64vec3 m_count;      ///< Number of equal sized blocks Region is divided into.
   glm::u64vec3 m_voxStart;   ///< col,row,slab of the voxel start of these blocks.
 
 };
