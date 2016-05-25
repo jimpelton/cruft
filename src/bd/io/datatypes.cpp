@@ -55,7 +55,7 @@ to_string(DataType type)
         });
 
     if (cit != DataTypesMap.end()) {
-      return (cit->first).c_str();
+      return (cit->first);
     } 
     
     return "unknown";

@@ -66,7 +66,7 @@ target_link_libraries(crufterly
     "${GLEW_LIBRARIES}"
     "${OPENGL_LIBRARIES}"
     "${GLFW_LIBRARIES}"
-    "/usr/local/lib/libtbb.dylib"
+    "/usr/lib/libtbb.so"
     )
 add_subdirectory("test")
 

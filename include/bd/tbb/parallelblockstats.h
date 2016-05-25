@@ -34,7 +34,7 @@ private:
   const uint64_t bcX, bcY, bcZ;    // block count along X, Y, Z axis
   const uint64_t voxel_start;      // global voxel index this buffer starts at.
 
-  std::function<bool(Ty)> isEmpty;
+  std::function<bool(Ty)> isEmpty; //< Is the element a relevant voxel or not.
 
 public:
 
