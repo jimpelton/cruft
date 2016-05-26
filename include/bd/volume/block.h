@@ -48,7 +48,7 @@ public:
 
 
   /// \brief Set/get if this block is marked empty.
-//  void empty(bool);
+  void empty(bool);
   /// \brief Set/get if this block is marked empty.
   bool empty() const;
 
@@ -73,7 +73,7 @@ private:
   glm::u64vec3 m_ijk;   ///< Block's location in block coordinates.
   Texture m_tex;        ///< Texture data assoc'd with this block.
 //  glm::vec3 m_origin;   ///< Center of block in world coordinates.
-//  bool m_empty;       ///< True if this block was determined empty.
+  bool m_empty;       ///< True if this block was determined empty.
 //  float m_avg;          ///< Avg. val. of this block.
 
 }; // class Block

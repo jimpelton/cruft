@@ -56,7 +56,13 @@ Block::ijk(const glm::u64vec3& ijk)
 bool
 Block::empty() const
 {
-  return m_fb.is_empty == 1;
+  return m_empty;
+}
+
+void
+Block::empty(bool b)
+{
+  m_empty = b;
 }
 
 
