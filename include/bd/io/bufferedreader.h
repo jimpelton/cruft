@@ -46,7 +46,7 @@ public:
   /// \brief Stop reading and wait for the read thread to exit.
   /// \return The number of bytes read so far by the thread.
   ///////////////////////////////////////////////////////////////////////////////
-  size_t reset();
+  long long int reset();
 
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -80,7 +80,7 @@ private:
   size_t m_bufSizeBytes;
 
   BufferPool<Ty> *m_pool;  
-  std::future<size_t> m_future;
+  std::future<long long int> m_future;
   std::atomic_bool m_stopThread;
 
 };
@@ -124,7 +124,7 @@ BufferedReader<Ty>::start()
 {
   m_stopThread = false;
   m_future = std::async(std::launch::async,
-      [&]()->size_t {
+      [&]()-> long long int {
           ReaderWorker<BufferedReader<Ty>, BufferPool<Ty>, Ty> worker(this, m_pool);
           worker.setPath(m_path);
           return worker(std::ref(m_stopThread));
@@ -143,7 +143,7 @@ BufferedReader<Ty>::start()
 
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
-size_t
+long long int
 BufferedReader<Ty>::reset()
 {
   m_stopThread = true;

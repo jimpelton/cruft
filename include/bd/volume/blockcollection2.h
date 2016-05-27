@@ -393,8 +393,9 @@ template<typename Ty>
 void
 BlockCollection2<Ty>::create
 (
-    const std::string& file, size_t bufSize,
-    const std::function<bool(Ty)> &isEmpty
+  const std::string& file,
+  size_t bufSize,
+  const std::function<bool(Ty)> &isEmpty
 )
 {
   BufferedReader<Ty> r{ bufSize };

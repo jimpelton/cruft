@@ -20,7 +20,7 @@ public:
   /// \param nb[in]      Number of blocks in x,y,z directions.
   /// \param vd[in]      Volume dimensions
   /// \param blocks[out] Vector that new blocks are pushed onto.
-  ///////////////////////////////////////////////////////////////////////////////
+
   void initBlocksFromFileBlocks(const std::vector<FileBlock*> fileBlocks, glm::u64vec3 numblocks);
 
 
@@ -30,7 +30,6 @@ public:
   /// \param tmin[in] min average block value to filter against.
   /// \param tmax[in] max average block value to filter against.
   /// \param sampler[in] The sampler location of the block texture sampler.
-  ///////////////////////////////////////////////////////////////////////////////
   //TODO: filterblocks takes Functor for thresholding.
 //  void filterBlocks(const float* data, /*unsigned int sampler,*/
 //                    float tmin = 0.0f, float tmax = 1.0f);
@@ -41,7 +40,11 @@ public:
   const std::vector<Block *>& nonEmptyBlocks();
 
 private:
-  void initBlockTextures(const std::string &file);
+  bool initBlockTextures(const std::string &file);
+
+  template<typename Ty>
+  bool
+  do_initBlockTextures(const std::string &file);
 
   /////////////////////////////////////////////////////////////////////////////////
   /// \brief Fills \c out_blockData with part of \c in_data corresponding to block (i,j,k).
@@ -51,9 +54,10 @@ private:
   ///                    volsz.x*volsz.y*volsz.z == length(in_data).
   /// \param in_data[in] Source data
   /// \param out_blockData[out] Destination space for data.
-  ///////////////////////////////////////////////////////////////////////////////
-  void fillBlockData(glm::u64vec3 ijk, glm::u64vec3 vox_dims, const float* in_data, float* out_blockData);
 
+  template<typename Ty>
+  void
+  fillBlockData( const Block& b, std::istream& infile, Ty* blockBuffer) const;
 
 //  static glm::u64vec3 m_blockDims; ///< Dimensions of a block in something.
 //  static glm::u64vec3 m_volDims; ///< Volume dimensions (# data points).
@@ -63,6 +67,8 @@ private:
   std::vector<Block *> m_nonEmptyBlocks;
 
   bd::IndexFile *m_indexFile;
+
+  //TODO: volume member in BlockCollection.
 
 };
 } // namespace bd

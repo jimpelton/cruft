@@ -27,11 +27,14 @@ BlockCollection::initBlocksFromIndexFile(const std::string &fileName)
 
 
 
+  Dbg() << "Initializing blocks from index file: " << fileName;
   initBlocksFromFileBlocks(m_indexFile->blocks(),
-                           {header.numblocks[0],
-                            header.numblocks[1],
-                            header.numblocks[2]});
+                           { header.numblocks[0],
+                             header.numblocks[1],
+                             header.numblocks[2] });
 
+  Dbg() << "Initializing non-empty block textures";
+  initBlockTextures(fileName);
 }
 
 void
@@ -39,46 +42,115 @@ BlockCollection::initBlocksFromFileBlocks(const std::vector< FileBlock * > fileB
                                           glm::u64vec3 nb)
 {
   auto idx = 0ull;
-  for(auto k = 0ull; k < nb.z; ++k) {
-    for (auto j = 0ull; j < nb.y; ++j) {
+  for(auto k = 0ull; k < nb.z; ++k)
+    for (auto j = 0ull; j < nb.y; ++j)
       for (auto i = 0ull; i < nb.x; ++i) {
         Block block{ { i,j,k }, { 1.0f/nb.x, 1.0f/nb.y, 1.0f/nb.z }, *fileBlocks[idx] };
         m_blocks.push_back( block );
+        //TODO: block filtering
+//        if (isEmpty(*fileBlocks[idx]))
+//          m_nonEmptyBlocks.push_back(&m_blocks.back());
+
         idx++;
       }
+}
+
+
+bool
+BlockCollection::initBlockTextures(const std::string &file)
+{
+  bool rval = false;
+  DataType type{ IndexFileHeader::getType(m_indexFile->getHeader()) };
+  switch(type){
+    case DataType::UnsignedCharacter:
+      do_initBlockTextures<unsigned char>(file);
+      break;
+    case DataType::UnsignedShort:
+      do_initBlockTextures<unsigned short>(file);
+      break;
+    case DataType::Float:
+    default:
+      do_initBlockTextures<float>(file);
+      break;
+  }
+
+  return rval;
+
+}
+
+template<typename Ty>
+bool
+BlockCollection::do_initBlockTextures(const std::string &file)
+{
+  std::ifstream is(file, std::ios::binary);
+  if (! is.is_open()) {
+    Err() << "Could not open rawfile: " << file << ".";
+    return false;
+  }
+
+  Ty *buf{ new Ty[ m_blocks[0].voxel_extent().x *
+                   m_blocks[1].voxel_extent().y *
+                   m_blocks[2].voxel_extent().z ] };
+
+  for(auto *b : m_nonEmptyBlocks) {
+    fillBlockData<Ty>(*b, is, buf);
+    b->texture().genGLTex3d(buf,
+                            bd::Texture::Format::RED,
+                            bd::Texture::Format::RED,
+                            b->voxel_extent().x,
+                            b->voxel_extent().y,
+                            b->voxel_extent().z);
+  }
+
+  delete buf;
+
+  return true;
+}
+
+
+template<typename Ty>
+void
+BlockCollection::fillBlockData
+(
+  const Block& b,
+  std::istream& infile,
+  Ty* blockBuffer
+) const
+{
+//  const glm::u64vec3 &nb{ m_volume.lower().block_count() };
+//  const glm::u64vec3 &bd{ m_volume.lower().block_dims() };
+//  const glm::u64vec3 &vd{ m_volume.dims() };
+
+  const glm::u64vec3 &bd{ b.voxel_extent() };
+  const glm::u64vec2 &vd{ m_indexFile->getHeader().volume_extent[0],
+                          m_indexFile->getHeader().volume_extent[1] };
+
+  // start element = block index w/in volume * block size
+  const glm::u64vec3 start{ b.ijk() * bd };
+  // block end element = block voxel start dims + block size
+  const glm::u64vec3 end{ start + bd };
+  // byte offset into file to read from
+  size_t offset{ b.fileBlock().data_offset };
+
+  // Loop through rows and slabs of volume reading rows of voxels into memory.
+  const size_t blockRowLength{ bd.x };
+  for (auto slab = start.z; slab<end.z; ++slab) {
+    for (auto row = start.y; row<end.y; ++row) {
+
+      // seek to start of row
+      infile.seekg(offset, infile.beg);
+
+      // read the bytes of current row
+      infile.read(reinterpret_cast<char*>(blockBuffer), blockRowLength*sizeof(Ty));
+      blockBuffer += blockRowLength;
+
+      // offset of next row
+      offset = bd::to1D(start.x, row+1, slab, vd.x, vd.y);
+      offset *= sizeof(Ty);
     }
   }
 }
 
-void
-BlockCollection::initBlockTextures(const std::string &file)
-{
-
-}
-
-void
-BlockCollection::fillBlockData(glm::u64vec3 ijk, glm::u64vec3 vox_dims,
-    const float* in_data, float* out_blockData)
-{
-  size_t imageIdx{ 0 };
-
-  // block start = block index * block size
-  glm::u64vec3 bst{ ijk * vox_dims };
-
-  // block end = block start + block size
-  glm::u64vec3 end{ bst + vox_dims };
-
-  auto vol_dims_x = m_indexFile->getHeader().volume_extent[0];
-  auto vol_dims_y = m_indexFile->getHeader().volume_extent[1];
-
-  for (auto k = bst.z; k < end.z; ++k)
-    for (auto j = bst.y; j < end.y; ++j)
-      for (auto i = bst.x; i < end.x; ++i) {
-        size_t dataIdx{ bd::to1D(i, j, k, vol_dims_x, vol_dims_y) };
-        float val{ in_data[dataIdx] };
-        out_blockData[imageIdx++] = val;
-      }
-}
 
 const std::vector<Block>&
 BlockCollection::blocks()
@@ -213,11 +285,31 @@ BlockCollection::nonEmptyBlocks()
 //      << m_blocks.size() << " blocks marked empty.";
 //}
 
-
-///////////////////////////////////////////////////////////////////////////////
-// Private Members
-///////////////////////////////////////////////////////////////////////////////
-
+//void
+//BlockCollection::fillBlockData(const glm::u64vec3 &ijk,
+//    const glm::u64vec3 &vox_dims,
+//    const float* in_data,
+//    float* out_blockData)
+//{
+//  size_t imageIdx{ 0 };
+//
+//  // block start = block index * block size
+//  glm::u64vec3 bst{ ijk * vox_dims };
+//
+//  // block end = block start + block size
+//  glm::u64vec3 end{ bst + vox_dims };
+//
+//  auto vol_dims_x = m_indexFile->getHeader().volume_extent[0];
+//  auto vol_dims_y = m_indexFile->getHeader().volume_extent[1];
+//
+//  for (auto k = bst.z; k < end.z; ++k)
+//    for (auto j = bst.y; j < end.y; ++j)
+//      for (auto i = bst.x; i < end.x; ++i) {
+//        size_t dataIdx{ bd::to1D(i, j, k, vol_dims_x, vol_dims_y) };
+//        float val{ in_data[dataIdx] };
+//        out_blockData[imageIdx++] = val;
+//      }
+//}
 
 
 } // namespace bd

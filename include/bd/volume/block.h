@@ -35,10 +35,12 @@ public:
   /// \param[in] dims The dimensions in data points of this block.
   /// \param[in] origin Center of this block in world coords
   ///            (or whatever coords you want...maybe...sigh...whatevs).
-  ///////////////////////////////////////////////////////////////////////////////
   Block(const glm::u64vec3& ijk, const glm::vec3 &dims, const FileBlock &fb);
 
   virtual ~Block();
+
+  /// \brief Get the FileBlock for this block.
+  const FileBlock& fileBlock() const;
 
 
   /// \brief Get the ijk location of this block.
@@ -53,18 +55,25 @@ public:
   bool empty() const;
 
 
-  /// \brief Set/get the average value of this here block.
-//  void avg(float);
-  /// \brief Set/get the average value of this here block.
+  /// \brief Get the average value of this here block.
   double avg() const;
+
 
   /// \brief Get the center coordinates of this block.
   glm::vec3 origin() const;
 
+
   /// \brief Get the texture assoc'd with this block.
   bd::Texture& texture();
 
+
+  /// \brief Get a reference to this blocks model-to-world transform matrix.
   glm::mat4& transform();
+
+
+  /// \brief Get dimensions of this block in voxels.
+  glm::u64vec3 voxel_extent() const;
+
 
   /// \brief String rep. of this blockeroo.
   virtual std::string to_string() const override;
