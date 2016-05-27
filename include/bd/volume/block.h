@@ -36,7 +36,7 @@ public:
   /// \param[in] origin Center of this block in world coords
   ///            (or whatever coords you want...maybe...sigh...whatevs).
   ///////////////////////////////////////////////////////////////////////////////
-  Block(const glm::u64vec3& ijk, const FileBlock &fb);
+  Block(const glm::u64vec3& ijk, const glm::vec3 &dims, const FileBlock &fb);
 
   virtual ~Block();
 
@@ -64,20 +64,21 @@ public:
   /// \brief Get the texture assoc'd with this block.
   bd::Texture& texture();
 
+  glm::mat4& transform();
 
   /// \brief String rep. of this blockeroo.
   virtual std::string to_string() const override;
 
 private:
   FileBlock m_fb;
-  glm::u64vec3 m_ijk;   ///< Block's location in block coordinates.
-  Texture m_tex;        ///< Texture data assoc'd with this block.
-//  glm::vec3 m_origin;   ///< Center of block in world coordinates.
-  bool m_empty;       ///< True if this block was determined empty.
-//  float m_avg;          ///< Avg. val. of this block.
+  glm::u64vec3 m_ijk;    ///< Block's location in block coordinates.
+  glm::mat4 m_transform; ///< Block's model-to-world transform matrix.
+  Texture m_tex;         ///< Texture data assoc'd with this block.
+  bool m_empty;          ///< True if this block was determined empty.
 
 }; // class Block
 
+/// \brief Output a string representation of given Block.
 std::ostream& operator<<(std::ostream& os, const Block& b);
 } // namespace bd
 

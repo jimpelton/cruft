@@ -304,10 +304,10 @@ BlockCollection2<Ty>::doBlockAvg()
 template<typename Ty>
 void
 BlockCollection2<Ty>::computeVolumeStatistics
-    (
-        BufferedReader<Ty>& r,
-        const std::function<bool(Ty)> &isEmptyTest
-    )
+(
+  BufferedReader<Ty>& r,
+  const std::function<bool(Ty)> &isEmptyTest
+)
 {
   Info() << "Computing volume statistics...";
 
@@ -392,10 +392,10 @@ BlockCollection2<Ty>::addBlock(const FileBlock& b)
 template<typename Ty>
 void
 BlockCollection2<Ty>::create
-    (
-        const std::string& file, size_t bufSize,
-        const std::function<bool(Ty)> &isEmpty
-    )
+(
+    const std::string& file, size_t bufSize,
+    const std::function<bool(Ty)> &isEmpty
+)
 {
   BufferedReader<Ty> r{ bufSize };
   if (!r.open(file)) {

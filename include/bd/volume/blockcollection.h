@@ -3,6 +3,7 @@
 
 
 #include <bd/volume/block.h>
+#include <bd/io/indexfile.h>
 
 namespace bd
 {
@@ -10,23 +11,9 @@ class BlockCollection
 {
 public:
   BlockCollection();
-  //BlockCollection(const glm::u64vec3 volumeVoxelDimensions);
   ~BlockCollection();
 
-  /////////////////////////////////////////////////////////////////////////////////
-  /// \brief Set/get this BlockCollection's dimensions in voxels
-  /////////////////////////////////////////////////////////////////////////////////
-//  void blockDims(const glm::u64vec3& dims);
-//  glm::u64vec3 blockDims();
-
-
-  /////////////////////////////////////////////////////////////////////////////////
-  /// \brief Set/get the volume's dimensions in voxels
-  /////////////////////////////////////////////////////////////////////////////////
-//  glm::u64vec3 volDims();
-//  void volDims(const glm::u64vec3& voldims);
-  //TODO: move volDims() out of block class (yeah...probably need to make a class representing a volume).
-
+  void initBlocksFromIndexFile(const std::string &fileName);
 
   /////////////////////////////////////////////////////////////////////////////////
   /// \brief Initializes \c nb blocks so that they fit within the extent of \c vd.
@@ -34,9 +21,8 @@ public:
   /// \param vd[in]      Volume dimensions
   /// \param blocks[out] Vector that new blocks are pushed onto.
   ///////////////////////////////////////////////////////////////////////////////
-//  void initBlocks(glm::u64vec3 nb, glm::u64vec3 vd);
+  void initBlocksFromFileBlocks(const std::vector<FileBlock*> fileBlocks, glm::u64vec3 numblocks);
 
-  void initBlocksFromFileBlocks(const std::vector<FileBlock*> fileBlocks, glm::u64vec3);
 
   /////////////////////////////////////////////////////////////////////////////////
   /// \brief Marks blocks as empty and uploads GL textures if average is outside of [tmin..tmax].
@@ -55,6 +41,7 @@ public:
   const std::vector<Block *>& nonEmptyBlocks();
 
 private:
+  void initBlockTextures(const std::string &file);
 
   /////////////////////////////////////////////////////////////////////////////////
   /// \brief Fills \c out_blockData with part of \c in_data corresponding to block (i,j,k).
@@ -65,8 +52,7 @@ private:
   /// \param in_data[in] Source data
   /// \param out_blockData[out] Destination space for data.
   ///////////////////////////////////////////////////////////////////////////////
-//  void fillBlockData(glm::u64vec3 ijk, const float* in_data,
-//                     float* out_blockData);
+  void fillBlockData(glm::u64vec3 ijk, glm::u64vec3 vox_dims, const float* in_data, float* out_blockData);
 
 
 //  static glm::u64vec3 m_blockDims; ///< Dimensions of a block in something.
@@ -75,6 +61,9 @@ private:
 
   std::vector<Block> m_blocks;
   std::vector<Block *> m_nonEmptyBlocks;
+
+  bd::IndexFile *m_indexFile;
+
 };
 } // namespace bd
 

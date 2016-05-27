@@ -7,6 +7,7 @@
 #include <glm/gtx/string_cast.hpp>
 
 #include <sstream>
+#include <glm/gtc/matrix_transform.hpp>
 
 
 namespace bd
@@ -22,11 +23,19 @@ namespace bd
 
 
 ///////////////////////////////////////////////////////////////////////////////
-Block::Block(const glm::u64vec3& ijk, const FileBlock &fb)
+Block::Block(const glm::u64vec3& ijk, const glm::vec3 &dims, const FileBlock &fb)
   : m_fb{ fb }
   , m_ijk{ ijk }
+  , m_transform{ 1.0f }  // identity matrix
   , m_tex{ bd::Texture::Target::Tex3D }
 {
+  glm::vec3 wld_pos{ fb.world_oigin[0], fb.world_oigin[1], fb.world_oigin[2] };
+
+  glm::mat4 s = glm::scale(glm::mat4{ 1.0f }, dims);
+  glm::mat4 t = glm::translate(glm::mat4{ 1.0f }, wld_pos);
+
+  m_transform = t * s;
+
 }
 
 
@@ -90,6 +99,15 @@ Block::texture()
 
 
 ///////////////////////////////////////////////////////////////////////////////
+glm::mat4&
+Block::transform()
+{
+  return m_transform;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
 std::string
 Block::to_string() const
 {
@@ -97,12 +115,11 @@ Block::to_string() const
   ss << "{ ijk: ("
       << m_ijk.x << ',' << m_ijk.y << ',' << m_ijk.z << "),\n"
       "Origin: ("
-      << m_fb.world_oigin[0] << ',' << m_fb.world_oigin[1] << ','
-      << m_fb.world_oigin[2] << "),\n"
-      "Empty: "
-      << (empty() ? "True" : "False") << "\n"
-      "Texture: "
-      << m_tex << " }";
+          << m_fb.world_oigin[0]
+          << ',' << m_fb.world_oigin[1]
+          << ',' << m_fb.world_oigin[2] << "),\n"
+      "Empty: " << (empty() ? "True" : "False") << "\n"
+      "Texture: " << m_tex << " }";
 
   return ss.str();
 }

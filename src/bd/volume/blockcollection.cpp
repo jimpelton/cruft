@@ -3,6 +3,7 @@
 #include <bd/log/gl_log.h>
 #include <bd/log/logger.h>
 #include <bd/util/util.h>
+#include <bd/io/indexfile.h>
 
 namespace bd
 {
@@ -17,6 +18,82 @@ BlockCollection::BlockCollection()
 BlockCollection::~BlockCollection()
 {
 }
+
+void
+BlockCollection::initBlocksFromIndexFile(const std::string &fileName)
+{
+  m_indexFile = bd::IndexFile::fromBinaryIndexFile(fileName);
+  const bd::IndexFileHeader &header = m_indexFile->getHeader();
+
+
+
+  initBlocksFromFileBlocks(m_indexFile->blocks(),
+                           {header.numblocks[0],
+                            header.numblocks[1],
+                            header.numblocks[2]});
+
+}
+
+void
+BlockCollection::initBlocksFromFileBlocks(const std::vector< FileBlock * > fileBlocks,
+                                          glm::u64vec3 nb)
+{
+  auto idx = 0ull;
+  for(auto k = 0ull; k < nb.z; ++k) {
+    for (auto j = 0ull; j < nb.y; ++j) {
+      for (auto i = 0ull; i < nb.x; ++i) {
+        Block block{ { i,j,k }, { 1.0f/nb.x, 1.0f/nb.y, 1.0f/nb.z }, *fileBlocks[idx] };
+        m_blocks.push_back( block );
+        idx++;
+      }
+    }
+  }
+}
+
+void
+BlockCollection::initBlockTextures(const std::string &file)
+{
+
+}
+
+void
+BlockCollection::fillBlockData(glm::u64vec3 ijk, glm::u64vec3 vox_dims,
+    const float* in_data, float* out_blockData)
+{
+  size_t imageIdx{ 0 };
+
+  // block start = block index * block size
+  glm::u64vec3 bst{ ijk * vox_dims };
+
+  // block end = block start + block size
+  glm::u64vec3 end{ bst + vox_dims };
+
+  auto vol_dims_x = m_indexFile->getHeader().volume_extent[0];
+  auto vol_dims_y = m_indexFile->getHeader().volume_extent[1];
+
+  for (auto k = bst.z; k < end.z; ++k)
+    for (auto j = bst.y; j < end.y; ++j)
+      for (auto i = bst.x; i < end.x; ++i) {
+        size_t dataIdx{ bd::to1D(i, j, k, vol_dims_x, vol_dims_y) };
+        float val{ in_data[dataIdx] };
+        out_blockData[imageIdx++] = val;
+      }
+}
+
+const std::vector<Block>&
+BlockCollection::blocks()
+{
+  return m_blocks;
+}
+
+
+const std::vector<Block *>&
+BlockCollection::nonEmptyBlocks()
+{
+  return m_nonEmptyBlocks;
+}
+
+
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -92,35 +169,7 @@ BlockCollection::~BlockCollection()
 //  Dbg() << "Finished block init: total blocks is " << m_blocks.size();
 //}
 
-void
-BlockCollection::initBlocksFromFileBlocks(const std::vector< FileBlock * > fileBlocks,
-                                          glm::u64vec3 nb)
-{
-  auto idx = 0ull;
-  for(auto k = 0ull; k < nb.z; ++k) {
-    for (auto j = 0ull; j < nb.y; ++j) {
-      for (auto i = 0ull; i < nb.x; ++i) {
-        Block block{ { i,j,k }, *fileBlocks[idx] };
-        m_blocks.push_back( { {i,j,k}, *fileBlocks[idx] } );
-        idx++;
-      }
-    }
-  }
-}
 
-
-const std::vector<Block>&
-BlockCollection::blocks()
-{
-  return m_blocks;
-}
-
-
-const std::vector<Block *>&
-BlockCollection::nonEmptyBlocks()
-{
-  return m_nonEmptyBlocks;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 //void BlockCollection::filterBlocks(const float* data, /*unsigned int sampler,*/
@@ -170,25 +219,7 @@ BlockCollection::nonEmptyBlocks()
 ///////////////////////////////////////////////////////////////////////////////
 
 
-//void BlockCollection::fillBlockData(glm::u64vec3 ijk, const float* in_data,
-//                                    float* out_blockData)
-//{
-//  size_t imageIdx{ 0 };
-//
-//  // block start = block index * block size
-//  glm::u64vec3 bst{ ijk * m_blockDims };
-//
-//  // block end = block start + block size
-//  glm::u64vec3 end{ bst + m_blockDims };
-//
-//  for (auto k = bst.z; k < end.z; ++k)
-//    for (auto j = bst.y; j < end.y; ++j)
-//      for (auto i = bst.x; i < end.x; ++i) {
-//        size_t dataIdx{ bd::to1D(i, j, k, m_volDims.x, m_volDims.y) };
-//        float val{ in_data[dataIdx] };
-//        out_blockData[imageIdx++] = val;
-//      }
-//}
+
 } // namespace bd
 
 
