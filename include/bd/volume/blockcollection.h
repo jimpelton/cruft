@@ -23,6 +23,7 @@ public:
 
   void initBlocksFromFileBlocks(const std::vector<FileBlock*> fileBlocks, glm::u64vec3 numblocks);
 
+  bool initBlockTextures(const std::string &rawFile);
 
   /////////////////////////////////////////////////////////////////////////////////
   /// \brief Marks blocks as empty and uploads GL textures if average is outside of [tmin..tmax].
@@ -40,7 +41,6 @@ public:
   const std::vector<Block *>& nonEmptyBlocks();
 
 private:
-  bool initBlockTextures(const std::string &file);
 
   template<typename Ty>
   bool

@@ -5,6 +5,7 @@
 
 #include <string>
 #include <cstdlib>
+#include <bd/io/datatypes.h>
 
 namespace bd
 {
@@ -37,38 +38,26 @@ public:
   };
 
 
-  ///////////////////////////////////////////////////////////////////////////////
-  // Constructors/Destructor
-  ///////////////////////////////////////////////////////////////////////////////
   Texture(Target textureType);
   virtual ~Texture();
 
 
-  ///////////////////////////////////////////////////////////////////////////////
-  // Interface
-  ///////////////////////////////////////////////////////////////////////////////
-
-  ///////////////////////////////////////////////////////////////////////////////
   /// \brief Binds this texture to the current active texture.
-  ///////////////////////////////////////////////////////////////////////////////
   void bind() const;
 
 
-  ///////////////////////////////////////////////////////////////////////////////
   /// \brief Activates texture unit \c unit and binds this texture.
-  ///////////////////////////////////////////////////////////////////////////////
   void bind(unsigned int unit) const;
 
 
   unsigned int genGLTex1d(float* img, Format ity, Format ety, size_t w);
 
 
-  unsigned int genGLTex2d(float* img, Format ity, Format ety,
-                          size_t w, size_t h);
+  unsigned int genGLTex2d(float* img, Format ity, Format ety, size_t w, size_t h);
 
 
-  unsigned int genGLTex3d(float* img, Format internal, Format external,
-                          size_t w, size_t h, size_t d);
+  unsigned int genGLTex3d(Format internal, Format external, size_t w, size_t h, size_t d,
+      DataType ty, void* pixelData);
 
 
   unsigned int
@@ -90,12 +79,14 @@ private:
   ///////////////////////////////////////////////////////////////////////////////
   // Data members
   ///////////////////////////////////////////////////////////////////////////////
+
   unsigned int m_id; ///< OpenGL id of the texture data.
   //  unsigned int m_samplerUniform;  ///< OpenGL id of the texture sampler to use.
   //  unsigned int m_unit; ///< Texture sampling unit.
   Target m_type; ///< the gl target to bind to.
   //    Sampler m_sampler; ///
 };
+
 
 std::ostream& operator<<(std::ostream& os, const bd::Texture& t);
 } // namespace bd

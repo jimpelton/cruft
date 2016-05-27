@@ -33,8 +33,8 @@ BlockCollection::initBlocksFromIndexFile(const std::string &fileName)
                              header.numblocks[1],
                              header.numblocks[2] });
 
-  Dbg() << "Initializing non-empty block textures";
-  initBlockTextures(fileName);
+//  Dbg() << "Initializing non-empty block textures";
+//  initBlockTextures(fileName);
 }
 
 void
@@ -45,11 +45,12 @@ BlockCollection::initBlocksFromFileBlocks(const std::vector< FileBlock * > fileB
   for(auto k = 0ull; k < nb.z; ++k)
     for (auto j = 0ull; j < nb.y; ++j)
       for (auto i = 0ull; i < nb.x; ++i) {
+        std::cout << "\rCreating block " << idx;
         Block block{ { i,j,k }, { 1.0f/nb.x, 1.0f/nb.y, 1.0f/nb.z }, *fileBlocks[idx] };
         m_blocks.push_back( block );
         //TODO: block filtering
-//        if (isEmpty(*fileBlocks[idx]))
-//          m_nonEmptyBlocks.push_back(&m_blocks.back());
+//      if (isEmpty(*fileBlocks[idx]))
+          m_nonEmptyBlocks.push_back(&m_blocks.back());
 
         idx++;
       }
@@ -92,15 +93,20 @@ BlockCollection::do_initBlockTextures(const std::string &file)
                    m_blocks[1].voxel_extent().y *
                    m_blocks[2].voxel_extent().z ] };
 
+  std::cout << std::endl;
+  int i{ 0 };
   for(auto *b : m_nonEmptyBlocks) {
+    std::cout << "\rInitializing texture block " << i << "/" << m_nonEmptyBlocks.size();
     fillBlockData<Ty>(*b, is, buf);
-    b->texture().genGLTex3d(buf,
-                            bd::Texture::Format::RED,
+    b->texture().genGLTex3d(bd::Texture::Format::RED,
                             bd::Texture::Format::RED,
                             b->voxel_extent().x,
                             b->voxel_extent().y,
-                            b->voxel_extent().z);
+                            b->voxel_extent().z,
+                            IndexFileHeader::getType(m_indexFile->getHeader()),
+                            buf);
   }
+  std::cout << " ...done." << std::endl;
 
   delete buf;
 

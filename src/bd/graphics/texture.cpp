@@ -10,7 +10,9 @@
 
 
 namespace bd
-{ namespace
+{
+
+namespace
 {
 static const std::array<GLenum, 4> gl_format{
   GL_RED, GL_RG, GL_RGB, GL_RGBA
@@ -19,6 +21,39 @@ static const std::array<GLenum, 4> gl_format{
 static const std::array<GLenum, 3> gl_target{
   GL_TEXTURE_1D, GL_TEXTURE_2D, GL_TEXTURE_3D
 };
+
+GLenum pixelType(DataType dt)
+{
+  GLenum rval;
+  switch(dt) {
+    case DataType::Integer:
+      rval = GL_INT;
+      break;
+    case DataType::UnsignedInteger:
+      rval = GL_UNSIGNED_INT;
+      break;
+    case DataType::Character:
+      rval = GL_BYTE;
+      break;
+    case DataType::UnsignedCharacter:
+      rval = GL_UNSIGNED_BYTE;
+      break;
+    case DataType::Short:
+      rval = GL_SHORT;
+      break;
+    case DataType::UnsignedShort:
+      rval = GL_UNSIGNED_SHORT;
+      break;
+    case DataType::Float:
+    default:
+      rval = GL_FLOAT;
+      break;
+  }
+
+  return rval;
+}
+
+
 } // namespace
 
 Texture::Texture(Target textureType)
@@ -109,22 +144,25 @@ Texture::genGLTex2d(float* img, Format ity, Format ety, size_t w, size_t h)
 
 
 unsigned int
-Texture::genGLTex3d(float* img, Format ity, Format ety,
-                    size_t w, size_t h, size_t d)
+Texture::genGLTex3d(Format ity, Format ety, size_t w, size_t h, size_t d,
+    DataType ty, void* pixelData)
 {
+  const GLint border{ 0 };
+  const GLint mipMapLevel{ 0 };
+
   GLuint texId{ 0 };
   gl_check(glGenTextures(1, &texId));
   gl_check(glBindTexture(GL_TEXTURE_3D, texId));
 
   gl_check(glTexImage3D(
-      GL_TEXTURE_3D,
-      0,
-      gl_format[ordinal<Format>(ity)],
-    w, h, d,
-    0,
-    gl_format[ordinal<Format>(ety)],
-    GL_FLOAT,
-    img));
+    GL_TEXTURE_3D,
+    mipMapLevel,                         // mip-map detail level
+    gl_format[ordinal<Format>(ity)],     // internal format (how texture is to be stored by GL)
+    w, h, d,                             // dimensions
+    border,                              // border
+    gl_format[ordinal<Format>(ety)],     // pixel data format (R, RG, etc.)
+    pixelType(ty),                       // pixel data type
+    pixelData));                         // ptr to data
 
   gl_check(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
   gl_check(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
@@ -177,6 +215,10 @@ operator<<(std::ostream& os, const bd::Texture& t)
 {
   return os << t.to_string();
 }
+
+
+
+
 } // namespace bd
 
 
