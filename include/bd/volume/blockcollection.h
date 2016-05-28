@@ -36,7 +36,7 @@ public:
 //                    float tmin = 0.0f, float tmax = 1.0f);
 
 
-  const std::vector<Block>& blocks();
+  const std::vector<Block *>& blocks();
 
   const std::vector<Block *>& nonEmptyBlocks();
 
@@ -63,7 +63,7 @@ private:
 //  static glm::u64vec3 m_volDims; ///< Volume dimensions (# data points).
 //  static glm::u64vec3 m_numBlocks; ///< Number of blocks volume is divided into.
 
-  std::vector<Block> m_blocks;
+  std::vector<Block *> m_blocks;
   std::vector<Block *> m_nonEmptyBlocks;
 
   bd::IndexFile *m_indexFile;
