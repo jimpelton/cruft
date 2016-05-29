@@ -186,9 +186,15 @@ Texture::to_string() const
   GLenum tt;
   tt = gl_target[bd::ordinal<Target>(m_type)];
 
-  static const std::array<GLenum, 8> thingies2{
+  static const std::array<GLenum, 14> thingies2{
     GL_TEXTURE_WIDTH,
     GL_TEXTURE_HEIGHT,
+    GL_TEXTURE_DEPTH,
+    GL_TEXTURE_INTERNAL_FORMAT,
+    GL_TEXTURE_RED_TYPE,
+    GL_TEXTURE_BLUE_TYPE,
+    GL_TEXTURE_GREEN_TYPE,
+    GL_TEXTURE_ALPHA_TYPE,
     GL_TEXTURE_RED_SIZE,
     GL_TEXTURE_BLUE_SIZE,
     GL_TEXTURE_GREEN_SIZE,
