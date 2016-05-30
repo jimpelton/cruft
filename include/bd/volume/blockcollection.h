@@ -40,6 +40,8 @@ public:
 
   const std::vector<Block *>& nonEmptyBlocks();
 
+  const IndexFile& indexFile() const { return *m_indexFile; }
+
 private:
 
   template<typename Ty>
