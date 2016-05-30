@@ -34,7 +34,9 @@ struct DatFileData
   // data type of raw file
   DataType dataType;
 
-  std::string 
+  ///////////////////////////////////////////////////////////////////////////////
+  /// \brief Output text representation of a DatFileData object.
+  std::string
   to_string() const
   {
     std::stringstream ss;
@@ -47,9 +49,13 @@ struct DatFileData
   }
 };
 
-std::ostream& 
+///////////////////////////////////////////////////////////////////////////////
+/// \brief Output text representation of a DatFileData object.
+std::ostream&
 operator<<(std::ostream&, const DatFileData&);
 
+///////////////////////////////////////////////////////////////////////////////
+/// \brief Open and parse a .dat file, placing results in \c data.
 bool
 parseDat(const std::string& datfile, DatFileData& data);
 

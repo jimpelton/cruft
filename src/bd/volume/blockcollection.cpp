@@ -46,16 +46,23 @@ BlockCollection::initBlocksFromFileBlocks(const std::vector< FileBlock * > fileB
     for (auto j = 0ull; j < nb.y; ++j)
       for (auto i = 0ull; i < nb.x; ++i) {
         std::cout << "\rCreating block " << idx;
-        Block *block{ new Block{{ i,j,k }, { 1.0f/nb.x, 1.0f/nb.y, 1.0f/nb.z }, *fileBlocks[idx] }};
+        FileBlock *file_block{ fileBlocks[idx] };
+        Block *block{ new Block{{ i,j,k }, { 1.0f/nb.x, 1.0f/nb.y, 1.0f/nb.z }, *file_block }};
         m_blocks.push_back( block );
-        //TODO: block filtering
-      if ()
-          m_nonEmptyBlocks.push_back(block);
 
         idx++;
       }
 }
 
+void
+BlockCollection::filterBlocks(std::function<bool(const Block*)> isEmpty)
+{
+  for(Block* b : m_blocks) {
+    if (! isEmpty(b)){
+      m_nonEmptyBlocks.push_back(b);
+    }
+  }
+}
 
 bool
 BlockCollection::initBlockTextures(const std::string &file)

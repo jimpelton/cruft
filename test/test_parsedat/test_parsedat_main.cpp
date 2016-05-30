@@ -3,7 +3,7 @@
 #define CATCH_CONFIG_MAIN
 #include <catch.hpp>
 
-#include <bd/io/parsedat.h>
+#include <bd/io/datfile.h>
 #include <bd/io/datatypes.h>
 
 //#include <iostream>

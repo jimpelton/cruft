@@ -5,6 +5,8 @@
 #include <bd/volume/block.h>
 #include <bd/io/indexfile.h>
 
+#include <functional>
+
 namespace bd
 {
 class BlockCollection
@@ -22,6 +24,8 @@ public:
   /// \param blocks[out] Vector that new blocks are pushed onto.
 
   void initBlocksFromFileBlocks(const std::vector<FileBlock*> fileBlocks, glm::u64vec3 numblocks);
+
+  void filterBlocks(std::function<bool(const Block*)> isEmpty);
 
   bool initBlockTextures(const std::string &rawFile);
 

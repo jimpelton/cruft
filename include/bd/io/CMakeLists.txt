@@ -10,7 +10,7 @@ set(io_HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/datatypes.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/fileblock.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/indexfile.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/parsedat.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/datfile.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/readerworker.h"
     PARENT_SCOPE
     )

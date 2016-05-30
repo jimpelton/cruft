@@ -142,22 +142,6 @@ gl_err_num_str(GLenum err)
 namespace bd
 {
 
-namespace
-{
-//const char* logFileName = "gl.log";
-//const char* glDebugFileName = "gl_debug.log";
-//const char* glCallbackLogFileName = "gl_callback.log";
-//FILE* io = NULL;
-//
-//FILE* glDebugFile = NULL;
-//
-//const char* ogl = "OGL";
-//const char* gcb = "GCB";
-//const char* err = "ERR";
-//const char *log = "LOG";
-} // namespace
-
-
 ///////////////////////////////////////////////////////////////////////////////
 void gl_debug_message_callback(GLenum source, GLenum type, GLuint id,
                                GLenum severity, GLsizei length, const GLchar* message, void* userParam)
@@ -165,11 +149,11 @@ void gl_debug_message_callback(GLenum source, GLenum type, GLuint id,
   const char* sev = gl_debug_severity_str(severity);
   const char* typ = gl_debug_type_str(type);
   const char* src = gl_debug_source_str(source);
-  Gl_Dbg() << "Source: " << src
-      << " Type: " << typ
-      << " Id: " << id
-      << " Severity: " << sev
-      << " Message: " << message;
+  Gl_Dbg() << "\nSource: " << src
+      << "\n Type: " << typ
+      << "\n Id: " << id
+      << "\n Severity: " << sev
+      << "\n Message: " << message;
 }
 
 

@@ -2,7 +2,7 @@
 #include <bd/util/util.h>
 #include <bd/io/datareader.h>
 #include <bd/io/datatypes.h>
-#include <bd/io/parsedat.h>
+#include <bd/io/datfile.h>
 
 #include <glm/glm.hpp>
 #include <algorithm>
