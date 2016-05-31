@@ -105,7 +105,7 @@ BlockCollection::do_initBlockTextures(const std::string &file)
 
   std::cout << std::endl;
   int i{ 0 };
-  for(auto *b : m_blocks) {
+  for(auto *b : m_nonEmptyBlocks) {
     std::cout << "\rInitializing texture block " << ++i << "/" << m_nonEmptyBlocks.size();
     fillBlockData<Ty>(*b, is, buf);
     for (size_t idx{ 0 }; idx < buf_size; ++idx) {

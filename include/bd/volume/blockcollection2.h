@@ -314,7 +314,7 @@ BlockCollection2<Ty>::computeVolumeStatistics
   size_t total_bytes_processed{ 0 };
   double volsum{ 0.0 };
   Ty vol_min{ std::numeric_limits<Ty>::max() };
-  Ty vol_max{ std::numeric_limits<Ty>::min() };
+  Ty vol_max{ std::numeric_limits<Ty>::lowest() };
   unsigned long long vol_empty_voxels{ 0 };
 
   while (r.hasNext()) {

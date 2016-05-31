@@ -59,7 +59,7 @@ public:
 namespace
 {
 const uint16_t MAGIC{ 7376 }; ///< Magic number for the file (ascii 'SV')
-const uint16_t VERSION{ 1 };
+const uint16_t VERSION{ 2 };
 const uint32_t HEAD_LEN{ sizeof(IndexFileHeader) };
 }  // namespace
 

@@ -349,7 +349,7 @@ FileBlock::to_string() const
     "      \"max_val\": " << max_val << ",\n"
     "      \"avg_val\": " << avg_val << ",\n"
     "      \"total_val\": " << total_val << ",\n"
-    "      \"empty\": " << (is_empty ? "true" : "false") << "\n"
+    "      \"empty\": " << std::boolalpha << is_empty << "\n"
     "   }";
 
   return ss.str();

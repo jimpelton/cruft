@@ -54,7 +54,7 @@ struct FileBlock
       , world_oigin{ 0 }
       , empty_voxels{ 0 }
       , min_val{ std::numeric_limits< decltype(min_val) >::max() }
-      , max_val{ std::numeric_limits< decltype(max_val) >::min() }
+      , max_val{ std::numeric_limits< decltype(max_val) >::lowest() }
       , avg_val{ 0.0 }
       , total_val{ 0.0 }
       , is_empty{ 0 }
