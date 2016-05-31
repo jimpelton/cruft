@@ -96,6 +96,7 @@ BlockCollection::do_initBlockTextures(const std::string &file)
     return false;
   }
 
+
   size_t buf_size{ m_blocks[0]->voxel_extent().x *
                    m_blocks[0]->voxel_extent().y *
                    m_blocks[0]->voxel_extent().z};

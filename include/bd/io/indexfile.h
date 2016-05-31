@@ -109,10 +109,8 @@ public:
 
   void create(const std::string& rawFile, size_t buffSize, const float minmax[2]) override
   {
-    auto test = [minmax](Ty val) -> bool {
-      return val < minmax[0] || val > minmax[1];
-    };
-    c.create(rawFile, buffSize, test);
+    ValueRangeFilter<Ty> isRelevant(minmax[0], minmax[1]);
+    c.createFromRawFile(rawFile, buffSize, isRelevant);
   }
 
 

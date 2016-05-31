@@ -15,18 +15,19 @@
 namespace bd
 {
 
+/// \brief Compute some global volume statistics.
 template<typename Ty>
 class ParallelVolumeStats
 {
 private:
   const Ty* const data;
 
-  std::function<bool(Ty)> isEmpty;
+//  std::function<bool(Ty)> isRelevant;
 
 public:
   Ty min_value;
   Ty max_value;
-  uint64_t empty_voxels;
+//  uint64_t empty_voxels;
 
   void operator()(const tbb::blocked_range<size_t>& r)
   {
@@ -39,9 +40,9 @@ public:
       if (val<min_value) { min_value = val; }
       if (val>max_value) { max_value = val; }
 
-      if (isEmpty(val)) {
-        empty_voxels += 1;
-      }
+//      if (isRelevant(val)) {
+//        empty_voxels += 1;
+//      }
 
     }
   }
@@ -49,10 +50,10 @@ public:
 
   ParallelVolumeStats(ParallelVolumeStats& x, tbb::split)
       : data{ x.data }
-      , isEmpty{ x.isEmpty }
+//      , isRelevant{ x.isRelevant }
       , min_value{ std::numeric_limits<Ty>::max() }
-      , max_value{ std::numeric_limits<Ty>::min() }
-      , empty_voxels{ 0 }
+      , max_value{ std::numeric_limits<Ty>::lowest() }
+//      , empty_voxels{ 0 }
   {
   }
 
@@ -67,16 +68,16 @@ public:
       max_value = y.max_value;
     }
 
-    empty_voxels += y.empty_voxels;
+//    empty_voxels += y.empty_voxels;
   }
 
 
-  ParallelVolumeStats(const Buffer<Ty>* b, const std::function<bool(Ty)> &isEmpty)
+  ParallelVolumeStats(const Buffer<Ty>* b /*, const std::function<bool(Ty)> &isRelevant*/)
       : data{ b->ptr() }
-      , isEmpty{ isEmpty }
+//    , isRelevant{ isRelevant }
       , min_value{ std::numeric_limits<Ty>::max() }
-      , max_value{ std::numeric_limits<Ty>::min() }
-      , empty_voxels{ 0 }
+      , max_value{ std::numeric_limits<Ty>::lowest() }
+//      , empty_voxels{ 0 }
   {
   }
 

@@ -9,6 +9,7 @@
 #include <bd/tbb/parallelvolumestats.h>
 #include <bd/tbb/parallelblockstats.h>
 #include <bd/volume/volume.h>
+#include <bd/volume/valuerangefilter.h>
 
 #include <tbb/parallel_reduce.h>
 #include <tbb/blocked_range.h>
@@ -57,7 +58,7 @@ public:
   /// \param tmin[in] min average block value to filter against.
   /// \param tmax[in] max average block value to filter against.
   ///////////////////////////////////////////////////////////////////////////////
-  void create(const std::string& file, size_t bufSize, const std::function<bool(Ty)> &isEmpty);
+  void createFromRawFile(const std::string &file, size_t bufSize, std::function<bool(Ty)>);
 
 
   //////////////////////////////////////////////////////////////////////////////
@@ -174,6 +175,9 @@ template<typename Ty>
 BlockCollection2<Ty>::~BlockCollection2()
 {
   std::cout << "BlockCollection2 destructor\n";
+  for(auto b : m_blocks) {
+    delete b;
+  }
 }
 
 
@@ -306,7 +310,7 @@ void
 BlockCollection2<Ty>::computeVolumeStatistics
 (
   BufferedReader<Ty>& r,
-  const std::function<bool(Ty)> &isEmptyTest
+  const std::function<bool(Ty)> &isRelevant
 )
 {
   Info() << "Computing volume statistics...";
@@ -315,7 +319,7 @@ BlockCollection2<Ty>::computeVolumeStatistics
   double volsum{ 0.0 };
   Ty vol_min{ std::numeric_limits<Ty>::max() };
   Ty vol_max{ std::numeric_limits<Ty>::lowest() };
-  unsigned long long vol_empty_voxels{ 0 };
+//  unsigned long long vol_empty_voxels{ 0 };
 
   while (r.hasNext()) {
     Buffer<Ty>* buf = r.waitNext();
@@ -328,7 +332,7 @@ BlockCollection2<Ty>::computeVolumeStatistics
     // Compute the min/max values of the volume and a bunch of work on each block.
     Dbg() << "CO: Computing volume stats for this buffer.";
     tbb::blocked_range<size_t> vol_range(0, buf->elements());
-    ParallelVolumeStats<Ty> mm(buf, isEmptyTest);
+    ParallelVolumeStats<Ty> mm(buf);
     tbb::parallel_reduce(vol_range, mm);
 
     if (mm.min_value<vol_min) {
@@ -339,12 +343,12 @@ BlockCollection2<Ty>::computeVolumeStatistics
       vol_max = mm.max_value;
     }
 
-    vol_empty_voxels += mm.empty_voxels;
+//    vol_empty_voxels += mm.empty_voxels;
 
 
     Dbg() << "CO: Computing block stats for this buffer.";
     tbb::blocked_range<size_t> blocks_range(0, buf->elements());
-    ParallelBlockStats<Ty> ba(buf, &m_volume, m_blocks.data(), isEmptyTest);
+    ParallelBlockStats<Ty> ba(buf, &m_volume, m_blocks.data(), isRelevant);
     tbb::parallel_for(blocks_range, ba);
 
     Dbg() << "CO: Returning empty buffer.";
@@ -391,11 +395,11 @@ BlockCollection2<Ty>::addBlock(const FileBlock& b)
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 void
-BlockCollection2<Ty>::create
+BlockCollection2<Ty>::createFromRawFile
 (
-  const std::string& file,
+  const std::string &file,
   size_t bufSize,
-  const std::function<bool(Ty)> &isEmpty
+  std::function<bool(Ty)> isVoxelEmpty
 )
 {
   BufferedReader<Ty> r{ bufSize };
@@ -407,7 +411,7 @@ BlockCollection2<Ty>::create
 
   initBlocks();
 
-  computeVolumeStatistics(r, isEmpty);
+  computeVolumeStatistics(r, isVoxelEmpty);
 
   Info() << m_blocks.size()-m_nonEmptyBlocks.size() << "/" << m_blocks.size() <<
       " blocks marked empty.";

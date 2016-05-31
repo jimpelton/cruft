@@ -38,7 +38,7 @@ namespace bd
 ///   min val           | 8 bytes float
 ///   avg val           | 8 bytes float
 ///
-///   isEmpty           | 4 bytes unsigned
+///   isRelevant           | 4 bytes unsigned
 ///   -----------------------------------------
 ///   Dat file section (unimplemented)
 ///   DAT file sz         | 2 bytes unsigned
