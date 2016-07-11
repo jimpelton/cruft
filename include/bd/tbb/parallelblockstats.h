@@ -23,10 +23,9 @@ template<typename Ty>
 class ParallelBlockStats{
 
 private:
-
-
   const Ty * const data;
-  FileBlock ** m_blocks;
+  const FileBlock * const * m_blocks;
+
 
   const uint64_t vdX, vdY;         // volume dims along X, Y axis
   const uint64_t bdX, bdY, bdZ;    // block dims along X, Y, Z axis
@@ -35,35 +34,73 @@ private:
 
   std::function<bool(Ty)> isRelevant; //< Is the element a relevant voxel or not.
 
-public:
+  FileBlock *m_myBlocks;
 
-  void operator()(const tbb::blocked_range<size_t> &r) const
+public:
+  const FileBlock* blocks() { return m_myBlocks; }
+
+//  FileBlock* copyBlocks(size_t rBegin, size_t rEnd) const
+//  {
+//
+//    uint64_t vIdx, bI, bJ, bK, bIdx;
+//    vIdx =  rBegin + voxel_start;
+//    bI = (vIdx % vdX) / bdX;
+//    bJ = ((vIdx / vdX) % vdY) / bdY;
+//    bK = ((vIdx / vdX) / vdY) / bdZ;
+//    uint64_t startBlock = bI + bcX * (bJ + bK * bcY);
+//
+//    // end block
+//    vIdx =  rEnd + voxel_start;
+//    bI = (vIdx % vdX) / bdX;
+//    bJ = ((vIdx / vdX) % vdY) / bdY;
+//    bK = ((vIdx / vdX) / vdY) / bdZ;
+//    uint64_t endBlock = bI + bcX * (bJ + bK * bcY);
+//
+//    // Copy the blocks covered by the blocked_range r.
+//    size_t sz{ endBlock - startBlock };
+//    FileBlock *my_blocks = new FileBlock[sz];
+//    for(size_t i{ 0 }; i < sz; ++i) {
+//      my_blocks[i] = *m_blocks[startBlock];
+//      startBlock++;
+//    }
+//
+//    return my_blocks;
+//  }
+
+
+  FileBlock* copyBlocks(const FileBlock * const *theBlocks, size_t numBlocks) {
+    m_myBlocks = new FileBlock[numBlocks];
+    for(size_t i{ 0 }; i<numBlocks; ++i)
+      m_myBlocks[i] = *theBlocks[i];
+
+    return m_myBlocks;
+  }
+
+
+  void operator()(const tbb::blocked_range<size_t> &r)
   {
     const Ty * const a{ data };
-    FileBlock * const * const blks{ m_blocks };
+    FileBlock * const my_blocks{ copyBlocks(m_blocks, bcX*bcY*bcZ) };
 
+    uint64_t vIdx, bI, bJ, bK, bIdx;
     for (size_t i{ r.begin() }; i != r.end(); ++i) {
-      // Convert idx (the voxel index within the entire volume data set)
-      // into a 3D index.
-      uint64_t vIdx{ i + voxel_start };
-      uint64_t vX{ vIdx % vdX };
-      uint64_t vY{ (vIdx / vdX) % vdY };
-      uint64_t vZ{ (vIdx / vdX) / vdY };
-      
-      // Convert the 3D voxel index obtained from idx into a 3D block index
-      // to be used in determining if our voxel is within the part of the
-      // volume covered by our blocks.
-      uint64_t bI{ vX/bdX };
-      uint64_t bJ{ vY/bdY };
-      uint64_t bK{ vZ/bdZ };
+
+      // Convert vIdx (the voxel index within the entire volume data set)
+      // into a 3D index, then convert the 3D voxel index obtained from
+      // vIdx into a 3D block index to be used in determining if our voxel
+      // is within the part of the volume covered by our blocks.
+      vIdx = i + voxel_start;
+      bI = (vIdx % vdX) / bdX;
+      bJ = ((vIdx / vdX) % vdY) / bdY;
+      bK = ((vIdx / vdX) / vdY) / bdZ;
 
       if (bI < bcX && bJ < bcY && bK < bcZ) {
         Ty val = a[i];
 
         // Convert the 3D block index into a 1D block index and fetch the
         // block from the array of blocks.
-        uint64_t blockIdx{ bI + bcX * (bJ + bK * bcY) };
-        FileBlock *b = blks[blockIdx];
+        bIdx = bI + bcX * (bJ + bK * bcY);
+        FileBlock *b = &my_blocks[bIdx];
 
         if (! isRelevant(val))
           b->empty_voxels += 1;
@@ -77,42 +114,67 @@ public:
       }
     }
 
+    m_myBlocks = my_blocks;
   }
 
-  ParallelBlockStats(const ParallelBlockStats<Ty> &o)
-      : data{ o.data }
-      , m_blocks{ o.m_blocks }
-      , vdX{ o.vdX }
-      , vdY{ o.vdY }
-      , bdX{ o.bdX }
-      , bdY{ o.bdY }
-      , bdZ{ o.bdZ }
-      , bcX{ o.bcX }
-      , bcY{ o.bcY }
-      , bcZ{ o.bcZ }
-      , voxel_start{ o.voxel_start }
-      , isRelevant{ o.isRelevant }
-  { }
+  void join(const ParallelBlockStats<Ty> &y)
+  {
+
+  }
+
+  ParallelBlockStats(ParallelBlockStats<Ty> &o, tbb::split)
+    : data{ o.data }
+    , m_blocks{ o.m_blocks }
+//    , m_myBlocks{ o.m_myBlocks }
+    , vdX{ o.vdX }
+    , vdY{ o.vdY }
+    , bdX{ o.bdX }
+    , bdY{ o.bdY }
+    , bdZ{ o.bdZ }
+    , bcX{ o.bcX }
+    , bcY{ o.bcY }
+    , bcZ{ o.bcZ }
+    , voxel_start{ o.voxel_start }
+    , isRelevant{ o.isRelevant }
+    {
+
+    }
+
+
+//  ParallelBlockStats(const ParallelBlockStats<Ty> &o)
+//    : data{ o.data }
+//    , m_blocks{ o.m_blocks }
+//    , m_myBlocks{ o.m_myBlocks }
+//    , vdX{ o.vdX }
+//    , vdY{ o.vdY }
+//    , bdX{ o.bdX }
+//    , bdY{ o.bdY }
+//    , bdZ{ o.bdZ }
+//    , bcX{ o.bcX }
+//    , bcY{ o.bcY }
+//    , bcZ{ o.bcZ }
+//    , voxel_start{ o.voxel_start }
+//    , isRelevant{ o.isRelevant }
+//  { }
 
   ParallelBlockStats(Buffer<Ty> *b, const Volume *v, FileBlock * const * blocks,
       std::function<bool(Ty)> isEmpty)
-      : data{ b->ptr() }
-      , m_blocks{ }
-      , vdX{ v->dims().x }
-      , vdY{ v->dims().y }
-      , bdX{ v->lower().block_dims().x }
-      , bdY{ v->lower().block_dims().y }
-      , bdZ{ v->lower().block_dims().z }
-      , bcX{ v->lower().block_count().x }
-      , bcY{ v->lower().block_count().y }
-      , bcZ{ v->lower().block_count().z }
-      , voxel_start{ b->index() }
-      , isRelevant{ isEmpty }
-  {
+    : data{ b->ptr() }
+    , m_blocks{ blocks }
+    , m_myBlocks{ nullptr }
+    , vdX{ v->dims().x }
+    , vdY{ v->dims().y }
+    , bdX{ v->lower().block_dims().x }
+    , bdY{ v->lower().block_dims().y }
+    , bdZ{ v->lower().block_dims().z }
+    , bcX{ v->lower().block_count().x }
+    , bcY{ v->lower().block_count().y }
+    , bcZ{ v->lower().block_count().z }
+    , voxel_start{ b->index() }
+    , isRelevant{ isEmpty }
+  { }
 
-
-
-  }
+  ~ParallelBlockStats() { }
 
 }; // class ParallelBlockStats
 

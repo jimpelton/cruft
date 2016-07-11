@@ -17,7 +17,7 @@ namespace bd
 
 /// \brief Compute some global volume statistics.
 template<typename Ty>
-class ParallelVolumeStats
+class ParallelVolumeMinMax
 {
 private:
   const Ty* const data;
@@ -48,7 +48,7 @@ public:
   }
 
 
-  ParallelVolumeStats(ParallelVolumeStats& x, tbb::split)
+  ParallelVolumeMinMax(ParallelVolumeMinMax& x, tbb::split)
       : data{ x.data }
 //      , isRelevant{ x.isRelevant }
       , min_value{ std::numeric_limits<Ty>::max() }
@@ -58,7 +58,7 @@ public:
   }
 
 
-  void join(const ParallelVolumeStats& y)
+  void join(const ParallelVolumeMinMax& y)
   {
     // Reduce to a global minimum and maximum for the volume.
     if (y.min_value<min_value) {
@@ -72,7 +72,7 @@ public:
   }
 
 
-  ParallelVolumeStats(const Buffer<Ty>* b /*, const std::function<bool(Ty)> &isRelevant*/)
+  ParallelVolumeMinMax(const Buffer<Ty>* b /*, const std::function<bool(Ty)> &isRelevant*/)
       : data{ b->ptr() }
 //    , isRelevant{ isRelevant }
       , min_value{ std::numeric_limits<Ty>::max() }
@@ -81,7 +81,7 @@ public:
   {
   }
 
-}; // class ParallelVolumeStats
+}; // class ParallelVolumeMinMax
 
 } // namespace preproc
 

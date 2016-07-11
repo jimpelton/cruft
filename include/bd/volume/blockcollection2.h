@@ -6,7 +6,7 @@
 #include <bd/io/buffer.h>
 #include <bd/log/logger.h>
 #include <bd/util/util.h>
-#include <bd/tbb/parallelvolumestats.h>
+#include <bd/tbb/parallelvolumeminmax.h>
 #include <bd/tbb/parallelblockstats.h>
 #include <bd/volume/volume.h>
 #include <bd/volume/valuerangefilter.h>
@@ -235,7 +235,7 @@ BlockCollection2<Ty>::initBlocks()
           << ", " << wld_dims.x << ", " << wld_dims.y << ", " << wld_dims.z;
 
 
-  // Loop through all our blocks (identified by <bx,by,bz>) and populate block fields.
+  // Loop through all our blocks (identified by <bxi,byj,bzk>) and populate block fields.
   for (auto bzk = 0ull; bzk<bc.z; ++bzk)
     for (auto byj = 0ull; byj<bc.y; ++byj)
       for (auto bxi = 0ull; bxi<bc.x; ++bxi) {
@@ -244,22 +244,22 @@ BlockCollection2<Ty>::initBlocks()
         // lower left corner in world coordinates
         const glm::vec3 worldLoc{ wld_dims*glm::vec3(blkId)-0.5f }; // - 0.5f;
         // origin (centroid) in world coordiates
-        const glm::vec3 blk_origin{ (worldLoc+(worldLoc+wld_dims))*0.5f };
+        const glm::vec3 blkOrigin{ (worldLoc+(worldLoc+wld_dims))*0.5f };
         // voxel start of block within volume
         const glm::u64vec3 startVoxel{ blkId*m_volume.lower().block_dims() };
 
         FileBlock* blk = new FileBlock(); // { std::make_shared<FileBlock>() };
         blk->block_index = bd::to1D(bxi, byj, bzk, bc.x, bc.y);
-        blk->data_offset = bd::to1D(startVoxel.x, startVoxel.y,
-            startVoxel.z, vd.x, vd.y)*sizeof(Ty);
+        blk->data_offset = bd::to1D(startVoxel.x, startVoxel.y, startVoxel.z, vd.x, vd.y);
+        blk->data_offset *= sizeof(Ty);
 
-        blk->voxel_dims[0] = static_cast<decltype(blk->voxel_dims[0])>(bd.x);
-        blk->voxel_dims[1] = static_cast<decltype(blk->voxel_dims[1])>(bd.y);
-        blk->voxel_dims[2] = static_cast<decltype(blk->voxel_dims[2])>(bd.z);
+        blk->voxel_dims[0] = static_cast< decltype(blk->voxel_dims[0]) >(bd.x);
+        blk->voxel_dims[1] = static_cast< decltype(blk->voxel_dims[1]) >(bd.y);
+        blk->voxel_dims[2] = static_cast< decltype(blk->voxel_dims[2]) >(bd.z);
 
-        blk->world_oigin[0] = blk_origin.x;
-        blk->world_oigin[1] = blk_origin.y;
-        blk->world_oigin[2] = blk_origin.z;
+        blk->world_oigin[0] = blkOrigin.x;
+        blk->world_oigin[1] = blkOrigin.y;
+        blk->world_oigin[2] = blkOrigin.z;
 
         m_blocks.push_back(blk);
       }
@@ -332,7 +332,7 @@ BlockCollection2<Ty>::computeVolumeStatistics
     // Compute the min/max values of the volume and a bunch of work on each block.
     Dbg() << "CO: Computing volume stats for this buffer.";
     tbb::blocked_range<size_t> vol_range(0, buf->elements());
-    ParallelVolumeStats<Ty> mm(buf);
+    ParallelVolumeMinMax<Ty> mm(buf);
     tbb::parallel_reduce(vol_range, mm);
 
     if (mm.min_value<vol_min) {
@@ -349,7 +349,7 @@ BlockCollection2<Ty>::computeVolumeStatistics
     Dbg() << "CO: Computing block stats for this buffer.";
     tbb::blocked_range<size_t> blocks_range(0, buf->elements());
     ParallelBlockStats<Ty> ba(buf, &m_volume, m_blocks.data(), isRelevant);
-    tbb::parallel_for(blocks_range, ba);
+    tbb::parallel_reduce(blocks_range, ba);
 
     Dbg() << "CO: Returning empty buffer.";
     r.waitReturn(buf);

@@ -62,8 +62,6 @@ struct FileBlock
 
 
   FileBlock(const FileBlock& other) = default;
-
-
   std::string to_string() const;
 
 

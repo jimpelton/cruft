@@ -40,7 +40,7 @@ Region::block_dims(const glm::u64vec3& dims)
 const glm::u64vec3&
 Region::block_count() const
 {
-  return m_count;
+  return m_blockCount;
 }
 
 
@@ -48,7 +48,7 @@ Region::block_count() const
 void
 Region::block_count(const glm::u64vec3& nb)
 {
-  m_count = nb;
+  m_blockCount = nb;
 }
 
 
@@ -70,7 +70,7 @@ Region::vox_start(const glm::u64vec3& m)
 
 glm::u64vec3 Region::extent() const
 {
-  return m_count * m_blockDims;  // component-wise multiply
+  return m_blockCount * m_blockDims;  // component-wise multiply
 }
 
 
