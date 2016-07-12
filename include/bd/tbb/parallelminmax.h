@@ -15,9 +15,10 @@
 namespace bd
 {
 
-/// \brief Compute some global volume statistics.
+/// \brief Simply compute the min/max of the given blocked_range.
+/// \note Use this with TBB's parallel_reduce.
 template<typename Ty>
-class ParallelVolumeMinMax
+class ParallelMinMax
 {
 private:
   const Ty* const data;
@@ -48,7 +49,7 @@ public:
   }
 
 
-  ParallelVolumeMinMax(ParallelVolumeMinMax& x, tbb::split)
+  ParallelMinMax(ParallelMinMax& x, tbb::split)
       : data{ x.data }
 //      , isRelevant{ x.isRelevant }
       , min_value{ std::numeric_limits<Ty>::max() }
@@ -58,7 +59,7 @@ public:
   }
 
 
-  void join(const ParallelVolumeMinMax& y)
+  void join(const ParallelMinMax& y)
   {
     // Reduce to a global minimum and maximum for the volume.
     if (y.min_value<min_value) {
@@ -72,7 +73,7 @@ public:
   }
 
 
-  ParallelVolumeMinMax(const Buffer<Ty>* b /*, const std::function<bool(Ty)> &isRelevant*/)
+  ParallelMinMax(const Buffer<Ty>* b /*, const std::function<bool(Ty)> &isRelevant*/)
       : data{ b->ptr() }
 //    , isRelevant{ isRelevant }
       , min_value{ std::numeric_limits<Ty>::max() }
@@ -81,7 +82,7 @@ public:
   {
   }
 
-}; // class ParallelVolumeMinMax
+}; // class ParallelMinMax
 
 } // namespace preproc
 

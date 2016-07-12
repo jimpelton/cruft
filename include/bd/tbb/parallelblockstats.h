@@ -113,8 +113,6 @@ public:
         b->total_val += val;
       }
     }
-
-    m_myBlocks = my_blocks;
   }
 
   void join(const ParallelBlockStats<Ty> &y)
@@ -157,7 +155,9 @@ public:
 //    , isRelevant{ o.isRelevant }
 //  { }
 
-  ParallelBlockStats(Buffer<Ty> *b, const Volume *v, FileBlock * const * blocks,
+  ParallelBlockStats(Buffer<Ty> *b,
+      const Volume *v,
+      FileBlock * const * blocks,
       std::function<bool(Ty)> isEmpty)
     : data{ b->ptr() }
     , m_blocks{ blocks }

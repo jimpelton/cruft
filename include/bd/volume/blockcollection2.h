@@ -6,7 +6,7 @@
 #include <bd/io/buffer.h>
 #include <bd/log/logger.h>
 #include <bd/util/util.h>
-#include <bd/tbb/parallelvolumeminmax.h>
+#include <bd/tbb/parallelminmax.h>
 #include <bd/tbb/parallelblockstats.h>
 #include <bd/volume/volume.h>
 #include <bd/volume/valuerangefilter.h>
@@ -126,7 +126,7 @@ private:
   /// \brief Compute the averages for each block after min/max and sum is
   //         found.
   //////////////////////////////////////////////////////////////////////////////
-  void doBlockAvg();
+  void finishBlockAverages();
 
 
   //////////////////////////////////////////////////////////////////////////////
@@ -292,11 +292,12 @@ BlockCollection2<Ty>::doBufferSum(Buffer<Ty>* buf)
 //////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 void
-BlockCollection2<Ty>::doBlockAvg()
+BlockCollection2<Ty>::finishBlockAverages()
 {
   uint64_t volume_empty_voxels = 0;
   for (FileBlock* b : m_blocks) {
-    b->avg_val = b->total_val/(b->voxel_dims[0]*b->voxel_dims[1]*b->voxel_dims[2]);
+    uint64_t total_vox{ b->voxel_dims[0]*b->voxel_dims[1]*b->voxel_dims[2] };
+    b->avg_val = b->total_val / total_vox;
     volume_empty_voxels += b->empty_voxels;
   }
 
@@ -332,7 +333,7 @@ BlockCollection2<Ty>::computeVolumeStatistics
     // Compute the min/max values of the volume and a bunch of work on each block.
     Dbg() << "CO: Computing volume stats for this buffer.";
     tbb::blocked_range<size_t> vol_range(0, buf->elements());
-    ParallelVolumeMinMax<Ty> mm(buf);
+    ParallelMinMax<Ty> mm(buf);
     tbb::parallel_reduce(vol_range, mm);
 
     if (mm.min_value<vol_min) {
@@ -365,10 +366,10 @@ BlockCollection2<Ty>::computeVolumeStatistics
   // Save final volume min/max/avg.
   m_volume.min(vol_min);
   m_volume.max(vol_max);
-  m_volume.avg(volsum/(m_volume.dims().x*m_volume.dims().y*m_volume.dims().z));
+  m_volume.avg( volsum / (m_volume.dims().x*m_volume.dims().y*m_volume.dims().z) );
 
   // Average the blocks!
-  doBlockAvg();
+  finishBlockAverages();
 
   Info() << "Done computing volume statistics "
       << m_volume.min() << ", " << m_volume.max() << ", " << m_volume.avg()
