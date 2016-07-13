@@ -21,7 +21,7 @@ template<typename Ty>
 class ParallelMinMax
 {
 private:
-  const Ty* const data;
+  Ty const * const data;
 
 //  std::function<bool(Ty)> isRelevant;
 
@@ -30,9 +30,9 @@ public:
   Ty max_value;
 //  uint64_t empty_voxels;
 
-  void operator()(const tbb::blocked_range<size_t>& r)
+  void operator()(tbb::blocked_range<size_t> const &r)
   {
-    const Ty* const a{ data };
+    Ty const * const a{ data };
 
     for (size_t i{ r.begin() }; i!=r.end(); ++i) {
 

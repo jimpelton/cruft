@@ -25,6 +25,7 @@ class ParallelBlockStats{
 private:
   const Ty * const data;
   const FileBlock * const * m_blocks;
+  FileBlock *m_myBlocks;
 
 
   const uint64_t vdX, vdY;         // volume dims along X, Y axis
@@ -34,7 +35,6 @@ private:
 
   std::function<bool(Ty)> isRelevant; //< Is the element a relevant voxel or not.
 
-  FileBlock *m_myBlocks;
 
 public:
   const FileBlock* blocks() { return m_myBlocks; }
@@ -68,19 +68,19 @@ public:
 //  }
 
 
-  FileBlock* copyBlocks(const FileBlock * const *theBlocks, size_t numBlocks) {
-    m_myBlocks = new FileBlock[numBlocks];
-    for(size_t i{ 0 }; i<numBlocks; ++i)
-      m_myBlocks[i] = *theBlocks[i];
-
-    return m_myBlocks;
-  }
+//  FileBlock* copyBlocks(const FileBlock * const *theBlocks, size_t numBlocks) {
+//    m_myBlocks = new FileBlock[numBlocks];
+//    for(size_t i{ 0 }; i<numBlocks; ++i)
+//      m_myBlocks[i] = *theBlocks[i];
+//
+//    return m_myBlocks;
+//  }
 
 
   void operator()(const tbb::blocked_range<size_t> &r)
   {
-    const Ty * const a{ data };
-    FileBlock * const my_blocks{ copyBlocks(m_blocks, bcX*bcY*bcZ) };
+    Ty const * const a{ data };
+    FileBlock * const my_blocks{ /* copyBlocks(m_blocks, bcX*bcY*bcZ) */ };
 
     uint64_t vIdx, bI, bJ, bK, bIdx;
     for (size_t i{ r.begin() }; i != r.end(); ++i) {

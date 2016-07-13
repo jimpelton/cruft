@@ -51,6 +51,11 @@ Region::block_count(const glm::u64vec3& nb)
   m_blockCount = nb;
 }
 
+uint64_t
+Region::total_block_count() const
+{
+  return m_blockCount.x * m_blockCount.y * m_blockCount.z;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 const glm::u64vec3&
@@ -137,6 +142,19 @@ void Volume::avg(double avg)
   m_volAvg = avg;
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
+double Volume::total() const
+{
+  return m_volTot;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+void Volume::total(double t)
+{
+  m_volTot = t;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 void Volume::emptyVoxels(uint64_t empty)

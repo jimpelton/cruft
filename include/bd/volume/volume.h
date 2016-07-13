@@ -35,6 +35,7 @@ public:
   /// \brief Get/Set the number of blocks along each axis.
   const glm::u64vec3& block_count() const;
   void block_count(const glm::u64vec3 &);
+  uint64_t total_block_count() const;
 
   glm::u64vec3 extent() const;
 
@@ -50,6 +51,8 @@ private:
 
 };
 
+
+//////////////////////////////////////////////////////////////////////////////
 class Volume
 {
 
@@ -64,6 +67,7 @@ public:
     , m_volMax{ std::numeric_limits<double>::lowest() }
     , m_volMin{ std::numeric_limits<double>::max() }
     , m_volAvg{ 0.0 }
+    , m_volTot{ 0.0 }
   { }
 
   ~Volume() { }
@@ -75,16 +79,22 @@ public:
 
   double min() const;
   void min(double);
+
   double max() const;
   void max(double);
+
   double avg() const;
   void avg(double);
+
+  double total() const;
+  void total(double);
+
   uint64_t emptyVoxels() const;
   void emptyVoxels(uint64_t);
 
-  const Region & lower() const;
-  Region& lower();
-  void lower(const Region &lower);
+  Region const & lower() const;
+  Region & lower();
+  void lower(Region const & lower);
 
 //  const Region & upper() const { return m_upperRegion; }
 //  Region & upper() { return m_upperRegion; }
@@ -104,6 +114,8 @@ private:
   double m_volMax;           ///< Max value found in volume.
   double m_volMin;           ///< Min value found in volume.
   double m_volAvg;           ///< Avg value found in volume.
+  double m_volTot;           ///< Total of all values in volume.
+
 
 };
 

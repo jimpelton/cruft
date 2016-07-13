@@ -25,6 +25,7 @@
 #include <stdexcept>
 #include <cassert>
 #include <iterator>
+#include <bd/tbb/parallelblockminmax.h>
 
 
 namespace bd
@@ -72,7 +73,7 @@ public:
 
 
   //////////////////////////////////////////////////////////////////////////////
-  /// \brief Add a pre-initialized block to this BlockCollection2.
+  /// \brief Add a reference to the pre-initialized block to this BlockCollection2.
   /// \note  Adds block to non-empty list if block is not empty.
   /// \param b The block to add.
   //////////////////////////////////////////////////////////////////////////////
@@ -121,6 +122,9 @@ private:
   //////////////////////////////////////////////////////////////////////////////
   double doBufferSum(Buffer<Ty>*);
 
+  void doBufferMinMax(Buffer<Ty>*);
+
+  void doBlockMinMax(Buffer<Ty>*);
 
   //////////////////////////////////////////////////////////////////////////////
   /// \brief Compute the averages for each block after min/max and sum is
@@ -285,7 +289,53 @@ BlockCollection2<Ty>::doBufferSum(Buffer<Ty>* buf)
       std::plus<double>()
   ) };
 
+  m_volume.total( m_volume.total() + volsum );
+
   return volsum;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+template<typename Ty>
+void
+BlockCollection2<Ty>::doBufferMinMax(Buffer<Ty>* buf)
+{
+  tbb::blocked_range<size_t> range(0, buf->elements());
+  ParallelMinMax<Ty> mm(buf);
+  tbb::parallel_reduce(range, mm);
+
+  double vol_min{ m_volume.min() };
+  double vol_max{ m_volume.max() };
+
+  if (mm.min_value < vol_min) {
+    m_volume.min(mm.min_value);
+  }
+
+  if (mm.max_value > vol_max) {
+    m_volume.max(mm.max_value);
+  }
+}
+
+
+//////////////////////////////////////////////////////////////////////////////
+template<typename Ty>
+void
+BlockCollection2<Ty>::doBlockMinMax(Buffer<Ty> *buf)
+{
+  ParallelBlockMinMax<Ty> blockMinMax(&m_volume, buf);
+
+  tbb::blocked_range<size_t> range(0, buf->elements());
+  tbb::parallel_reduce(range, blockMinMax);
+
+  // update the blocks with this buffers min max data.
+  MinMaxPairDouble *pairs{ blockMinMax.m_pairs };
+  for(uint64_t i{ 0 }; i < m_volume.lower().total_block_count(); ++i) {
+    FileBlock * b{ m_blocks[i] };
+    if (b->min_val > pairs[i].min) b->min_val = pairs[i].min;
+    if (b->max_val < pairs[i].max) b->max_val = pairs[i].max;
+    b->total_val = pairs[i].total;
+  }
+
 }
 
 
@@ -317,40 +367,22 @@ BlockCollection2<Ty>::computeVolumeStatistics
   Info() << "Computing volume statistics...";
 
   size_t total_bytes_processed{ 0 };
-  double volsum{ 0.0 };
-  Ty vol_min{ std::numeric_limits<Ty>::max() };
-  Ty vol_max{ std::numeric_limits<Ty>::lowest() };
-//  unsigned long long vol_empty_voxels{ 0 };
+//  Ty vol_min{ std::numeric_limits<Ty>::max() };
+//  Ty vol_max{ std::numeric_limits<Ty>::lowest() };
+
 
   while (r.hasNext()) {
     Buffer<Ty>* buf = r.waitNext();
     Dbg() << "CO: Got buffer of " << buf->elements() << " elements.";
 
-    // Sum values in this buffer
-    Dbg() << "CO: Computing sum for this buffer.";
-    volsum += doBufferSum(buf);
-
-    // Compute the min/max values of the volume and a bunch of work on each block.
     Dbg() << "CO: Computing volume stats for this buffer.";
-    tbb::blocked_range<size_t> vol_range(0, buf->elements());
-    ParallelMinMax<Ty> mm(buf);
-    tbb::parallel_reduce(vol_range, mm);
-
-    if (mm.min_value<vol_min) {
-      vol_min = mm.min_value;
-    }
-
-    if (mm.max_value>vol_max) {
-      vol_max = mm.max_value;
-    }
-
-//    vol_empty_voxels += mm.empty_voxels;
-
+    // Sum values in this buffer
+    doBufferSum(buf);
+    // Compute the min/max values of the volume and a bunch of work on each block.
+    doBufferMinMax(buf);
 
     Dbg() << "CO: Computing block stats for this buffer.";
-    tbb::blocked_range<size_t> blocks_range(0, buf->elements());
-    ParallelBlockStats<Ty> ba(buf, &m_volume, m_blocks.data(), isRelevant);
-    tbb::parallel_reduce(blocks_range, ba);
+    doBlockMinMax(buf);
 
     Dbg() << "CO: Returning empty buffer.";
     r.waitReturn(buf);
@@ -364,9 +396,8 @@ BlockCollection2<Ty>::computeVolumeStatistics
   } // while(...
 
   // Save final volume min/max/avg.
-  m_volume.min(vol_min);
-  m_volume.max(vol_max);
-  m_volume.avg( volsum / (m_volume.dims().x*m_volume.dims().y*m_volume.dims().z) );
+  m_volume.avg( m_volume.total() /
+                    (m_volume.dims().x * m_volume.dims().y * m_volume.dims().z) );
 
   // Average the blocks!
   finishBlockAverages();
