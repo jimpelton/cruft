@@ -20,46 +20,44 @@ namespace bd
 template<typename Ty>
 class ParallelMinMax
 {
-private:
-  Ty const * const data;
-
-//  std::function<bool(Ty)> isRelevant;
-
 public:
-  Ty min_value;
-  Ty max_value;
-//  uint64_t empty_voxels;
 
-  void operator()(tbb::blocked_range<size_t> const &r)
+  ////////////////////////////////////////////////////////////////////////////////
+  ParallelMinMax(const Buffer<Ty>* b /*, const std::function<bool(Ty)> &isRelevant*/)
+    : min_value{ std::numeric_limits<Ty>::max() }
+    , max_value{ std::numeric_limits<Ty>::lowest() }
+    , data{ b->ptr() }
+  {
+  }
+
+
+  ////////////////////////////////////////////////////////////////////////////////
+  ParallelMinMax(ParallelMinMax& x, tbb::split)
+    : min_value{ std::numeric_limits<Ty>::max() }
+    , max_value{ std::numeric_limits<Ty>::lowest() }
+    , data{ x.data }
+  {
+  }
+
+
+  ////////////////////////////////////////////////////////////////////////////////
+  void
+  operator()(tbb::blocked_range<size_t> const &r)
   {
     Ty const * const a{ data };
 
     for (size_t i{ r.begin() }; i!=r.end(); ++i) {
-
       Ty val{ a[i] };
       
       if (val<min_value) { min_value = val; }
       if (val>max_value) { max_value = val; }
-
-//      if (isRelevant(val)) {
-//        empty_voxels += 1;
-//      }
-
     }
   }
 
 
-  ParallelMinMax(ParallelMinMax& x, tbb::split)
-      : data{ x.data }
-//      , isRelevant{ x.isRelevant }
-      , min_value{ std::numeric_limits<Ty>::max() }
-      , max_value{ std::numeric_limits<Ty>::lowest() }
-//      , empty_voxels{ 0 }
-  {
-  }
-
-
-  void join(const ParallelMinMax& y)
+  ////////////////////////////////////////////////////////////////////////////////
+  void
+  join(const ParallelMinMax& y)
   {
     // Reduce to a global minimum and maximum for the volume.
     if (y.min_value<min_value) {
@@ -68,22 +66,20 @@ public:
     if (y.max_value>max_value) {
       max_value = y.max_value;
     }
-
 //    empty_voxels += y.empty_voxels;
   }
 
 
-  ParallelMinMax(const Buffer<Ty>* b /*, const std::function<bool(Ty)> &isRelevant*/)
-      : data{ b->ptr() }
-//    , isRelevant{ isRelevant }
-      , min_value{ std::numeric_limits<Ty>::max() }
-      , max_value{ std::numeric_limits<Ty>::lowest() }
-//      , empty_voxels{ 0 }
-  {
-  }
+//  std::function<bool(Ty)> isRelevant;
+  Ty min_value;
+  Ty max_value;
+//  uint64_t empty_voxels;
+
+private:
+  Ty const * const data;
 
 }; // class ParallelMinMax
 
-} // namespace preproc
+} // namespace bd
 
 #endif // ! minmax_h__

@@ -104,7 +104,6 @@ private:
 
   //////////////////////////////////////////////////////////////////////////////
   /// \brief Initializes \c nb blocks so that they fit within the extent of \c vd.
-  //////////////////////////////////////////////////////////////////////////////
   void initBlocks();
 
 
@@ -113,30 +112,36 @@ private:
   ///        appropriate dimensions and update the volume with new block counts.
   /// \note Does not update the voxel dimensions of the volume.
   /// \return The updated block counts.
-  //////////////////////////////////////////////////////////////////////////////
   glm::u64vec3 updateBlockCount();
 
 
   //////////////////////////////////////////////////////////////////////////////
   /// \brief Sum the given buffer in parallel.
-  //////////////////////////////////////////////////////////////////////////////
   double doBufferSum(Buffer<Ty>*);
 
+
+  //////////////////////////////////////////////////////////////////////////////
+  /// \brief Find buffer global min/max.
   void doBufferMinMax(Buffer<Ty>*);
 
-  void doBlockMinMax(Buffer<Ty>*);
 
   //////////////////////////////////////////////////////////////////////////////
-  /// \brief Compute the averages for each block after min/max and sum is
-  //         found.
+  /// \brief Find block local min/max and total values.
+  void doBlockMinMax(Buffer<Ty>*);
+
+
   //////////////////////////////////////////////////////////////////////////////
+  /// \brief Count the relevant voxels for each block in the given buffer.
+  void doBlockVoxelRelavance(Buffer<Ty>*, std::function<bool(Ty)> const &);
+
+  //////////////////////////////////////////////////////////////////////////////
+  /// \brief Compute the averages for each block after min/max and sum is found.
   void finishBlockAverages();
 
 
   //////////////////////////////////////////////////////////////////////////////
   /// \brief Compute and save a few stats from provided raw file.
-  //////////////////////////////////////////////////////////////////////////////
-  void computeVolumeStatistics(BufferedReader<Ty>& r, const std::function<bool(Ty)> &);
+  void computeVolumeStatistics(BufferedReader<Ty> & r, std::function<bool(Ty)> const &);
 
 
   //////////////////////////////////////////////////////////////////////////////
@@ -328,16 +333,33 @@ BlockCollection2<Ty>::doBlockMinMax(Buffer<Ty> *buf)
   tbb::parallel_reduce(range, blockMinMax);
 
   // update the blocks with this buffers min max data.
-  MinMaxPairDouble *pairs{ blockMinMax.m_pairs };
+  MinMaxPairDouble const * pairs{ blockMinMax.pairs() };
   for(uint64_t i{ 0 }; i < m_volume.lower().total_block_count(); ++i) {
     FileBlock * b{ m_blocks[i] };
     if (b->min_val > pairs[i].min) b->min_val = pairs[i].min;
     if (b->max_val < pairs[i].max) b->max_val = pairs[i].max;
-    b->total_val = pairs[i].total;
+    b->total_val += pairs[i].total;
   }
 
 }
 
+///////////////////////////////////////////////////////////////////////////////
+template<typename Ty>
+void
+BlockCollection2<Ty>::doBlockVoxelRelavance(Buffer<Ty> *buf,
+    std::function<bool(Ty)> const &f)
+{
+  ParallelBlockStats<Ty> stats(buf, &m_volume, f);
+
+  tbb::blocked_range<size_t> range(0, buf->elements());
+  tbb::parallel_reduce(range, stats);
+  uint64_t const *empties{ stats.empties() };
+  for(uint64_t i{ 0 }; i < m_volume.lower().total_block_count(); ++i) {
+    FileBlock * b{ m_blocks[i] };
+    b->empty_voxels += empties[i];
+  }
+
+}
 
 //////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
@@ -358,11 +380,8 @@ BlockCollection2<Ty>::finishBlockAverages()
 //////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 void
-BlockCollection2<Ty>::computeVolumeStatistics
-(
-  BufferedReader<Ty>& r,
-  const std::function<bool(Ty)> &isRelevant
-)
+BlockCollection2<Ty>::computeVolumeStatistics(BufferedReader<Ty>& r,
+    std::function<bool(Ty)> const & isRelevant)
 {
   Info() << "Computing volume statistics...";
 
@@ -383,6 +402,8 @@ BlockCollection2<Ty>::computeVolumeStatistics
 
     Dbg() << "CO: Computing block stats for this buffer.";
     doBlockMinMax(buf);
+    doBlockVoxelRelavance(buf, isRelevant);
+
 
     Dbg() << "CO: Returning empty buffer.";
     r.waitReturn(buf);

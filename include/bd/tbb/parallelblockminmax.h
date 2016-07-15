@@ -1,10 +1,3 @@
-//
-// Created by jim on 6/15/16.
-//
-
-
-
-
 #ifndef CRUFTERLY_PARALLELBLOCKMINMAX_H_H
 #define CRUFTERLY_PARALLELBLOCKMINMAX_H_H
 
@@ -35,12 +28,16 @@ public:
 class MinMaxPairDouble : public MinMaxPair<double> {};
 
 /// \brief Compute the min and max values for each block
-///        associated with values in the BlockedRange.
+///        associated with values in the blocked_range.
+///        Also compute the total for each block.
 /// \note  For use with parallel_reduce() in Intel TBB.
 template<typename Ty>
 class ParallelBlockMinMax
 {
 public:
+
+
+  ////////////////////////////////////////////////////////////////////////////////
   ParallelBlockMinMax(Volume const *v, Buffer<Ty> const *b)
     : m_volume{ v }
     , m_data{ b->ptr() }
@@ -49,12 +46,16 @@ public:
   {
   }
 
+
+  ////////////////////////////////////////////////////////////////////////////////
   ~ParallelBlockMinMax()
   {
     if (m_pairs)
       delete [] m_pairs;
   }
 
+
+  ////////////////////////////////////////////////////////////////////////////////
   ParallelBlockMinMax(ParallelBlockMinMax const &o, tbb::split)
     : m_volume{ o.m_volume }
     , m_data{ o.m_data }
@@ -63,7 +64,10 @@ public:
   {
   }
 
-  void join(ParallelBlockMinMax &rhs)
+
+  ////////////////////////////////////////////////////////////////////////////////
+  void
+  join(ParallelBlockMinMax &rhs)
   {
     for(uint64_t i{ 0 }; i < m_volume->lower().total_block_count(); ++i) {
       if (m_pairs[i].min > rhs.m_pairs[i].min)
@@ -77,7 +81,9 @@ public:
   }
 
 
-  void operator()(tbb::blocked_range<size_t> const & r)
+  ////////////////////////////////////////////////////////////////////////////////
+  void
+  operator()(tbb::blocked_range<size_t> const & r)
   {
     const uint64_t
     vdX = m_volume->dims().x,
@@ -104,12 +110,12 @@ public:
       bK = ((vIdx / vdX) / vdY) / bdZ;
 
       if (bI < bcX && bJ < bcY && bK < bcZ) {
-        Ty val = a[i];
+        Ty val{ a[i] };
 
         // Convert the 3D block index into a 1D block index and fetch the
         // block from the array of blocks.
         bIdx = bI + bcX * (bJ + bK * bcY);
-        MinMaxPairDouble *b = &m_pairs[bIdx];
+        MinMaxPairDouble *b{ &m_pairs[bIdx] };
 
         // Accumulate block-specific values.
         if (val < b->min) { b->min = val; }
@@ -119,30 +125,21 @@ public:
     }
   }
 
-//  static void SetGlobalBlocksPtr(FileBlock const * const *ptr, size_t sz)
-//  {
-//    if (GLOBAL_BLOCKS == nullptr) {
-//      GLOBAL_BLOCKS = ptr;
-//      NUM_BLOCKS = sz;
-//    }
-//  }
 
+  ////////////////////////////////////////////////////////////////////////////////
+  MinMaxPairDouble const *
+  pairs() const
+  {
+    return m_pairs;
+  }
+
+
+private:
   Volume const * const m_volume;
   Ty const * const m_data;
   size_t const m_voxelStart;
   MinMaxPairDouble * const m_pairs;
 
-
-
-private:
-  // static FileBlock const * const *GLOBAL_BLOCKS = nullptr;
-
-//  void copyBlocks()
-//  {
-//    for(size_t i{ 0 }; i < NUM_BLOCKS; ++i) {
-//      m_pairs[i] = *GLOBAL_BLOCKS[i];
-//    }
-//  }
 
 }; // class ParallelBlockMinMax
 
