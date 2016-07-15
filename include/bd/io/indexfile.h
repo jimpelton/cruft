@@ -24,14 +24,15 @@ public:
   uint32_t header_length;
 
   // Block metadata
+
   uint64_t numblocks[3];        ///< Num blocks along each coordinate axis.
 
   uint32_t dataType;            ///< Int representing the data type of elements (char, short, etc).
-  uint64_t volume_extent[3];          ///< Dimensions of volume in voxels.
-  uint64_t blocks_extent[3];
-
+  uint64_t volume_extent[3];    ///< Dimensions of volume in voxels.
+  uint64_t blocks_extent[3];    ///< The voxel extent of the blocks (may not equal the volume voxel extent).
+                                ///  Equates to the extent of voxels processed.
   // Volume statistics
-  uint64_t vol_empty_voxels;    ///< Num voxels determined empty (ie, irrelevent voxels).
+//  uint64_t vol_empty_voxels;    ///< Num voxels determined empty (ie, irrelevent voxels).
   double vol_avg;
   double vol_min;
   double vol_max;

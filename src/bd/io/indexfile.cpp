@@ -119,7 +119,7 @@ IndexFile::fromRawFile(const std::string& path, size_t bufsz, DataType type,
   idxfile->m_header.blocks_extent[1] = blkExt.y;
   idxfile->m_header.blocks_extent[2] = blkExt.z;
 
-  idxfile->m_header.vol_empty_voxels = idxfile->m_col->volume().emptyVoxels();
+//  idxfile->m_header.vol_empty_voxels = idxfile->m_col->volume().emptyVoxels();
 
   idxfile->m_header.vol_avg = idxfile->m_col->volume().avg();
   idxfile->m_header.vol_max = idxfile->m_col->volume().max();
@@ -379,7 +379,7 @@ operator<<(std::ostream& os, const bd::IndexFileHeader& h)
       "  \"data_type\": \"" << bd::to_string(IndexFileHeader::getType(h)) << "\",\n"
       "  \"volume_extent\": [" << h.volume_extent[0] << ", " << h.volume_extent[1] << ", " << h.volume_extent[2] << "],\n"
       "  \"blocks_extent\": [" << h.blocks_extent[0] << ", " << h.blocks_extent[1] << ", " << h.blocks_extent[2] << "],\n"
-      "  \"vol_empty_voxels\": " << h.vol_empty_voxels << ",\n"
+//      "  \"vol_empty_voxels\": " << h.vol_empty_voxels << ",\n"
       "  \"vol_min\": " << h.vol_min << ",\n"
       "  \"vol_max\": " << h.vol_max << ",\n"
       "  \"vol_avg\": " << h.vol_avg << "\n"

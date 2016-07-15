@@ -1,5 +1,5 @@
-#ifndef blockaverage_h__
-#define blockaverage_h__
+#ifndef parallelblockstats_h__
+#define parallelblockstats_h__
 
 #include <bd/io/fileblock.h>
 #include <bd/volume/volume.h>
@@ -128,7 +128,7 @@ private:
 
 } // namespace preproc
 
-#endif // ! blockaverage_h__
+#endif // ! parallelblockstats_h__
 
 //  FileBlock* copyBlocks(size_t rBegin, size_t rEnd) const
 //  {

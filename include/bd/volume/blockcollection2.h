@@ -327,9 +327,9 @@ template<typename Ty>
 void
 BlockCollection2<Ty>::doBlockMinMax(Buffer<Ty> *buf)
 {
-  ParallelBlockMinMax<Ty> blockMinMax(&m_volume, buf);
+  ParallelBlockMinMax<Ty> blockMinMax{ &m_volume, buf };
 
-  tbb::blocked_range<size_t> range(0, buf->elements());
+  tbb::blocked_range<size_t> range{ 0, buf->elements() };
   tbb::parallel_reduce(range, blockMinMax);
 
   // update the blocks with this buffers min max data.
@@ -349,9 +349,9 @@ void
 BlockCollection2<Ty>::doBlockVoxelRelavance(Buffer<Ty> *buf,
     std::function<bool(Ty)> const &f)
 {
-  ParallelBlockStats<Ty> stats(buf, &m_volume, f);
+  ParallelBlockStats<Ty> stats{ buf, &m_volume, f };
 
-  tbb::blocked_range<size_t> range(0, buf->elements());
+  tbb::blocked_range<size_t> range{ 0, buf->elements() };
   tbb::parallel_reduce(range, stats);
   uint64_t const *empties{ stats.empties() };
   for(uint64_t i{ 0 }; i < m_volume.lower().total_block_count(); ++i) {
@@ -366,14 +366,14 @@ template<typename Ty>
 void
 BlockCollection2<Ty>::finishBlockAverages()
 {
-  uint64_t volume_empty_voxels = 0;
+//  uint64_t volume_empty_voxels{ 0 };
   for (FileBlock* b : m_blocks) {
     uint64_t total_vox{ b->voxel_dims[0]*b->voxel_dims[1]*b->voxel_dims[2] };
     b->avg_val = b->total_val / total_vox;
-    volume_empty_voxels += b->empty_voxels;
+//    volume_empty_voxels += b->empty_voxels;
   }
 
-  m_volume.emptyVoxels(volume_empty_voxels);
+//  m_volume.emptyVoxels(volume_empty_voxels);
 }
 
 
@@ -465,6 +465,7 @@ BlockCollection2<Ty>::createFromRawFile
   initBlocks();
 
   computeVolumeStatistics(r, isVoxelEmpty);
+
 
   Info() << m_blocks.size()-m_nonEmptyBlocks.size() << "/" << m_blocks.size() <<
       " blocks marked empty.";

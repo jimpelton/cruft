@@ -37,6 +37,9 @@ public:
   void block_count(const glm::u64vec3 &);
   uint64_t total_block_count() const;
 
+  //////////////////////////////////////////////////////////////////////////////
+  /// \brief The voxel extent of this Region.
+  /// \note  IOW, this is the number of blocks times the size of each block.
   glm::u64vec3 extent() const;
 
   //////////////////////////////////////////////////////////////////////////////
@@ -63,7 +66,7 @@ public:
   Volume(const glm::u64vec3 &volDims, const glm::u64vec3 &numBlocks)
     : m_lowerRegion{ volDims / numBlocks, numBlocks }
     , m_volDims{ volDims }
-    , m_volEmptyVoxels{  }
+//    , m_volEmptyVoxels{  }
     , m_volMax{ std::numeric_limits<double>::lowest() }
     , m_volMin{ std::numeric_limits<double>::max() }
     , m_volAvg{ 0.0 }
@@ -89,8 +92,8 @@ public:
   double total() const;
   void total(double);
 
-  uint64_t emptyVoxels() const;
-  void emptyVoxels(uint64_t);
+//  uint64_t emptyVoxels() const;
+//  void emptyVoxels(uint64_t);
 
   Region const & lower() const;
   Region & lower();
@@ -110,7 +113,7 @@ private:
   //Region m_upperRegion;
 
   glm::u64vec3 m_volDims;    ///< Volume dimensions in voxels.
-  uint64_t m_volEmptyVoxels; ///< Number of non-relevant voxels.
+//  uint64_t m_volEmptyVoxels; ///< Number of non-relevant voxels.
   double m_volMax;           ///< Max value found in volume.
   double m_volMin;           ///< Min value found in volume.
   double m_volAvg;           ///< Avg value found in volume.

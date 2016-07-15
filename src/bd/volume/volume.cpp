@@ -73,6 +73,7 @@ Region::vox_start(const glm::u64vec3& m)
 }
 
 
+///////////////////////////////////////////////////////////////////////////////
 glm::u64vec3 Region::extent() const
 {
   return m_blockCount * m_blockDims;  // component-wise multiply
@@ -157,17 +158,17 @@ void Volume::total(double t)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-void Volume::emptyVoxels(uint64_t empty)
-{
-  m_volEmptyVoxels = empty;
-}
+//void Volume::emptyVoxels(uint64_t empty)
+//{
+//  m_volEmptyVoxels = empty;
+//}
 
 
 ///////////////////////////////////////////////////////////////////////////////
-uint64_t Volume::emptyVoxels() const
-{
-  return m_volEmptyVoxels;
-}
+//uint64_t Volume::emptyVoxels() const
+//{
+//  return m_volEmptyVoxels;
+//}
 
 
 ///////////////////////////////////////////////////////////////////////////////
