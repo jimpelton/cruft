@@ -15,138 +15,152 @@ BlockCollection::BlockCollection()
 {
 }
 
+
 BlockCollection::~BlockCollection()
 {
 }
 
+
 void
-BlockCollection::initBlocksFromIndexFile(const std::string &fileName)
+BlockCollection::initBlocksFromIndexFile(std::string const & fileName)
 {
   m_indexFile = bd::IndexFile::fromBinaryIndexFile(fileName);
-  const bd::IndexFileHeader &header = m_indexFile->getHeader();
-
-
+  const bd::IndexFileHeader& header = m_indexFile->getHeader();
 
   Dbg() << "Initializing blocks from index file: " << fileName;
   initBlocksFromFileBlocks(m_indexFile->blocks(),
-                           { header.numblocks[0],
-                             header.numblocks[1],
-                             header.numblocks[2] });
+      { header.numblocks[0],
+          header.numblocks[1],
+          header.numblocks[2] });
 
 //  Dbg() << "Initializing non-empty block textures";
 //  initBlockTextures(fileName);
 }
 
+
 void
-BlockCollection::initBlocksFromFileBlocks(const std::vector< FileBlock * > fileBlocks,
-                                          glm::u64vec3 nb)
+BlockCollection::initBlocksFromFileBlocks
+(
+  std::vector< FileBlock * > const fileBlocks,
+  glm::u64vec3 nb
+)
 {
   auto idx = 0ull;
-  for(auto k = 0ull; k < nb.z; ++k)
+  for (auto k = 0ull; k < nb.z; ++k)
     for (auto j = 0ull; j < nb.y; ++j)
       for (auto i = 0ull; i < nb.x; ++i) {
         std::cout << "\rCreating block " << idx;
-        FileBlock *file_block{ fileBlocks[idx] };
-        Block *block{ new Block{{ i,j,k }, { 1.0f/nb.x, 1.0f/nb.y, 1.0f/nb.z }, *file_block }};
-        m_blocks.push_back( block );
+        FileBlock * file_block{ fileBlocks[idx] };
+        Block * block{ new Block{
+            { i, j, k }, { 1.0f / nb.x, 1.0f / nb.y, 1.0f / nb.z },
+            *file_block } };
+
+        m_blocks.push_back(block);
 
         idx++;
       }
 }
 
+
 void
-BlockCollection::filterBlocks(std::function<bool(const Block*)> isEmpty)
+BlockCollection::filterBlocks(std::function< bool(Block const *) > isEmpty)
 {
-  for(Block* b : m_blocks) {
-    if (! isEmpty(b)){
+  for (Block * b : m_blocks) {
+    if (!isEmpty(b)) {
       m_nonEmptyBlocks.push_back(b);
     }
   }
 }
 
+
 bool
-BlockCollection::initBlockTextures(const std::string &file)
+BlockCollection::initBlockTextures(std::string const & file)
 {
   bool rval = false;
   DataType type{ IndexFileHeader::getType(m_indexFile->getHeader()) };
-  switch(type){
-    case DataType::UnsignedCharacter:
-      do_initBlockTextures<unsigned char>(file);
-      break;
-    case DataType::UnsignedShort:
-      do_initBlockTextures<unsigned short>(file);
-      break;
-    case DataType::Float:
-    default:
-      do_initBlockTextures<float>(file);
-      break;
+  switch (type) {
+  case DataType::UnsignedCharacter:
+    do_initBlockTextures< unsigned char >(file);
+    break;
+  case DataType::UnsignedShort:
+    do_initBlockTextures< unsigned short >(file);
+    break;
+  case DataType::Float:
+  default:
+    do_initBlockTextures< float >(file);
+    break;
   }
 
   return rval;
 
 }
 
-template<typename Ty>
+
+template< typename Ty >
 bool
-BlockCollection::do_initBlockTextures(const std::string &file)
+BlockCollection::do_initBlockTextures
+(
+  std::string const &file
+)
 {
   std::ifstream is(file, std::ios::binary);
-  if (! is.is_open()) {
+  if (!is.is_open()) {
     Err() << "Could not open rawfile: " << file << ".";
     return false;
   }
 
+  //TODO: use Region from Volume class to get block voxel extents.
+  size_t buf_size{
+      m_blocks[0]->voxel_extent().x *
+      m_blocks[0]->voxel_extent().y *
+      m_blocks[0]->voxel_extent().z };
 
-  size_t buf_size{ m_blocks[0]->voxel_extent().x *
-                   m_blocks[0]->voxel_extent().y *
-                   m_blocks[0]->voxel_extent().z};
-
-  Ty *buf{ new Ty[ buf_size ] };
-  float *tex{ new float[ buf_size ] };
+  Ty *buf{ new Ty[buf_size] };
+  float *tex{ new float[buf_size] };
 
   std::cout << std::endl;
   int i{ 0 };
-  for(auto *b : m_nonEmptyBlocks) {
+  for (auto *b : m_nonEmptyBlocks) {
     std::cout << "\rInitializing texture block " << ++i << "/" << m_nonEmptyBlocks.size();
-    fillBlockData<Ty>(*b, is, buf);
+    fillBlockData< Ty >(*b, is, buf);
     for (size_t idx{ 0 }; idx < buf_size; ++idx) {
       tex[idx] = buf[idx] / static_cast<float>(m_indexFile->getHeader().vol_max);
     }
 
     b->texture().genGLTex3d(bd::Texture::Format::RED,
-                            bd::Texture::Format::RED,
-                            b->voxel_extent().x,
-                            b->voxel_extent().y,
-                            b->voxel_extent().z,
-                            //IndexFileHeader::getType(m_indexFile->getHeader()),
-                            DataType::Float,
-                            tex);
+        bd::Texture::Format::RED,
+        b->voxel_extent().x,
+        b->voxel_extent().y,
+        b->voxel_extent().z,
+        //IndexFileHeader::getType(m_indexFile->getHeader()),
+        DataType::Float,
+        tex);
   }
   std::cout << " ...done." << std::endl;
 
-  delete [] buf;
-  delete [] tex;
+  delete[] buf;
+  delete[] tex;
 
   return true;
 }
 
 
-template<typename Ty>
+template< typename Ty >
 void
 BlockCollection::fillBlockData
 (
-  const Block& b,
+  Block const& b,
   std::istream& infile,
-  Ty* blockBuffer
+  Ty * blockBuffer
 ) const
 {
 //  const glm::u64vec3 &nb{ m_volume.lower().block_count() };
 //  const glm::u64vec3 &bd{ m_volume.lower().block_dims() };
 //  const glm::u64vec3 &vd{ m_volume.dims() };
 
-  const glm::u64vec3 &bd{ b.voxel_extent() };
-  const glm::u64vec2 &vd{ m_indexFile->getHeader().volume_extent[0],
-                          m_indexFile->getHeader().volume_extent[1] };
+  glm::u64vec3 const& bd{ b.voxel_extent() };
+  glm::u64vec2 const& vd{ m_indexFile->getHeader().volume_extent[0],
+      m_indexFile->getHeader().volume_extent[1] };
 
   // start element = block index w/in volume * block size
   const glm::u64vec3 start{ b.ijk() * bd };
@@ -157,32 +171,32 @@ BlockCollection::fillBlockData
 
   // Loop through rows and slabs of volume reading rows of voxels into memory.
   const size_t blockRowLength{ bd.x };
-  for (auto slab = start.z; slab<end.z; ++slab) {
-    for (auto row = start.y; row<end.y; ++row) {
+  for (auto slab = start.z; slab < end.z; ++slab) {
+    for (auto row = start.y; row < end.y; ++row) {
 
       // seek to start of row
       infile.seekg(offset, infile.beg);
 
       // read the bytes of current row
-      infile.read(reinterpret_cast<char*>(blockBuffer), blockRowLength*sizeof(Ty));
+      infile.read(reinterpret_cast<char *>(blockBuffer), blockRowLength * sizeof(Ty));
       blockBuffer += blockRowLength;
 
       // offset of next row
-      offset = bd::to1D(start.x, row+1, slab, vd.x, vd.y);
+      offset = bd::to1D(start.x, row + 1, slab, vd.x, vd.y);
       offset *= sizeof(Ty);
     }
   }
 }
 
 
-const std::vector<Block*>&
+std::vector<Block *> const &
 BlockCollection::blocks()
 {
   return m_blocks;
 }
 
 
-const std::vector<Block *>&
+std::vector<Block *> const &
 BlockCollection::nonEmptyBlocks()
 {
   return m_nonEmptyBlocks;
