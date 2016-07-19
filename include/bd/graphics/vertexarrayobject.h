@@ -96,7 +96,7 @@ public:
   ///
   /// \returns The gl id of the index buffer created.
   ///////////////////////////////////////////////////////////////////////////////
-  unsigned int setIndexBuffer(unsigned short *indices, unsigned int length);
+  unsigned int setIndexBuffer(unsigned short *indices, unsigned int length, Usage u);
 
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Add an index buffer to be bound with this VAO.
@@ -106,7 +106,7 @@ public:
   ///
   /// \returns The gl id of the index buffer created.
   ///////////////////////////////////////////////////////////////////////////////
-  unsigned int setIndexBuffer(std::vector<unsigned short> const &indices);
+  unsigned int setIndexBuffer(std::vector<unsigned short> const &indices, Usage u);
 
   //////////////////////////////////////////////////////////////////////////
   /// \brief Number of elements in index array.
@@ -135,7 +135,7 @@ private:
                        unsigned int attr_idx, Usage usage);
 
   // index buffer object helper
-  unsigned int gen_ibo(unsigned short const *indices, unsigned int length);
+  unsigned int gen_ibo(unsigned short const *indices, unsigned int length, Usage usage);
 
 
   ///////////////////////////////////////////////////////////////////////////////

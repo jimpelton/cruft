@@ -25,13 +25,13 @@ void
 BlockCollection::initBlocksFromIndexFile(std::string const & fileName)
 {
   m_indexFile = bd::IndexFile::fromBinaryIndexFile(fileName);
-  const bd::IndexFileHeader& header = m_indexFile->getHeader();
+  bd::IndexFileHeader const &header = m_indexFile->getHeader();
 
   Dbg() << "Initializing blocks from index file: " << fileName;
   initBlocksFromFileBlocks(m_indexFile->blocks(),
-      { header.numblocks[0],
-          header.numblocks[1],
-          header.numblocks[2] });
+                           { header.numblocks[0],
+                             header.numblocks[1],
+                             header.numblocks[2] });
 
 //  Dbg() << "Initializing non-empty block textures";
 //  initBlockTextures(fileName);
@@ -50,10 +50,10 @@ BlockCollection::initBlocksFromFileBlocks
     for (auto j = 0ull; j < nb.y; ++j)
       for (auto i = 0ull; i < nb.x; ++i) {
         std::cout << "\rCreating block " << idx;
-        FileBlock * file_block{ fileBlocks[idx] };
-        Block * block{ new Block{
-            { i, j, k }, { 1.0f / nb.x, 1.0f / nb.y, 1.0f / nb.z },
-            *file_block } };
+        FileBlock *file_block{ fileBlocks[idx] };
+        Block *block{ new Block{{ i, j, k },
+                                { 1.0f / nb.x, 1.0f / nb.y, 1.0f / nb.z },
+                                *file_block }};
 
         m_blocks.push_back(block);
 
@@ -65,7 +65,7 @@ BlockCollection::initBlocksFromFileBlocks
 void
 BlockCollection::filterBlocks(std::function< bool(Block const *) > isEmpty)
 {
-  for (Block * b : m_blocks) {
+  for (Block *b : m_blocks) {
     if (!isEmpty(b)) {
       m_nonEmptyBlocks.push_back(b);
     }

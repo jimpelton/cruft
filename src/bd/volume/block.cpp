@@ -24,8 +24,8 @@ Block::Block(const glm::u64vec3& ijk, const glm::vec3 &dims, const FileBlock &fb
 {
   glm::vec3 wld_pos{ fb.world_oigin[0], fb.world_oigin[1], fb.world_oigin[2] };
 
-  glm::mat4 s = glm::scale(glm::mat4{ 1.0f }, dims);
-  glm::mat4 t = glm::translate(glm::mat4{ 1.0f }, wld_pos);
+  glm::mat4 s{ glm::scale(glm::mat4{ 1.0f }, dims) };
+  glm::mat4 t{ glm::translate(glm::mat4{ 1.0f }, wld_pos) };
 
   m_transform = t * s;
 
@@ -37,11 +37,14 @@ Block::~Block()
 {
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
 const FileBlock&
 Block::fileBlock() const
 {
   return m_fb;
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 const glm::u64vec3&
@@ -66,6 +69,8 @@ Block::empty() const
   return m_empty;
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
 void
 Block::empty(bool b)
 {
@@ -73,6 +78,7 @@ Block::empty(bool b)
 }
 
 
+///////////////////////////////////////////////////////////////////////////////
 glm::vec3
 Block::origin() const
 {

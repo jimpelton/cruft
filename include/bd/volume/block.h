@@ -9,13 +9,11 @@
 
 #include <string>
 #include <vector>
-
 #include <algorithm>
 
 namespace bd
 {
 
-class ShaderProgram;
 
 
 //////////////////////////////////////////////////////////////////////////

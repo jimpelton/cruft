@@ -18,27 +18,16 @@ public:
   void initBlocksFromIndexFile(const std::string &fileName);
 
   /////////////////////////////////////////////////////////////////////////////////
-  /// \brief Initializes \c nb blocks so that they fit within the extent of \c vd.
-  /// \param nb[in]      Number of blocks in x,y,z directions.
-  /// \param vd[in]      Volume dimensions
+  /// \brief Initializes \c blocks from the provided vector of FileBlock.
+  /// \note Blocks are sized to fit it within the world-extent of the volume data.
+  /// \param fileBlocks[in] The FileBlocks generated from the IndexFile.
+  /// \param numBlocks[in]  The number of blocks to generate in each dimension.
   /// \param blocks[out] Vector that new blocks are pushed onto.
-
   void initBlocksFromFileBlocks(const std::vector<FileBlock*> fileBlocks, glm::u64vec3 numblocks);
 
   void filterBlocks(std::function<bool(const Block*)> isEmpty);
 
   bool initBlockTextures(const std::string &rawFile);
-
-  /////////////////////////////////////////////////////////////////////////////////
-  /// \brief Marks blocks as empty and uploads GL textures if average is outside of [tmin..tmax].
-  /// \param data[in] Volume data set
-  /// \param tmin[in] min average block value to filter against.
-  /// \param tmax[in] max average block value to filter against.
-  /// \param sampler[in] The sampler location of the block texture sampler.
-  //TODO: filterblocks takes Functor for thresholding.
-//  void filterBlocks(const float* data, /*unsigned int sampler,*/
-//                    float tmin = 0.0f, float tmax = 1.0f);
-
 
   const std::vector<Block *>& blocks();
 

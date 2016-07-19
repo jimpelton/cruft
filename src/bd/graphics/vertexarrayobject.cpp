@@ -105,7 +105,7 @@ VertexArrayObject::addVbo(const std::vector<glm::vec4> &verts,
 
 ///////////////////////////////////////////////////////////////////////////////
 unsigned int
-VertexArrayObject::setIndexBuffer(const std::vector<unsigned short> &indices)
+VertexArrayObject::setIndexBuffer(const std::vector<unsigned short> &indices, Usage u)
 {
   unsigned int iboId{0};
 
@@ -113,7 +113,7 @@ VertexArrayObject::setIndexBuffer(const std::vector<unsigned short> &indices)
     return m_idxBufId;
   }
 
-  iboId = gen_ibo(indices.data(), indices.size());
+  iboId = gen_ibo(indices.data(), indices.size(), u);
 
   return iboId;
 }
@@ -121,7 +121,8 @@ VertexArrayObject::setIndexBuffer(const std::vector<unsigned short> &indices)
 ///////////////////////////////////////////////////////////////////////////////
 unsigned int
 VertexArrayObject::setIndexBuffer(unsigned short *indices,
-                                  unsigned int length)
+                                  unsigned int length,
+                                  Usage u)
 {
   unsigned int iboId{0};
 
@@ -129,7 +130,7 @@ VertexArrayObject::setIndexBuffer(unsigned short *indices,
     return m_idxBufId;
   }
 
-  iboId = gen_ibo(indices, length);
+  iboId = gen_ibo(indices, length, u);
 
   return iboId;
 }
@@ -215,7 +216,8 @@ VertexArrayObject::gen_vbo(const float *verts,
 ///////////////////////////////////////////////////////////////////////////////
 unsigned int
 VertexArrayObject::gen_ibo(unsigned short const *indices,
-                           unsigned int length)
+                           unsigned int length,
+                           Usage usage)
 {
   unsigned int ibo{0};
 
@@ -227,7 +229,7 @@ VertexArrayObject::gen_ibo(unsigned short const *indices,
   gl_check(glBufferData(GL_ELEMENT_ARRAY_BUFFER,
                         length * sizeof(unsigned short),
                         indices,
-                        GL_STATIC_DRAW));
+                        gl_usage[ordinal<Usage>(usage)] ));
 
   unbind();
 
