@@ -32,20 +32,22 @@ public:
     : m_data{ b->ptr() }
     , m_volume{ v }
     , m_voxelStart{ b->index() }
-    , m_empties{ new uint64_t[v->lower().total_block_count()] }
+    , m_empties{ nullptr }
     , isRelevant{ isEmpty }
   {
-    memset(m_empties, 0, v->lower().total_block_count()*sizeof(uint64_t));
+    m_empties = new uint64_t[m_volume->lower().total_block_count()]();
+//    memset(m_empties, 0, v->lower().total_block_count()*sizeof(uint64_t));
   }
 
   ParallelBlockStats(ParallelBlockStats<Ty> &o, tbb::split)
       : m_data{ o.m_data }
       , m_volume{ o.m_volume }
       , m_voxelStart{ o.m_voxelStart }
-      , m_empties{ new uint64_t[o.m_volume->lower().total_block_count()] }
+      , m_empties{ nullptr }
       , isRelevant{ o.isRelevant }
   {
-    memset(m_empties, 0, o.m_volume->lower().total_block_count()*sizeof(uint64_t));
+    m_empties = new uint64_t[o.m_volume->lower().total_block_count()]();
+//    memset(m_empties, 0, o.m_volume->lower().total_block_count()*sizeof(uint64_t));
   }
 
   ~ParallelBlockStats()
@@ -111,7 +113,7 @@ private:
   Ty const * const m_data;
   Volume const * const m_volume;
   size_t const m_voxelStart;
-  uint64_t * const m_empties;
+  uint64_t * m_empties;
 
   std::function<bool(Ty)> isRelevant; //< Is the element a relevant voxel or not.
 

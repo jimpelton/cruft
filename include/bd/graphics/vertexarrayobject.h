@@ -14,6 +14,14 @@ class VertexArrayObject
 {
 public:
 
+  /// \brief Buffer usage specifiers.
+  enum class Usage: int
+  {
+    Stream_Draw,
+    Static_Draw,
+    Dynamic_Draw
+  };
+
   ///////////////////////////////////////////////////////////////////////////////
   // Ctor/Dtor
   ///////////////////////////////////////////////////////////////////////////////
@@ -36,7 +44,6 @@ public:
   ///////////////////////////////////////////////////////////////////////////////
   unsigned int create();
 
-
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Add a vbo with \c length vertices supplied in \c verts
   ///
@@ -44,32 +51,11 @@ public:
   ///
   /// \returns The gl id of the vertex buffer object created.
   ///////////////////////////////////////////////////////////////////////////////
-  unsigned int addVbo(float const* verts, size_t length,
-                      unsigned int elements_per_vertex, unsigned int attr_idx);
-
-
-  ///////////////////////////////////////////////////////////////////////////////
-  /// \brief Add a vbo with the vertices in \c verts
-  ///
-  /// \note Subsequent calls to addIndexedVbo() return the previous gl id.
-  ///
-  /// \returns The gl id of the vertex buffer object created.
-  ///////////////////////////////////////////////////////////////////////////////
-  unsigned int addVbo(const std::vector<float>& verts,
+  unsigned int addVbo(float const *verts,
+                      size_t length,
                       unsigned int elements_per_vertex,
-                      unsigned int attr_idx);
-
-
-  ///////////////////////////////////////////////////////////////////////////////
-  /// \brief Add a vbo with the vertices in \c verts
-  ///
-  /// \note Subsequent calls to addIndexedVbo() return the previous gl id.
-  ///
-  /// \returns The gl id of the vertex buffer object created.
-  ///////////////////////////////////////////////////////////////////////////////
-  unsigned int addVbo(const std::vector<glm::vec3>& verts,
-                      unsigned int attr_idx);
-
+                      unsigned int attr_idx,
+                      Usage usage);
 
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Add a vbo with the vertices in \c verts
@@ -78,9 +64,29 @@ public:
   ///
   /// \returns The gl id of the vertex buffer object created.
   ///////////////////////////////////////////////////////////////////////////////
-  unsigned int addVbo(const std::vector<glm::vec4>& verts,
-                      unsigned int attr_idx);
+  unsigned int addVbo(const std::vector<float> &verts,
+                      unsigned int elements_per_vertex,
+                      unsigned int attr_idx, Usage usage);
 
+  ///////////////////////////////////////////////////////////////////////////////
+  /// \brief Add a vbo with the vertices in \c verts
+  ///
+  /// \note Subsequent calls to addIndexedVbo() return the previous gl id.
+  ///
+  /// \returns The gl id of the vertex buffer object created.
+  ///////////////////////////////////////////////////////////////////////////////
+  unsigned int addVbo(const std::vector<glm::vec3> &verts,
+                      unsigned int attr_idx, Usage usage);
+
+  ///////////////////////////////////////////////////////////////////////////////
+  /// \brief Add a vbo with the vertices in \c verts
+  ///
+  /// \note Subsequent calls to addIndexedVbo() return the previous gl id.
+  ///
+  /// \returns The gl id of the vertex buffer object created.
+  ///////////////////////////////////////////////////////////////////////////////
+  unsigned int addVbo(std::vector<glm::vec4> const &verts,
+                      unsigned int attr_idx, Usage usage);
 
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Add an index buffer to be bound with this VAO with \c length indices.
@@ -90,7 +96,7 @@ public:
   ///
   /// \returns The gl id of the index buffer created.
   ///////////////////////////////////////////////////////////////////////////////
-  unsigned int setIndexBuffer(unsigned short* indices, unsigned int length);
+  unsigned int setIndexBuffer(unsigned short *indices, unsigned int length);
 
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Add an index buffer to be bound with this VAO.
@@ -100,7 +106,7 @@ public:
   ///
   /// \returns The gl id of the index buffer created.
   ///////////////////////////////////////////////////////////////////////////////
-  unsigned int setIndexBuffer(const std::vector<unsigned short>& indices);
+  unsigned int setIndexBuffer(std::vector<unsigned short> const &indices);
 
   //////////////////////////////////////////////////////////////////////////
   /// \brief Number of elements in index array.
@@ -123,12 +129,13 @@ private:
   ///////////////////////////////////////////////////////////////////////////////
 
   // vertex buffer object helper
-  unsigned int gen_vbo(const float* verts, size_t length,
+  unsigned int gen_vbo(float const *verts,
+                       size_t length,
                        unsigned int elements_per_vertex,
-                       unsigned int attr_idx);
+                       unsigned int attr_idx, Usage usage);
 
   // index buffer object helper
-  unsigned int gen_ibo(const unsigned short* indices, unsigned int length);
+  unsigned int gen_ibo(unsigned short const *indices, unsigned int length);
 
 
   ///////////////////////////////////////////////////////////////////////////////

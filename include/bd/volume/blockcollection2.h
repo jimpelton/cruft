@@ -8,6 +8,7 @@
 #include <bd/util/util.h>
 #include <bd/tbb/parallelminmax.h>
 #include <bd/tbb/parallelblockstats.h>
+#include <bd/tbb/parallelblockminmax.h>
 #include <bd/volume/volume.h>
 #include <bd/volume/valuerangefilter.h>
 
@@ -25,7 +26,6 @@
 #include <stdexcept>
 #include <cassert>
 #include <iterator>
-#include <bd/tbb/parallelblockminmax.h>
 
 
 namespace bd
