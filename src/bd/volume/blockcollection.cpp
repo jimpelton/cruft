@@ -190,6 +190,12 @@ BlockCollection::fillBlockData
 
 
 std::vector<Block *> const &
+BlockCollection::blocks() const
+{
+  return m_blocks;
+}
+
+std::vector<Block *>  &
 BlockCollection::blocks()
 {
   return m_blocks;
@@ -197,6 +203,12 @@ BlockCollection::blocks()
 
 
 std::vector<Block *> const &
+BlockCollection::nonEmptyBlocks() const
+{
+  return m_nonEmptyBlocks;
+}
+
+std::vector<Block *> &
 BlockCollection::nonEmptyBlocks()
 {
   return m_nonEmptyBlocks;

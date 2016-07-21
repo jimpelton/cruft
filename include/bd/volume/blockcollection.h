@@ -29,9 +29,11 @@ public:
 
   bool initBlockTextures(const std::string &rawFile);
 
-  const std::vector<Block *>& blocks();
+  const std::vector<Block *>& blocks() const;
+  std::vector<Block *>& blocks();
 
-  const std::vector<Block *>& nonEmptyBlocks();
+  const std::vector<Block *>& nonEmptyBlocks() const;
+  std::vector<Block *>& nonEmptyBlocks();
 
   const IndexFile& indexFile() const { return *m_indexFile; }
 

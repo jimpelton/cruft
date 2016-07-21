@@ -88,24 +88,20 @@ public:
   unsigned int addVbo(std::vector<glm::vec4> const &verts,
                       unsigned int attr_idx, Usage usage);
 
-  ///////////////////////////////////////////////////////////////////////////////
   /// \brief Add an index buffer to be bound with this VAO with \c length indices.
   ///
   /// \note Subsequent calls to setIndexBuffer() have no effect and return the
   ///  id of the index buffer.
   ///
   /// \returns The gl id of the index buffer created.
-  ///////////////////////////////////////////////////////////////////////////////
   unsigned int setIndexBuffer(unsigned short *indices, unsigned int length, Usage u);
 
-  ///////////////////////////////////////////////////////////////////////////////
   /// \brief Add an index buffer to be bound with this VAO.
   ///
   /// \note Subsequent calls to setIndexBuffer() have no effect and return the
   ///  id of the index buffer.
   ///
   /// \returns The gl id of the index buffer created.
-  ///////////////////////////////////////////////////////////////////////////////
   unsigned int setIndexBuffer(std::vector<unsigned short> const &indices, Usage u);
 
   //////////////////////////////////////////////////////////////////////////
