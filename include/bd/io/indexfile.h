@@ -144,14 +144,12 @@ private:
 
 };
 
-///////////////////////////////////////////////////////////////////////////////
 /// \brief Generate an index file from the provided BlockCollection2. The
 ///        IndexFile can be written to disk in either ASCII or binary format.
 class IndexFile
 {
 public:
 
-  ///////////////////////////////////////////////////////////////////////////////
   /// \brief Create IndexFile from an existing raw file.
   /// \param path The path to the raw file.
   /// \param type The data type in the file (\sa bd::DataType)
@@ -167,7 +165,6 @@ public:
                                 const float minmax[2]);
 
 
-  ///////////////////////////////////////////////////////////////////////////////
   /// \brief Create IndexFile from an existing binary index file.
   static IndexFile* fromBinaryIndexFile(const std::string& path);
 
@@ -178,27 +175,22 @@ public:
   ~IndexFile();
 
 
-  ///////////////////////////////////////////////////////////////////////////////
   /// \brief Write binary index file to ostream \c os.
-  void writeBinaryIndexFile(std::ostream& os);
+  void writeBinaryIndexFile(std::ostream& os) const;
 
 
-  ///////////////////////////////////////////////////////////////////////////////
   /// \brief Write binary index file to the file at \c outpath.
-  void writeBinaryIndexFile(const std::string& outpath);
+  void writeBinaryIndexFile(const std::string& outpath) const;
 
 
-  ///////////////////////////////////////////////////////////////////////////////
   /// \brief Write ascii index file to ostream \c os.
-  void writeAsciiIndexFile(std::ostream& os);
+  void writeAsciiIndexFile(std::ostream& os) const;
 
 
-  ///////////////////////////////////////////////////////////////////////////////
   /// \brief Write ascii index file to the file at \c outpath.
-  void writeAsciiIndexFile(const std::string& outpath);
+  void writeAsciiIndexFile(const std::string& outpath) const;
 
 
-  ///////////////////////////////////////////////////////////////////////////////
   /// \brief Get the IndexFileHeader for the index file.
   const IndexFileHeader& getHeader() const;
 

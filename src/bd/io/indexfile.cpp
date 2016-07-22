@@ -225,7 +225,7 @@ IndexFile::make_wrapper
 
 ///////////////////////////////////////////////////////////////////////////////
 void
-IndexFile::writeBinaryIndexFile(std::ostream& os)
+IndexFile::writeBinaryIndexFile(std::ostream& os) const
 {
   // write header to stream.
   IndexFileHeader::writeToStream(os, m_header);
@@ -238,7 +238,7 @@ IndexFile::writeBinaryIndexFile(std::ostream& os)
 
 ///////////////////////////////////////////////////////////////////////////////
 void
-IndexFile::writeBinaryIndexFile(const std::string& outpath)
+IndexFile::writeBinaryIndexFile(const std::string& outpath) const
 {
   std::ofstream os;
   os.open(outpath, std::ios::binary);
@@ -256,7 +256,7 @@ IndexFile::writeBinaryIndexFile(const std::string& outpath)
 
 ///////////////////////////////////////////////////////////////////////////////
 void
-IndexFile::writeAsciiIndexFile(std::ostream& os)
+IndexFile::writeAsciiIndexFile(std::ostream& os) const
 {
   // os << "\"index\": {\n";
   //
@@ -277,7 +277,7 @@ IndexFile::writeAsciiIndexFile(std::ostream& os)
 
 ///////////////////////////////////////////////////////////////////////////////
 void
-IndexFile::writeAsciiIndexFile(const std::string& outpath)
+IndexFile::writeAsciiIndexFile(const std::string& outpath) const
 {
   std::ofstream os;
   os.open(outpath);
