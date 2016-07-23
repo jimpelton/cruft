@@ -69,12 +69,12 @@ IndexFileHeader::getTypeInt(DataType ty)
 }
 
 
-IndexFile*
+std::unique_ptr<IndexFile>
 IndexFile::fromRawFile(const std::string& path, size_t bufsz, DataType type,
-    const uint64_t num_vox[3], const uint64_t numblocks[3], const float minmax[2])
+    const uint64_t* num_vox, const uint64_t* numblocks, const float* minmax)
 {
 
-  IndexFile *idxfile{ new IndexFile() };
+  std::unique_ptr<IndexFile>idxfile{ new IndexFile() };
   idxfile->m_fileName = path;
 
   // make blockcollection2 object.
@@ -131,15 +131,15 @@ IndexFile::fromRawFile(const std::string& path, size_t bufsz, DataType type,
 
 
 ///////////////////////////////////////////////////////////////////////////////
-IndexFile*
+std::unique_ptr<IndexFile>
 IndexFile::fromBinaryIndexFile(const std::string& path)
 {
   //std::shared_ptr<IndexFile> idxfile{ std::make_shared<IndexFile>() };
-  IndexFile *idxfile{ new IndexFile() };
+  std::unique_ptr<IndexFile> idxfile{ new IndexFile() };
   idxfile->m_fileName = path;
   bool success = idxfile->readBinaryIndexFile();
   if (! success){
-    delete idxfile;
+    //delete idxfile;
     return nullptr;
   }
 

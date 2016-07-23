@@ -15,7 +15,8 @@ public:
   BlockCollection();
   ~BlockCollection();
 
-  void initBlocksFromIndexFile(const std::string &fileName);
+//  void initBlocksFromIndexFile(const std::string &fileName);
+  void initBlocksFromIndexFile(std::unique_ptr<bd::IndexFile> index);
 
   /////////////////////////////////////////////////////////////////////////////////
   /// \brief Initializes \c blocks from the provided vector of FileBlock.
@@ -63,7 +64,7 @@ private:
   std::vector<Block *> m_blocks;
   std::vector<Block *> m_nonEmptyBlocks;
 
-  bd::IndexFile *m_indexFile;
+  std::unique_ptr<bd::IndexFile> m_indexFile;
 
   //TODO: volume member in BlockCollection.
 

@@ -157,16 +157,14 @@ public:
   /// \param numBlks number of blocks along x, y, and z axis.
   /// \param nummax The min and max block averages to use for threshold values 
   ///               when filtering blocks.
-  static IndexFile* fromRawFile(const std::string& path,
-                                size_t bufsz,
-                                DataType type,
-                                const uint64_t numVox[3],
-                                const uint64_t numBlks[3],
-                                const float minmax[2]);
+  static std::unique_ptr<IndexFile>
+  fromRawFile(const std::string& path, size_t bufsz, DataType type,
+      const uint64_t* numVox, const uint64_t* numBlks, const float* minmax);
 
 
   /// \brief Create IndexFile from an existing binary index file.
-  static IndexFile* fromBinaryIndexFile(const std::string& path);
+  static std::unique_ptr<IndexFile>
+  fromBinaryIndexFile(const std::string& path);
 
 
   IndexFile();
@@ -196,7 +194,6 @@ public:
 
 
   const std::vector<FileBlock*>& blocks() const;
-
 
   static collection_wrapper_base* make_wrapper(DataType type,
                                                const uint64_t num_vox[3],
