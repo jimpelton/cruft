@@ -15,7 +15,8 @@ public:
   BlockCollection();
   ~BlockCollection();
 
-  void initBlocksFromIndexFile(const std::string &fileName);
+//  void initBlocksFromIndexFile(const std::string &fileName);
+//  void initBlocksFromIndexFile(std::unique_ptr<bd::IndexFile> index);
 
   void initBlocksFromIndexFile(std::shared_ptr<IndexFile> index);
 

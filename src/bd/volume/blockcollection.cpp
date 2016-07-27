@@ -21,23 +21,41 @@ BlockCollection::~BlockCollection()
 }
 
 
-void
-BlockCollection::initBlocksFromIndexFile(std::string const & fileName)
-{
-  m_indexFile = std::shared_ptr<IndexFile>(
-    std::move(IndexFile::fromBinaryIndexFile(fileName)) );
+//void
+//BlockCollection::initBlocksFromIndexFile(std::string const & fileName)
+//{
+//  m_indexFile = bd::IndexFile::fromBinaryIndexFile(fileName);
+//  bd::IndexFileHeader const &header = m_indexFile->getHeader();
+//
+//  Dbg() << "Initializing blocks from index file: " << fileName;
+//  initBlocksFromFileBlocks(m_indexFile->blocks(),
+//                           { header.numblocks[0],
+//                             header.numblocks[1],
+//                             header.numblocks[2] });
+//
+////  Dbg() << "Initializing non-empty block textures";
+////  initBlockTextures(fileName);
+//}
 
-  bd::IndexFileHeader const &header = m_indexFile->getHeader();
-
-  Dbg() << "Initializing blocks from index file: " << fileName;
-  initBlocksFromFileBlocks(m_indexFile->blocks(),
-                           { header.numblocks[0],
-                             header.numblocks[1],
-                             header.numblocks[2] });
-
-//  Dbg() << "Initializing non-empty block textures";
-//  initBlockTextures(fileName);
-}
+//void
+//BlockCollection::initBlocksFromIndexFile(std::unique_ptr<bd::IndexFile> indexFile)
+//{
+//<<<<<<< HEAD
+//  m_indexFile = std::shared_ptr<IndexFile>(
+//    std::move(IndexFile::fromBinaryIndexFile(fileName)) );
+//
+//=======
+//  m_indexFile = std::move(indexFile);
+//>>>>>>> 3907b0abac9094b73a41c235dad37587f3eba2a5
+//  bd::IndexFileHeader const &header = m_indexFile->getHeader();
+//
+//  Dbg() << "Initializing blocks from index file. "; //<< fileName;
+//  initBlocksFromFileBlocks(m_indexFile->blocks(),
+//      { header.numblocks[0],
+//          header.numblocks[1],
+//          header.numblocks[2] });
+//
+//}
 
 void
 BlockCollection::initBlocksFromIndexFile(std::shared_ptr<IndexFile> index)
@@ -54,10 +72,8 @@ BlockCollection::initBlocksFromIndexFile(std::shared_ptr<IndexFile> index)
 }
 
 void
-BlockCollection::initBlocksFromFileBlocks
-(
-  std::vector< FileBlock * > const fileBlocks,
-  glm::u64vec3 nb
+BlockCollection::initBlocksFromFileBlocks(std::vector<FileBlock *> const fileBlocks,
+    glm::u64vec3 nb
 )
 {
   auto idx = 0ull;
@@ -78,7 +94,7 @@ BlockCollection::initBlocksFromFileBlocks
 
 
 void
-BlockCollection::filterBlocks(std::function< bool(Block const *) > isEmpty)
+BlockCollection::filterBlocks(std::function<bool(Block const *)> isEmpty)
 {
   for (Block *b : m_blocks) {
     if (!isEmpty(b)) {
@@ -113,10 +129,7 @@ BlockCollection::initBlockTextures(std::string const & file)
 
 template< typename Ty >
 bool
-BlockCollection::do_initBlockTextures
-(
-  std::string const &file
-)
+BlockCollection::do_initBlockTextures(std::string const &file)
 {
   std::ifstream is(file, std::ios::binary);
   if (!is.is_open()) {
@@ -125,6 +138,9 @@ BlockCollection::do_initBlockTextures
   }
 
   //TODO: use Region from Volume class to get block voxel extents.
+  // Since all the blocks are the same size, just use the first block's size
+  // to get the voxel dimensions for all the blocks. These dimensions are the
+  // size for the buffer used for handing the texture data to OpenGL.
   size_t buf_size{
       m_blocks[0]->voxel_extent().x *
       m_blocks[0]->voxel_extent().y *
@@ -162,19 +178,15 @@ BlockCollection::do_initBlockTextures
 
 template< typename Ty >
 void
-BlockCollection::fillBlockData
-(
-  Block const& b,
-  std::istream& infile,
-  Ty * blockBuffer
-) const
+BlockCollection::fillBlockData(Block const& b, std::istream& infile,
+    Ty * blockBuffer) const
 {
 //  const glm::u64vec3 &nb{ m_volume.lower().block_count() };
 //  const glm::u64vec3 &bd{ m_volume.lower().block_dims() };
 //  const glm::u64vec3 &vd{ m_volume.dims() };
 
-  glm::u64vec3 const& bd{ b.voxel_extent() };
-  glm::u64vec2 const& vd{ m_indexFile->getHeader().volume_extent[0],
+  glm::u64vec3 const & bd{ b.voxel_extent() };
+  glm::u64vec2 const & vd{ m_indexFile->getHeader().volume_extent[0],
       m_indexFile->getHeader().volume_extent[1] };
 
   // start element = block index w/in volume * block size
@@ -210,6 +222,7 @@ BlockCollection::blocks() const
   return m_blocks;
 }
 
+
 std::vector<Block *>  &
 BlockCollection::blocks()
 {
@@ -222,6 +235,7 @@ BlockCollection::nonEmptyBlocks() const
 {
   return m_nonEmptyBlocks;
 }
+
 
 std::vector<Block *> &
 BlockCollection::nonEmptyBlocks()

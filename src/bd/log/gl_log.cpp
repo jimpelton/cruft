@@ -184,7 +184,7 @@ checkForAndLogGlError(const char* file, const char* func, int line)
     const char* estr = gl_err_num_str(error);
 
     std::cerr << "GL Error: " << file << "[" << line << "]:" << func << "()::\n\t"
-        << estr << " (" << error << ").";
+        << estr << " (" << error << ").\n";
   }
 }
 

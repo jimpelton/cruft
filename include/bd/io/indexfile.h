@@ -175,6 +175,12 @@ public:
   /// \returns A unique_ptr to the IndexFile created or nullptr on failure.
   static std::unique_ptr<IndexFile> fromBinaryIndexFile(std::string const & path);
 
+//  static std::unique_ptr<IndexFile>
+//  fromRawFile(const std::string& path, size_t bufsz, DataType type,
+//      const uint64_t* numVox, const uint64_t* numBlks, const float* minmax);
+
+
+
 
   IndexFile();
 

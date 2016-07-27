@@ -130,11 +130,12 @@ IndexFile::fromRawFile(std::string const & path, size_t bufsz, DataType type,
 }
 
 
+///////////////////////////////////////////////////////////////////////////////
 std::unique_ptr<IndexFile>
 IndexFile::fromBinaryIndexFile(const std::string& path)
 {
   //std::shared_ptr<IndexFile> idxfile{ std::make_shared<IndexFile>() };
-  std::unique_ptr<IndexFile> idxfile{ std::unique_ptr<IndexFile>{ new IndexFile{} } };
+  std::unique_ptr<IndexFile> idxfile{ new IndexFile() };
   idxfile->m_fileName = path;
   bool success = idxfile->readBinaryIndexFile();
   if (! success){

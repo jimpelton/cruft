@@ -50,7 +50,7 @@ Compiler::compile(Shader& shader, const char* code)
   if (infoLogLength > 1) {
     std::vector<char> msg(infoLogLength + 1);
     gl_check(glGetShaderInfoLog(shaderId, infoLogLength, nullptr, &msg[0]));
-    Gl_Dbg() << &msg[0];
+    Dbg() << &msg[0];
   }
 
   return result == GL_TRUE;
