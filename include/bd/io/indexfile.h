@@ -69,10 +69,10 @@ const uint32_t HEAD_LEN{ sizeof(IndexFileHeader) };
 /// \brief Allows using the BlockCollection2 template without
 ///        exposing the templated-ness of BlockCollection2, since we don't
 ///        know what type of BC2 we need until runtime.
-class collection_wrapper_base
+class blockcollection2_wrapper_base
 {
 public:
-  virtual ~collection_wrapper_base()
+  virtual ~blockcollection2_wrapper_base()
   {
   }
 
@@ -98,42 +98,47 @@ public:
 /// \sa base_collection_wrapper
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
-class collection_wrapper : public collection_wrapper_base
+class blockcollection2_wrapper : public blockcollection2_wrapper_base
 {
 public:
 
-  collection_wrapper(glm::u64vec3 volDims, glm::u64vec3 numBlocks)
+  blockcollection2_wrapper(glm::u64vec3 volDims, glm::u64vec3 numBlocks)
       : c{ volDims, numBlocks }
   {
   }
 
 
-  void create(const std::string& rawFile, size_t buffSize, const float minmax[2]) override
+  void
+  create(std::string const& rawFile, size_t buffSize, float const minmax[2]) override
   {
     ValueRangeFilter<Ty> isRelevant(minmax[0], minmax[1]);
     c.createFromRawFile(rawFile, buffSize, isRelevant);
   }
 
 
-  void addBlock(const FileBlock& b) override
+  void
+  addBlock(FileBlock const &b) override
   {
     c.addBlock(b);
   }
 
 
-  const Volume& volume() override
+  Volume const&
+  volume() override
   {
     return c.volume();
   }
 
 
-  const std::vector<FileBlock*>& blocks() override
+  std::vector<FileBlock*> const&
+  blocks() override
   {
     return c.blocks();
   }
 
 
-  const std::vector<FileBlock*>& nonEmptyBlocks() override
+  std::vector<FileBlock*> const&
+  nonEmptyBlocks() override
   {
     return c.nonEmptyBlocks();
   }
@@ -157,16 +162,18 @@ public:
   /// \param numBlks number of blocks along x, y, and z axis.
   /// \param nummax The min and max block averages to use for threshold values 
   ///               when filtering blocks.
-  static IndexFile* fromRawFile(const std::string& path,
-                                size_t bufsz,
-                                DataType type,
-                                const uint64_t numVox[3],
-                                const uint64_t numBlks[3],
-                                const float minmax[2]);
+  /// \returns A unique_ptr to the IndexFile generated.
+  static std::unique_ptr<IndexFile> fromRawFile(std::string const & path,
+                                                size_t bufsz,
+                                                DataType type,
+                                                uint64_t const numVox[3],
+                                                uint64_t const numBlks[3],
+                                                float const minmax[2]);
 
 
   /// \brief Create IndexFile from an existing binary index file.
-  static IndexFile* fromBinaryIndexFile(const std::string& path);
+  /// \returns A unique_ptr to the IndexFile created or nullptr on failure.
+  static std::unique_ptr<IndexFile> fromBinaryIndexFile(std::string const & path);
 
 
   IndexFile();
@@ -180,7 +187,7 @@ public:
 
 
   /// \brief Write binary index file to the file at \c outpath.
-  void writeBinaryIndexFile(const std::string& outpath) const;
+  void writeBinaryIndexFile(std::string const& outpath) const;
 
 
   /// \brief Write ascii index file to ostream \c os.
@@ -188,19 +195,20 @@ public:
 
 
   /// \brief Write ascii index file to the file at \c outpath.
-  void writeAsciiIndexFile(const std::string& outpath) const;
+  void writeAsciiIndexFile(std::string const& outpath) const;
 
 
   /// \brief Get the IndexFileHeader for the index file.
-  const IndexFileHeader& getHeader() const;
+  IndexFileHeader const& getHeader() const;
 
 
-  const std::vector<FileBlock*>& blocks() const;
+  std::vector<FileBlock*> const& blocks() const;
 
 
-  static collection_wrapper_base* make_wrapper(DataType type,
-                                               const uint64_t num_vox[3],
-                                               const uint64_t numblocks[3]);
+  static blockcollection2_wrapper_base*
+  make_wrapper(DataType type,
+               uint64_t const num_vox[3],
+               uint64_t const numblocks[3]);
 
 
 private:
@@ -210,12 +218,12 @@ private:
 private:
   IndexFileHeader m_header;
   std::string m_fileName;
-  collection_wrapper_base* m_col;
+  blockcollection2_wrapper_base* m_col;
 
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-std::ostream& operator<<(std::ostream& os, const IndexFileHeader& h);
+std::ostream& operator<<(std::ostream& os, IndexFileHeader const& h);
 
 } // namespace bd
 

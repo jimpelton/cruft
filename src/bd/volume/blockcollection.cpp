@@ -24,7 +24,9 @@ BlockCollection::~BlockCollection()
 void
 BlockCollection::initBlocksFromIndexFile(std::string const & fileName)
 {
-  m_indexFile = bd::IndexFile::fromBinaryIndexFile(fileName);
+  m_indexFile = std::shared_ptr<IndexFile>(
+    std::move(IndexFile::fromBinaryIndexFile(fileName)) );
+
   bd::IndexFileHeader const &header = m_indexFile->getHeader();
 
   Dbg() << "Initializing blocks from index file: " << fileName;
@@ -37,6 +39,19 @@ BlockCollection::initBlocksFromIndexFile(std::string const & fileName)
 //  initBlockTextures(fileName);
 }
 
+void
+BlockCollection::initBlocksFromIndexFile(std::shared_ptr<IndexFile> index)
+{
+  m_indexFile = index;
+  bd::IndexFileHeader const &header = m_indexFile->getHeader();
+
+  Dbg() << "Initializing blocks from index file."; //<< fileName;
+  initBlocksFromFileBlocks(m_indexFile->blocks(),
+                           { header.numblocks[0],
+                             header.numblocks[1],
+                             header.numblocks[2] });
+
+}
 
 void
 BlockCollection::initBlocksFromFileBlocks

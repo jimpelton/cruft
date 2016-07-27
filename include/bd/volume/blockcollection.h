@@ -17,6 +17,8 @@ public:
 
   void initBlocksFromIndexFile(const std::string &fileName);
 
+  void initBlocksFromIndexFile(std::shared_ptr<IndexFile> index);
+
   /////////////////////////////////////////////////////////////////////////////////
   /// \brief Initializes \c blocks from the provided vector of FileBlock.
   /// \note Blocks are sized to fit it within the world-extent of the volume data.
@@ -29,13 +31,13 @@ public:
 
   bool initBlockTextures(const std::string &rawFile);
 
-  const std::vector<Block *>& blocks() const;
+  std::vector<Block *> const& blocks() const;
   std::vector<Block *>& blocks();
 
-  const std::vector<Block *>& nonEmptyBlocks() const;
+  std::vector<Block *> const& nonEmptyBlocks() const;
   std::vector<Block *>& nonEmptyBlocks();
 
-  const IndexFile& indexFile() const { return *m_indexFile; }
+  IndexFile const& indexFile() const { return *m_indexFile; }
 
 private:
 
@@ -63,7 +65,7 @@ private:
   std::vector<Block *> m_blocks;
   std::vector<Block *> m_nonEmptyBlocks;
 
-  bd::IndexFile *m_indexFile;
+  std::shared_ptr<IndexFile> m_indexFile;
 
   //TODO: volume member in BlockCollection.
 

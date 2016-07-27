@@ -149,7 +149,7 @@ void gl_debug_message_callback(GLenum source, GLenum type, GLuint id,
   const char* sev = gl_debug_severity_str(severity);
   const char* typ = gl_debug_type_str(type);
   const char* src = gl_debug_source_str(source);
-  Gl_Dbg() << "\nSource: " << src
+  std::cerr << "\nSource: " << src
       << "\n Type: " << typ
       << "\n Id: " << id
       << "\n Severity: " << sev
@@ -183,7 +183,7 @@ checkForAndLogGlError(const char* file, const char* func, int line)
   while ((error = glGetError()) != GL_NO_ERROR) {
     const char* estr = gl_err_num_str(error);
 
-    Err() << "GL Error: " << file << "[" << line << "]:" << func << "()::\n\t"
+    std::cerr << "GL Error: " << file << "[" << line << "]:" << func << "()::\n\t"
         << estr << " (" << error << ").";
   }
 }

@@ -69,12 +69,11 @@ IndexFileHeader::getTypeInt(DataType ty)
 }
 
 
-IndexFile*
-IndexFile::fromRawFile(const std::string& path, size_t bufsz, DataType type,
-    const uint64_t num_vox[3], const uint64_t numblocks[3], const float minmax[2])
+std::unique_ptr<IndexFile>
+IndexFile::fromRawFile(std::string const & path, size_t bufsz, DataType type,
+    uint64_t const num_vox[3], uint64_t const numblocks[3], float const minmax[2])
 {
-
-  IndexFile *idxfile{ new IndexFile() };
+  std::unique_ptr<IndexFile> idxfile{ std::unique_ptr<IndexFile>{ new IndexFile{} }};
   idxfile->m_fileName = path;
 
   // make blockcollection2 object.
@@ -84,9 +83,10 @@ IndexFile::fromRawFile(const std::string& path, size_t bufsz, DataType type,
   // build the block collection
   idxfile->m_col->create(idxfile->m_fileName, bufsz, minmax);
 
-  // filter the blocks
-  BlockAverageFilter filter(minmax[0], minmax[1]);
 
+  // filter the blocks
+  //TODO: pass the block filter as parameter.
+  BlockAverageFilter filter(minmax[0], minmax[1]);
   for (FileBlock *b : idxfile->m_col->blocks()) {
     if (filter(*b)){
         b->is_empty =  0;
@@ -130,16 +130,15 @@ IndexFile::fromRawFile(const std::string& path, size_t bufsz, DataType type,
 }
 
 
-///////////////////////////////////////////////////////////////////////////////
-IndexFile*
+std::unique_ptr<IndexFile>
 IndexFile::fromBinaryIndexFile(const std::string& path)
 {
   //std::shared_ptr<IndexFile> idxfile{ std::make_shared<IndexFile>() };
-  IndexFile *idxfile{ new IndexFile() };
+  std::unique_ptr<IndexFile> idxfile{ std::unique_ptr<IndexFile>{ new IndexFile{} } };
   idxfile->m_fileName = path;
   bool success = idxfile->readBinaryIndexFile();
   if (! success){
-    delete idxfile;
+    //delete idxfile;
     return nullptr;
   }
 
@@ -171,7 +170,7 @@ IndexFile::getHeader() const
 
 
 ///////////////////////////////////////////////////////////////////////////////
-collection_wrapper_base*
+blockcollection2_wrapper_base*
 IndexFile::make_wrapper
 (
   DataType type,
@@ -179,36 +178,36 @@ IndexFile::make_wrapper
   const uint64_t numblocks[3]
   )
 {
-  collection_wrapper_base *col{ nullptr };
+  blockcollection2_wrapper_base *col{ nullptr };
 
   switch (type) {
 
   case bd::DataType::UnsignedCharacter:
-    col = new collection_wrapper<unsigned char> {
+    col = new blockcollection2_wrapper<unsigned char> {
         { num_vox[0], num_vox[1], num_vox[2] },
         { numblocks[0], numblocks[1], numblocks[2] } };
     break;
 
   case bd::DataType::Character:
-    col = new collection_wrapper<char>
+    col = new blockcollection2_wrapper<char>
         { { num_vox[0], num_vox[1], num_vox[2] },
           { numblocks[0], numblocks[1], numblocks[2] } };
     break;
 
   case bd::DataType::UnsignedShort:
-    col = new collection_wrapper<unsigned short>
-    { { num_vox[0], num_vox[1], num_vox[2] },
-    { numblocks[0], numblocks[1], numblocks[2] } };
+    col = new blockcollection2_wrapper<unsigned short>
+    {{ num_vox[0], num_vox[1], num_vox[2] },
+    { numblocks[0], numblocks[1], numblocks[2] }};
     break;
 
   case bd::DataType::Short:
-    col = new collection_wrapper<short>
+    col = new blockcollection2_wrapper<short>
         { { num_vox[0], num_vox[1], num_vox[2] },
           { numblocks[0], numblocks[1], numblocks[2] } };
     break;
 
   case bd::DataType::Float:
-    col = new collection_wrapper<float>
+    col = new blockcollection2_wrapper<float>
     { { num_vox[0], num_vox[1], num_vox[2] },
     { numblocks[0], numblocks[1], numblocks[2] } };
     break;
@@ -238,7 +237,7 @@ IndexFile::writeBinaryIndexFile(std::ostream& os) const
 
 ///////////////////////////////////////////////////////////////////////////////
 void
-IndexFile::writeBinaryIndexFile(const std::string& outpath) const
+IndexFile::writeBinaryIndexFile(std::string const& outpath) const
 {
   std::ofstream os;
   os.open(outpath, std::ios::binary);
@@ -277,7 +276,7 @@ IndexFile::writeAsciiIndexFile(std::ostream& os) const
 
 ///////////////////////////////////////////////////////////////////////////////
 void
-IndexFile::writeAsciiIndexFile(const std::string& outpath) const
+IndexFile::writeAsciiIndexFile(std::string const& outpath) const
 {
   std::ofstream os;
   os.open(outpath);
@@ -294,7 +293,7 @@ IndexFile::writeAsciiIndexFile(const std::string& outpath) const
 
 
 ///////////////////////////////////////////////////////////////////////////////
-const std::vector<FileBlock*>&
+std::vector<FileBlock*> const&
 IndexFile::blocks() const
 {
   return m_col->blocks();
@@ -359,7 +358,7 @@ FileBlock::to_string() const
 ///////////////////////////////////////////////////////////////////////////////
 // FileBlock operator<<
 std::ostream&
-operator<<(std::ostream& os, const bd::FileBlock& block)
+operator<<(std::ostream& os, bd::FileBlock const& block)
 {
   return os << block.to_string();
 }
@@ -368,7 +367,7 @@ operator<<(std::ostream& os, const bd::FileBlock& block)
 ///////////////////////////////////////////////////////////////////////////////
 // IndexFileHeader operator<<
 std::ostream&
-operator<<(std::ostream& os, const bd::IndexFileHeader& h)
+operator<<(std::ostream& os, bd::IndexFileHeader const& h)
 {
   os <<
       "\"header\": {\n"
