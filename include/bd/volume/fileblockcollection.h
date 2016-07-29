@@ -39,18 +39,18 @@ namespace bd
 ///            generated from.
 //////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
-class BlockCollection2
+class FileBlockCollection
 {
 
 public:
 
-  BlockCollection2();
+  FileBlockCollection();
 
 
-  BlockCollection2(glm::u64vec3 volDims, glm::u64vec3 numBlocks);
+  FileBlockCollection(glm::u64vec3 volDims, glm::u64vec3 numBlocks);
 
 
-  ~BlockCollection2();
+  ~FileBlockCollection();
 
 
   //////////////////////////////////////////////////////////////////////////////
@@ -73,7 +73,7 @@ public:
 
 
   //////////////////////////////////////////////////////////////////////////////
-  /// \brief Add a reference to the pre-initialized block to this BlockCollection2.
+  /// \brief Add a reference to the pre-initialized block to this FileBlockCollection.
   /// \note  Adds block to non-empty list if block is not empty.
   /// \param b The block to add.
   //////////////////////////////////////////////////////////////////////////////
@@ -158,20 +158,20 @@ private: //members
   std::vector<FileBlock*> m_nonEmptyBlocks;
 
 
-}; // class BlockCollection2
+}; // class FileBlockCollection
 
 
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
-BlockCollection2<Ty>::BlockCollection2()
-    : BlockCollection2({ 0, 0, 0 }, { 0, 0, 0 })
+FileBlockCollection<Ty>::FileBlockCollection()
+    : FileBlockCollection({ 0, 0, 0 }, { 0, 0, 0 })
 {
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
-BlockCollection2<Ty>::BlockCollection2(glm::u64vec3 volDims, glm::u64vec3 numBlocks)
+FileBlockCollection<Ty>::FileBlockCollection(glm::u64vec3 volDims, glm::u64vec3 numBlocks)
     : m_volume{ volDims, numBlocks }
     , m_blocks{ }
     , m_nonEmptyBlocks{ }
@@ -181,9 +181,9 @@ BlockCollection2<Ty>::BlockCollection2(glm::u64vec3 volDims, glm::u64vec3 numBlo
 
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
-BlockCollection2<Ty>::~BlockCollection2()
+FileBlockCollection<Ty>::~FileBlockCollection()
 {
-  std::cout << "BlockCollection2 destructor\n";
+  std::cout << "FileBlockCollection destructor\n";
   for(auto b : m_blocks) {
     delete b;
   }
@@ -193,7 +193,7 @@ BlockCollection2<Ty>::~BlockCollection2()
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 glm::u64vec3
-BlockCollection2<Ty>::updateBlockCount()
+FileBlockCollection<Ty>::updateBlockCount()
 {
   glm::u64vec3 bc{ volume().lower().block_count() };
   glm::u64vec3 vd{ volume().dims() };
@@ -225,7 +225,7 @@ BlockCollection2<Ty>::updateBlockCount()
 // bd: block dimensions
 template<typename Ty>
 void
-BlockCollection2<Ty>::initBlocks()
+FileBlockCollection<Ty>::initBlocks()
 {
   //glm::u64vec3 bc{ updateBlockCount() };
   glm::u64vec3 bc{ m_volume.lower().block_count() };
@@ -280,7 +280,7 @@ BlockCollection2<Ty>::initBlocks()
 //////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 double
-BlockCollection2<Ty>::doBufferSum(Buffer<Ty>* buf)
+FileBlockCollection<Ty>::doBufferSum(Buffer<Ty>* buf)
 {
   Ty* p = buf->ptr();
 
@@ -303,7 +303,7 @@ BlockCollection2<Ty>::doBufferSum(Buffer<Ty>* buf)
 //////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 void
-BlockCollection2<Ty>::doBufferMinMax(Buffer<Ty>* buf)
+FileBlockCollection<Ty>::doBufferMinMax(Buffer<Ty>* buf)
 {
   tbb::blocked_range<size_t> range(0, buf->elements());
   ParallelMinMax<Ty> mm(buf);
@@ -325,7 +325,7 @@ BlockCollection2<Ty>::doBufferMinMax(Buffer<Ty>* buf)
 //////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 void
-BlockCollection2<Ty>::doBlockMinMax(Buffer<Ty> *buf)
+FileBlockCollection<Ty>::doBlockMinMax(Buffer<Ty> *buf)
 {
   ParallelBlockMinMax<Ty> blockMinMax{ &m_volume, buf };
 
@@ -346,7 +346,7 @@ BlockCollection2<Ty>::doBlockMinMax(Buffer<Ty> *buf)
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 void
-BlockCollection2<Ty>::doBlockVoxelRelavance(Buffer<Ty> *buf,
+FileBlockCollection<Ty>::doBlockVoxelRelavance(Buffer<Ty> *buf,
     std::function<bool(Ty)> const &f)
 {
   ParallelBlockStats<Ty> stats{ buf, &m_volume, f };
@@ -364,7 +364,7 @@ BlockCollection2<Ty>::doBlockVoxelRelavance(Buffer<Ty> *buf,
 //////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 void
-BlockCollection2<Ty>::finishBlockAverages()
+FileBlockCollection<Ty>::finishBlockAverages()
 {
 //  uint64_t volume_empty_voxels{ 0 };
   for (FileBlock* b : m_blocks) {
@@ -380,7 +380,7 @@ BlockCollection2<Ty>::finishBlockAverages()
 //////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 void
-BlockCollection2<Ty>::computeVolumeStatistics(BufferedReader<Ty>& r,
+FileBlockCollection<Ty>::computeVolumeStatistics(BufferedReader<Ty>& r,
     std::function<bool(Ty)> const & isRelevant)
 {
   Info() << "Computing volume statistics...";
@@ -433,7 +433,7 @@ BlockCollection2<Ty>::computeVolumeStatistics(BufferedReader<Ty>& r,
 //////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 void
-BlockCollection2<Ty>::addBlock(const FileBlock& b)
+FileBlockCollection<Ty>::addBlock(const FileBlock& b)
 {
   FileBlock* ptr{ new FileBlock(b) }; //{ std::make_shared<FileBlock>(b) };
   m_blocks.push_back(ptr);
@@ -448,7 +448,7 @@ BlockCollection2<Ty>::addBlock(const FileBlock& b)
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 void
-BlockCollection2<Ty>::createFromRawFile
+FileBlockCollection<Ty>::createFromRawFile
 (
   const std::string &file,
   size_t bufSize,
@@ -475,7 +475,7 @@ BlockCollection2<Ty>::createFromRawFile
 ///////////////////////////////////////////////////////////////////////////////
 //template<typename Ty>
 //void
-//BlockCollection2<Ty>::fillBlockData
+//FileBlockCollection<Ty>::fillBlockData
 //(
 //    const FileBlock& b,
 //    std::istream& infile,
@@ -523,7 +523,7 @@ BlockCollection2<Ty>::createFromRawFile
 ////////////////////////////////////////////////////////////////////////////////
 //template<typename Ty>
 //void
-//BlockCollection2<Ty>::computeBlockStatistics(BufferedReader<Ty> &r)
+//FileBlockCollection<Ty>::computeBlockStatistics(BufferedReader<Ty> &r)
 //{
 //  Info() << "Computing block statistics for " << m_blocks.size() << " blocks.";
 //

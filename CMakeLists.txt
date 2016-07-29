@@ -66,9 +66,10 @@ target_link_libraries(crufterly
     "${GLEW_LIBRARIES}"
     "${OPENGL_LIBRARIES}"
     "${GLFW_LIBRARIES}"
-    "/usr/lib/libtbb.so"
+    #"/usr/lib/libtbb.so"
+    "/usr/local/lib/libtbb.dylib"
     )
-add_subdirectory("test")
+#add_subdirectory("test")
 
 install(TARGETS crufterly ARCHIVE
         DESTINATION "lib/crufterly/static/${CMAKE_BUILD_TYPE}/")

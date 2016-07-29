@@ -2,7 +2,7 @@
 #define indexfile_h__
 
 #include <bd/io/fileblock.h>
-#include <bd/volume/blockcollection2.h>
+#include <bd/volume/fileblockcollection.h>
 #include <bd/io/datatypes.h>
 
 #include <iostream>
@@ -66,8 +66,8 @@ const uint32_t HEAD_LEN{ sizeof(IndexFileHeader) };
 
 
 ///////////////////////////////////////////////////////////////////////////////
-/// \brief Allows using the BlockCollection2 template without
-///        exposing the templated-ness of BlockCollection2, since we don't
+/// \brief Allows using the FileBlockCollection template without
+///        exposing the templated-ness of FileBlockCollection, since we don't
 ///        know what type of BC2 we need until runtime.
 class blockcollection2_wrapper_base
 {
@@ -145,11 +145,11 @@ public:
 
 
 private:
-  BlockCollection2<Ty> c;
+  FileBlockCollection<Ty> c;
 
 };
 
-/// \brief Generate an index file from the provided BlockCollection2. The
+/// \brief Generate an index file from the provided FileBlockCollection. The
 ///        IndexFile can be written to disk in either ASCII or binary format.
 class IndexFile
 {
