@@ -36,11 +36,12 @@ public:
 
   const glm::mat4& getProjectionMatrix() const;
 
-  const glm::mat4& getViewMatrix() const;
+  /// \brief Update and return the view matrix.
+  const glm::mat4& getViewMatrix();
 
-  void updateViewMatrix();
 
 private:
+  void updateViewMatrix();
 
   glm::vec3 m_position;
 

@@ -47,9 +47,9 @@ public:
   void ijk(const glm::u64vec3& ijk);
 
 
-  /// \brief Set/get if this block is marked empty.
+  /// \brief Set if this block is marked empty.
   void empty(bool);
-  /// \brief Set/get if this block is marked empty.
+  /// \brief Get if this block is marked empty.
   bool empty() const;
 
 

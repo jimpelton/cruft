@@ -58,7 +58,7 @@ View::setGLViewport(int x, int y, int w, int h)
   m_viewport = glm::uvec4(x, y, w, h);
   glViewport(x, y, w, h);
 
-  m_viewDirty = true;
+  //m_viewDirty = true;
 }
 
 
@@ -108,7 +108,7 @@ View::getRotation() const
 void
 View::rotateBy(const glm::quat& delta)
 {
-  m_rotation *= delta;
+  m_rotation = m_rotation * delta;
   m_viewDirty = true;
 }
 
@@ -117,7 +117,7 @@ void
 View::rotateTo(const glm::vec3& dest)
 {
   glm::quat rot = glm::rotation(glm::normalize(m_position), dest);
-  m_rotation *= rot;
+  m_rotation = m_rotation * rot;
   m_viewDirty = true;
 }
 
@@ -131,7 +131,7 @@ void View::setPerspectiveProjectionMatrix(float fov, float aspect_rat,
 
 
 ///////////////////////////////////////////////////////////////////////////////
-const glm::mat4&
+glm::mat4 const&
 View::getProjectionMatrix() const
 {
   return m_proj;
@@ -139,9 +139,10 @@ View::getProjectionMatrix() const
 
 
 ///////////////////////////////////////////////////////////////////////////////
-const glm::mat4&
-View::getViewMatrix() const
+glm::mat4 const &
+View::getViewMatrix()
 {
+  updateViewMatrix();
   return m_view;
 }
 
@@ -150,12 +151,15 @@ View::getViewMatrix() const
 void
 View::updateViewMatrix()
 {
-  glm::mat4 tr = glm::translate(glm::mat4(1.0), -(m_position));
-  glm::mat4 rot = glm::transpose(glm::toMat4(m_rotation));
+  if (m_viewDirty) {
+    glm::mat4 tr = glm::translate(glm::mat4(1.0), -(m_position));
+    glm::mat4 rot = glm::transpose(glm::toMat4(m_rotation));
+    glm::mat4 tr_inv = glm::translate(tr, m_position);
 
-  m_view = rot * tr;
+    m_view = tr_inv * rot * tr;
 
-  m_viewDirty = false;
+    m_viewDirty = false;
+  }
 }
 } // namespace bd
 
