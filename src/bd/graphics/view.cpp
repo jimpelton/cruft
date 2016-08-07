@@ -154,9 +154,8 @@ View::updateViewMatrix()
   if (m_viewDirty) {
     glm::mat4 tr = glm::translate(glm::mat4(1.0), -(m_position));
     glm::mat4 rot = glm::transpose(glm::toMat4(m_rotation));
-    glm::mat4 tr_inv = glm::translate(tr, m_position);
 
-    m_view = tr_inv * rot * tr;
+    m_view = rot * tr;
 
     m_viewDirty = false;
   }

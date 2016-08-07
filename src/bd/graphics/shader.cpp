@@ -220,6 +220,10 @@ ShaderProgram::linkProgram()
 
   gl_check(glGetProgramiv(m_programId, GL_LINK_STATUS, &result));
   gl_check(glGetProgramiv(m_programId, GL_INFO_LOG_LENGTH, &InfoLogLength));
+  Dbg() << "GL Link Status for shader program "
+        << m_programId << ": "
+        << (result == GL_FALSE ? "GL_FALSE" : "GL_TRUE")
+        << ".";
 
   if (InfoLogLength > 1) {
     std::vector<char> programErrorMessage(InfoLogLength + 1);

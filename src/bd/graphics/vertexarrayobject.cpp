@@ -105,7 +105,7 @@ VertexArrayObject::addVbo(const std::vector<glm::vec4> &verts,
 
 ///////////////////////////////////////////////////////////////////////////////
 unsigned int
-VertexArrayObject::setIndexBuffer(const std::vector<unsigned short> &indices, Usage u)
+VertexArrayObject::setIndexBuffer(std::vector<unsigned short> const &indices, Usage u)
 {
   unsigned int iboId{0};
 
@@ -120,7 +120,7 @@ VertexArrayObject::setIndexBuffer(const std::vector<unsigned short> &indices, Us
 
 ///////////////////////////////////////////////////////////////////////////////
 unsigned int
-VertexArrayObject::setIndexBuffer(unsigned short *indices,
+VertexArrayObject::setIndexBuffer(unsigned short const *indices,
                                   unsigned int length,
                                   Usage u)
 {
@@ -137,14 +137,14 @@ VertexArrayObject::setIndexBuffer(unsigned short *indices,
 
 ///////////////////////////////////////////////////////////////////////////////
 void
-VertexArrayObject::bind()
+VertexArrayObject::bind() const
 {
   gl_check(glBindVertexArray(m_id));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 void
-VertexArrayObject::unbind()
+VertexArrayObject::unbind() const
 {
   gl_check(glBindVertexArray(0));
 }

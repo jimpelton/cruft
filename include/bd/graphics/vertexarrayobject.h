@@ -94,7 +94,7 @@ public:
   ///  id of the index buffer.
   ///
   /// \returns The gl id of the index buffer created.
-  unsigned int setIndexBuffer(unsigned short *indices, unsigned int length, Usage u);
+  unsigned int setIndexBuffer(unsigned short const *indices, unsigned int length, Usage u);
 
   /// \brief Add an index buffer to be bound with this VAO.
   ///
@@ -112,12 +112,12 @@ public:
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Bind this VertexArrayObject to the context.
   ///////////////////////////////////////////////////////////////////////////////
-  void bind();
+  void bind() const;
 
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Unbind this VAO from the context.
   ///////////////////////////////////////////////////////////////////////////////
-  void unbind();
+  void unbind() const;
 
 private:
   ///////////////////////////////////////////////////////////////////////////////
