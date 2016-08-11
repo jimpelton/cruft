@@ -12,11 +12,36 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake
     ${CMAKE_MODULE_PATH}
 )
 
+
+#### Intel's Thread Building Blocks ################################################
+if(NOT DEFINED INTELTBB_INCLUDE_DIR)
+    set(INTELTBB_INCLUDE_DIR "")
+endif()
+set(INTELTBB_INCLUDE_DIR ${${INTELTBB_INCLUDE_DIR}} CACHE PATH 
+	"Intel's thread building blocks includes path"
+)
+
+if(NOT DEFINED INTELTBB_DEBUG_LIBRARY)
+    set(INTELTBB_DEBUG_LIBRARY "")
+endif()
+set(INTELTBB_DEBUG_LIBRARY ${${INTELTBB_DEBUG_LIBRARY}} CACHE FILEPATH 
+	"Intel's thread building blocks library (debug version)"
+)
+
+if(NOT DEFINED INTELTBB_RELEASE_LIBRARY)
+    set(INTELTBB_RELEASE_LIBRARY "")
+endif()
+set(INTELTBB_RELEASE_LIBRARY ${${INTELTBB_RELEASE_LIBRARY}} CACHE FILEPATH 
+	"Intel's thread building blocks library"
+)
+
+#### Graphics & Math Libraries ################################################
 find_package(OpenGL REQUIRED)
 find_package(GLFW REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(GLM REQUIRED)
 
+#### Platform Specifics ################################################
 # Windows requires a few extra definitions.
 if (WIN32)
     add_definitions(-DGLEW_STATIC)  #Link statically to Glew
@@ -29,14 +54,11 @@ if (UNIX)
               -Wall \
               -Wno-missing-braces \
               -pthread \
-              -fdiagnostics-color=auto")
-endif (UNIX)
+              -fdiagnostics-color=auto"
+    )
 
-###########################################################################
-
-if (UNIX)
     include_directories("${OPENGL_INCLUDE_DIR}")
-endif(UNIX)
+endif (UNIX)
 
 # Resource directory is for test code only.
 set(CRUFT_RESOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/res")
@@ -46,15 +68,13 @@ include_directories(
         "${GLEW_INCLUDE_DIR}"
         "${GLM_INCLUDE_DIR}"
         "${GLFW_INCLUDE_DIRS}"
+        "${INTELTBB_INCLUDE_DIR}"
+)
 
-    )
-
-
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 # Enables gl_check() macros.
 add_definitions(-DBD_DEBUG)
-
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 add_subdirectory("include/bd")
 add_subdirectory("src/bd")
@@ -66,18 +86,25 @@ target_link_libraries(crufterly
     "${GLEW_LIBRARIES}"
     "${OPENGL_LIBRARIES}"
     "${GLFW_LIBRARIES}"
-    #"/usr/lib/libtbb.so"
-    "/usr/local/lib/libtbb.dylib"
-    )
+    debug "${INTELTBB_DEBUG_LIBRARY}"
+    optmized "${INTELTBB_RELEASE_LIBRARY}"
+)
 #add_subdirectory("test")
 
+# Install the static library.
 install(TARGETS crufterly ARCHIVE
-        DESTINATION "lib/crufterly/static/${CMAKE_BUILD_TYPE}/")
+        DESTINATION "lib/${PROJECT_NAME}/static/${CMAKE_BUILD_TYPE}/")
 
+# Install the headers.
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/bd/"
-        DESTINATION "include/crufterly/bd" FILES_MATCHING PATTERN "*.h")
+        DESTINATION "include/${PROJECT_NAME}/bd" FILES_MATCHING PATTERN "*.h")
 
+# On unix, create a custom install target
+# I find this useful for Jetbrain's CLion IDE.
+if (UNIX)
 add_custom_target(install_${PROJECT_NAME}
-                  make install
-                  DEPENDS ${PROJECT_NAME}
-                  COMMENT "Installing ${PROJECT_NAME}")
+        make install
+        DEPENDS ${PROJECT_NAME}
+        COMMENT "Installing ${PROJECT_NAME}"
+)
+endif()
