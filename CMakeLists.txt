@@ -87,7 +87,7 @@ target_link_libraries(crufterly
     "${OPENGL_LIBRARIES}"
     "${GLFW_LIBRARIES}"
     debug "${INTELTBB_DEBUG_LIBRARY}"
-    optmized "${INTELTBB_RELEASE_LIBRARY}"
+    optimized "${INTELTBB_RELEASE_LIBRARY}"
 )
 #add_subdirectory("test")
 

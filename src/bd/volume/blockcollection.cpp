@@ -21,44 +21,8 @@ BlockCollection::~BlockCollection()
 }
 
 
-//void
-//BlockCollection::initBlocksFromIndexFile(std::string const & fileName)
-//{
-//  m_indexFile = bd::IndexFile::fromBinaryIndexFile(fileName);
-//  bd::IndexFileHeader const &header = m_indexFile->getHeader();
-//
-//  Dbg() << "Initializing blocks from index file: " << fileName;
-//  initBlocksFromFileBlocks(m_indexFile->blocks(),
-//                           { header.numblocks[0],
-//                             header.numblocks[1],
-//                             header.numblocks[2] });
-//
-////  Dbg() << "Initializing non-empty block textures";
-////  initBlockTextures(fileName);
-//}
-
-//void
-//BlockCollection::initBlocksFromIndexFile(std::unique_ptr<bd::IndexFile> indexFile)
-//{
-//<<<<<<< HEAD
-//  m_indexFile = std::shared_ptr<IndexFile>(
-//    std::move(IndexFile::fromBinaryIndexFile(fileName)) );
-//
-//=======
-//  m_indexFile = std::move(indexFile);
-//>>>>>>> 3907b0abac9094b73a41c235dad37587f3eba2a5
-//  bd::IndexFileHeader const &header = m_indexFile->getHeader();
-//
-//  Dbg() << "Initializing blocks from index file. "; //<< fileName;
-//  initBlocksFromFileBlocks(m_indexFile->blocks(),
-//      { header.numblocks[0],
-//          header.numblocks[1],
-//          header.numblocks[2] });
-//
-//}
-
 void
-BlockCollection::initBlocksFromIndexFile(std::shared_ptr<IndexFile> index)
+BlockCollection::initBlocksFromIndexFile(std::shared_ptr<IndexFile const> index)
 {
   m_indexFile = index;
   bd::IndexFileHeader const &header = m_indexFile->getHeader();
@@ -72,9 +36,8 @@ BlockCollection::initBlocksFromIndexFile(std::shared_ptr<IndexFile> index)
 }
 
 void
-BlockCollection::initBlocksFromFileBlocks(std::vector<FileBlock *> const fileBlocks,
-    glm::u64vec3 nb
-)
+BlockCollection::initBlocksFromFileBlocks(std::vector<FileBlock *> const &fileBlocks,
+                                          glm::u64vec3 const &nb)
 {
   auto idx = 0ull;
   for (auto k = 0ull; k < nb.z; ++k)
@@ -111,14 +74,14 @@ BlockCollection::initBlockTextures(std::string const & file)
   DataType type{ IndexFileHeader::getType(m_indexFile->getHeader()) };
   switch (type) {
   case DataType::UnsignedCharacter:
-    do_initBlockTextures< unsigned char >(file);
+    rval = do_initBlockTextures< unsigned char >(file);
     break;
   case DataType::UnsignedShort:
-    do_initBlockTextures< unsigned short >(file);
+    rval = do_initBlockTextures< unsigned short >(file);
     break;
   case DataType::Float:
   default:
-    do_initBlockTextures< float >(file);
+    rval = do_initBlockTextures< float >(file);
     break;
   }
 
@@ -141,10 +104,9 @@ BlockCollection::do_initBlockTextures(std::string const &file)
   // Since all the blocks are the same size, just use the first block's size
   // to get the voxel dimensions for all the blocks. These dimensions are the
   // size for the buffer used for handing the texture data to OpenGL.
-  size_t buf_size{
-      m_blocks[0]->voxel_extent().x *
-      m_blocks[0]->voxel_extent().y *
-      m_blocks[0]->voxel_extent().z };
+  size_t buf_size{ m_blocks[0]->voxel_extent().x *
+                   m_blocks[0]->voxel_extent().y *
+                   m_blocks[0]->voxel_extent().z };
 
   Ty *buf{ new Ty[buf_size] };
   float *tex{ new float[buf_size] };
@@ -153,20 +115,23 @@ BlockCollection::do_initBlockTextures(std::string const &file)
   int i{ 0 };
   for (auto *b : m_nonEmptyBlocks) {
     std::cout << "\rInitializing texture block " << ++i << "/" << m_nonEmptyBlocks.size();
+
+    // Read data for this block from the disk.
     fillBlockData< Ty >(*b, is, buf);
+
+    // Normalize the data prior to generating the texture.
     for (size_t idx{ 0 }; idx < buf_size; ++idx) {
       tex[idx] = buf[idx] / static_cast<float>(m_indexFile->getHeader().vol_max);
     }
 
     b->texture().genGLTex3d(bd::Texture::Format::RED,
-        bd::Texture::Format::RED,
-        b->voxel_extent().x,
-        b->voxel_extent().y,
-        b->voxel_extent().z,
-        //IndexFileHeader::getType(m_indexFile->getHeader()),
-        DataType::Float,
-        tex);
-  }
+                            bd::Texture::Format::RED,
+                            b->voxel_extent().x,
+                            b->voxel_extent().y,
+                            b->voxel_extent().z,
+                            DataType::Float,
+                            tex);
+  } //for
   std::cout << " ...done." << std::endl;
 
   delete[] buf;
