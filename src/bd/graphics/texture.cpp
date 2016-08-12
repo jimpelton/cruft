@@ -84,7 +84,7 @@ Texture::bind(unsigned int unit) const
 
 
 unsigned int
-Texture::genGLTex1d(float* img, Format ity, Format ety, size_t w)
+Texture::genGLTex1d(float const * img, Format ity, Format ety, size_t w)
 {
   GLuint texId{ 0 };
   gl_check(glGenTextures(1, &texId));
@@ -98,7 +98,7 @@ Texture::genGLTex1d(float* img, Format ity, Format ety, size_t w)
     0,
     gl_format[ordinal<Format>(ety)],
     GL_FLOAT,
-    static_cast<void *>(img)
+    static_cast<void const *>(img)
     ));
 
   gl_check(glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
