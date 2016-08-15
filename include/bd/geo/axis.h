@@ -2,9 +2,6 @@
 #define bd_axis_h__
 
 
-#include <bd/scene/transformable.h>
-#include <bd/geo/drawable.h>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -12,7 +9,7 @@
 
 namespace bd
 {
-class CoordinateAxis : public Transformable, public IDrawable
+class CoordinateAxis
 {
 public:
   static const std::array<glm::vec4, 6> verts;
@@ -22,12 +19,14 @@ public:
 
   CoordinateAxis();
 
-  //    CoordinateAxis(const glm::vec3 &center, const glm::vec3 &dims);
-  ~CoordinateAxis()
-  {
-  }
+  virtual ~CoordinateAxis() { }
 
-  virtual void draw() override;
+  void setModel(glm::mat4 const &m);
+
+  glm::mat4 const & getModel() const;
+
+private:
+  glm::mat4 m_model;
 };
 } // namespace bd
 

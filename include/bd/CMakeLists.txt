@@ -1,6 +1,6 @@
 
 
-add_subdirectory(context)
+#add_subdirectory(context)
 add_subdirectory(io)
 add_subdirectory(geo)
 add_subdirectory(graphics)
@@ -14,7 +14,7 @@ add_subdirectory(volume)
 
 
 set(bd_HEADERS
-    "${context_HEADERS}"
+#    "${context_HEADERS}"
     "${io_HEADERS}"
     "${geo_HEADERS}"
     "${graphics_HEADERS}"

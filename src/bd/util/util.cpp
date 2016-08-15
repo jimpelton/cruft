@@ -1,6 +1,6 @@
-#include <bd/log/logger.h>
 #include <bd/util/util.h>
-#include <bd/io/datareader.h>
+
+#include <bd/log/logger.h>
 #include <bd/io/datatypes.h>
 #include <bd/io/datfile.h>
 
@@ -96,55 +96,55 @@ vecCompMult(const glm::u64vec3 &v)
   return v.x * v.y * v.z;
 }
 
-std::unique_ptr<float []>
-readVolumeData(const std::string& dtype, const std::string& fpath,
-    size_t volx, size_t voly, size_t volz)
-{
-  bd::DataType t = bd::to_dataType(dtype);
-  float* rawdata = nullptr;
-  switch (t) {
-  case bd::DataType::Float:
-    {
-      bd::DataReader<float, float> reader;
-      reader.loadRaw3d(fpath, volx, voly, volz, false);
-      rawdata = reader.takeOwnership();
-      break;
-    }
-  case bd::DataType::UnsignedCharacter:
-    {
-      bd::DataReader<unsigned char, float> reader;
-      reader.loadRaw3d(fpath, volx, voly, volz, false);
-      rawdata = reader.takeOwnership();
-      break;
-    }
-  case bd::DataType::UnsignedShort:
-    {
-      DataReader<unsigned short, float> reader;
-      reader.loadRaw3d(fpath, volx, voly, volz, false);
-      rawdata = reader.takeOwnership();
-      break;
-    }
-  default:
-    break;
-  }
-
-  return std::unique_ptr<float[]>(rawdata);
-}
-
-std::unique_ptr<float[]>
-readVolumeData(const std::string& datFilePath, const std::string &filePath)
-{
-  bd::DatFileData dat{};
-  bool success{ bd::parseDat(datFilePath, dat) };
-  if (! success) {
-    return nullptr;
-  }
- 
-  Info() << "Dat file: " << dat.to_string();
-  
-  std::string typeStr{ bd::to_string(dat.dataType) };
-  return readVolumeData(typeStr, filePath, dat.rX, dat.rY, dat.rZ);
-}
+//std::unique_ptr<float []>
+//readVolumeData(const std::string& dtype, const std::string& fpath,
+//    size_t volx, size_t voly, size_t volz)
+//{
+//  bd::DataType t = bd::to_dataType(dtype);
+//  float* rawdata = nullptr;
+//  switch (t) {
+//  case bd::DataType::Float:
+//    {
+//      bd::DataReader<float, float> reader;
+//      reader.loadRaw3d(fpath, volx, voly, volz, false);
+//      rawdata = reader.takeOwnership();
+//      break;
+//    }
+//  case bd::DataType::UnsignedCharacter:
+//    {
+//      bd::DataReader<unsigned char, float> reader;
+//      reader.loadRaw3d(fpath, volx, voly, volz, false);
+//      rawdata = reader.takeOwnership();
+//      break;
+//    }
+//  case bd::DataType::UnsignedShort:
+//    {
+//      DataReader<unsigned short, float> reader;
+//      reader.loadRaw3d(fpath, volx, voly, volz, false);
+//      rawdata = reader.takeOwnership();
+//      break;
+//    }
+//  default:
+//    break;
+//  }
+//
+//  return std::unique_ptr<float[]>(rawdata);
+//}
+//
+//std::unique_ptr<float[]>
+//readVolumeData(const std::string& datFilePath, const std::string &filePath)
+//{
+//  bd::DatFileData dat{};
+//  bool success{ bd::parseDat(datFilePath, dat) };
+//  if (! success) {
+//    return nullptr;
+//  }
+//
+//  Info() << "Dat file: " << dat.to_string();
+//
+//  std::string typeStr{ bd::to_string(dat.dataType) };
+//  return readVolumeData(typeStr, filePath, dat.rX, dat.rY, dat.rZ);
+//}
 
 } // namespace bd
 

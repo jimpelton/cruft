@@ -44,7 +44,6 @@ find_package(GLM REQUIRED)
 #### Platform Specifics ################################################
 # Windows requires a few extra definitions.
 if (WIN32)
-    add_definitions(-DGLEW_STATIC)  #Link statically to Glew
     add_definitions(-DNOMINMAX)     #Disable the overrides of std::min/max in Windows.h
 endif (WIN32)
 
@@ -64,6 +63,10 @@ endif (UNIX)
 set(CRUFT_RESOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/res")
 #message("Cruft resource directory: ${CRUFT_RESOURCE_DIR}")
 
+# Enables gl_check() macros.
+add_definitions(-DBD_DEBUG)
+add_definitions(-DGLEW_STATIC)  #Link statically to Glew
+
 include_directories(
         "${GLEW_INCLUDE_DIR}"
         "${GLM_INCLUDE_DIR}"
@@ -73,8 +76,6 @@ include_directories(
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-# Enables gl_check() macros.
-add_definitions(-DBD_DEBUG)
 
 add_subdirectory("include/bd")
 add_subdirectory("src/bd")
@@ -93,11 +94,11 @@ target_link_libraries(crufterly
 
 # Install the static library.
 install(TARGETS crufterly ARCHIVE
-        DESTINATION "lib/${PROJECT_NAME}/static/${CMAKE_BUILD_TYPE}/")
+        DESTINATION "lib/bd/static/${CMAKE_BUILD_TYPE}/")
 
 # Install the headers.
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/bd/"
-        DESTINATION "include/${PROJECT_NAME}/bd" FILES_MATCHING PATTERN "*.h")
+        DESTINATION "include/bd" FILES_MATCHING PATTERN "*.h")
 
 # On unix, create a custom install target
 # I find this useful for Jetbrain's CLion IDE.

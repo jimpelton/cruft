@@ -1,8 +1,6 @@
 #ifndef bbox_h__
 #define bbox_h__
 
-#include <bd/scene/transformable.h>
-#include <bd/geo/drawable.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -10,18 +8,17 @@
 
 namespace bd {
 
-class Box : public Transformable, public IDrawable {
+class WireframeBox {
 public:
     static const std::array<glm::vec4, 8> vertices;
     static const std::array<glm::vec3, 8> colors;
     static const std::array<unsigned short, 16> elements;
-
     static const unsigned int vert_element_size = 4;
 
-    Box();
-    ~Box();
+    WireframeBox();
+    ~WireframeBox();
 
-    virtual void draw() override;
+//    virtual void draw() override;
 };
 
 } // namspace bd

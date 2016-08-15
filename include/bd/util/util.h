@@ -30,20 +30,7 @@ size_t to1D(size_t col, size_t row, size_t slab, size_t maxCols, size_t maxRows)
 unsigned long long vecCompMult(const glm::u64vec3 &v);
 
 
-///////////////////////////////////////////////////////////////////////////////
-/// \brief A convenience method for reading an entire data io into memory.
-/// \param[in] dtype The data type as a string
-/// \param[in] path The io path
-/// \param[in] volx Number of samples in the x dim
-/// \param[in] voly Number of samples in the y dim
-/// \param[in] volz Number of samples in the z dim
-/// \returns An std::unique_ptr to an array of floats.
-///////////////////////////////////////////////////////////////////////////////
-std::unique_ptr<float []> readVolumeData(const std::string& dtype,
-    const std::string& fpath, size_t volx, size_t voly, size_t volz);
 
-std::unique_ptr<float []>
-readVolumeData(const std::string& datFilePath, const std::string &filePath);
 
 } // namespace bd
 

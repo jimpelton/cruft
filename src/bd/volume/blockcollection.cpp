@@ -7,9 +7,6 @@
 
 namespace bd
 {
-//glm::u64vec3 BlockCollection::m_blockDims{ 0, 0, 0 };
-//glm::u64vec3 BlockCollection::m_volDims{ 0, 0, 0 };
-//glm::u64vec3 BlockCollection::m_numBlocks{ 0, 0, 0 };
 
 BlockCollection::BlockCollection()
 {

@@ -2,10 +2,10 @@
 #define texture_h__
 
 #include <bd/graphics/shader.h>
+#include <bd/io/datatypes.h>
 
 #include <string>
 #include <cstdlib>
-#include <bd/io/datatypes.h>
 
 namespace bd
 {

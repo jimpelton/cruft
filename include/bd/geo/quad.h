@@ -1,8 +1,7 @@
 #ifndef quad_h__
 #define quad_h__
 
-#include <bd/scene/transformable.h>
-#include <bd/geo/drawable.h>
+//#include <bd/geo/drawable.h>
 
 #include <glm/glm.hpp>
 
@@ -10,7 +9,7 @@
 
 namespace bd
 {
-class Quad : public Transformable, public IDrawable
+class Quad //: public IDrawable
 {
 public:
   static const std::array<glm::vec4, 4> verts_xy; ///< initially in xy-plane
@@ -30,7 +29,7 @@ public:
   Quad();
   virtual ~Quad();
 
-  virtual void draw();
+//  virtual void draw();
 };
 } // namespace bd
 

@@ -3,7 +3,6 @@
 
 #include <bd/graphics/texture.h>
 #include <bd/io/fileblock.h>
-//#include <bd/scene/transformable.h>
 
 #include <glm/glm.hpp>
 

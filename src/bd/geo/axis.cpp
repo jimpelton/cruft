@@ -1,6 +1,5 @@
-#include <bd/log/gl_log.h>
 #include <bd/geo/axis.h>
-#include <GL/glew.h>
+#include <bd/log/gl_log.h>
 
 namespace bd
 {
@@ -36,15 +35,30 @@ const std::array<unsigned short, 6> CoordinateAxis::elements
 };
 
 CoordinateAxis::CoordinateAxis()
-  : Transformable()
+  : m_model{ 1.0f }
 {
 }
 
+
 void
-CoordinateAxis::draw()
+CoordinateAxis::setModel(glm::mat4 const &m)
 {
-  gl_check( glDrawArrays( GL_LINES, 0, static_cast<GLsizei>(verts.size()) ));
+  m_model = m;
 }
+
+glm::mat4 const &
+CoordinateAxis::getModel() const
+{
+  return m_model;
+}
+
+//void
+//CoordinateAxis::draw()
+//{
+//  gl_check( glDrawArrays( GL_LINES, 0, static_cast<GLsizei>(verts.size()) ));
+//}
+
+
 } /* namespace  bd */
 
 

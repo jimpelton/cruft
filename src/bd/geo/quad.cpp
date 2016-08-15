@@ -2,7 +2,7 @@
 #include <bd/log/gl_log.h>
 
 #include <array>
-#include <GL/glew.h>
+//#include <GL/glew.h>
 
 namespace bd
 {
@@ -67,7 +67,7 @@ const std::array<glm::vec3, 4> Quad::colors
   glm::vec3(0.0f, 1.0f, 0.0f)
 };
 
-Quad::Quad() : Transformable()
+Quad::Quad()
 {
 }
 
@@ -75,14 +75,14 @@ Quad::~Quad()
 {
 }
 
-void
-Quad::draw()
-{
-  gl_check(glDrawElements(GL_TRIANGLE_STRIP, 
-    static_cast<GLsizei>(elements.size()), 
-    GL_UNSIGNED_SHORT, 
-    nullptr));
-}
+//void
+//Quad::draw()
+//{
+//  gl_check(glDrawElements(GL_TRIANGLE_STRIP,
+//    static_cast<GLsizei>(elements.size()),
+//    GL_UNSIGNED_SHORT,
+//    nullptr));
+//}
 } // namespace bd
 
 

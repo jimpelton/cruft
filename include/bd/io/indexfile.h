@@ -109,7 +109,7 @@ public:
 
 
   void
-  create(std::string const& rawFile, size_t buffSize, float const minmax[2]) override
+  create(std::string const &rawFile, size_t buffSize, float const minmax[2]) override
   {
     ValueRangeFilter<Ty> isRelevant(minmax[0], minmax[1]);
     c.createFromRawFile(rawFile, buffSize, isRelevant);
