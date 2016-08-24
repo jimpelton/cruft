@@ -13,8 +13,8 @@ namespace bd
 namespace
 {
 
-const size_t NUM_BUCKETS{ 1536 };
-const size_t MAX_IDX{ NUM_BUCKETS - 1 };
+const long long NUM_BUCKETS{ 1536 };
+const long long MAX_IDX{ NUM_BUCKETS - 1 };
 
 }
 
