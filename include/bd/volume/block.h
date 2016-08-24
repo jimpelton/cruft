@@ -86,6 +86,7 @@ private:
 
 /// \brief Output a string representation of given Block.
 std::ostream& operator<<(std::ostream& os, const Block& b);
+
 } // namespace bd
 
 #endif // !block_h__

@@ -80,6 +80,15 @@ hsvToRgb(float h, float s, float v, glm::vec3& rgb)
   }
 }
 
+template<typename VecType, typename NumberType,
+         typename = typename std::enable_if<std::is_arithmetic<NumberType>::value,
+                                            NumberType>::type>
+NumberType lerp(VecType x, VecType y, NumberType a)
+{
+  return x * (1.0f - a) + y * a;
+}
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 size_t

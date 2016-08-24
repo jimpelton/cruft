@@ -2,14 +2,14 @@
 #define minmax_h__
 
 #include <bd/io/buffer.h>
-#include <bd/io/indexfile.h>
-#include <bd/volume/volume.h>
+//#include <bd/io/indexfile.h>
+//#include <bd/volume/volume.h>
 
 #include <tbb/parallel_reduce.h>
 #include <tbb/blocked_range.h>
 
 #include <limits>
-#include <vector>
+//#include <vector>
 #include <functional>
 
 namespace bd
