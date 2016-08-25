@@ -110,19 +110,15 @@ public:
     }
   }
 
-//  unsigned int
-//  get(size_t i)
-//  {
-//    return m_buckets[i];
-//  }
+  unsigned int* buckets() { return m_buckets; }
+  Ty* histMin() { return m_histMin; }
+  Ty* histMax() { return m_histMax; }
 
-public:
+private:
   unsigned int * m_buckets; // [NUM_BUCKETS];
   Ty * m_histMin;
   Ty * m_histMax;
   long long m_totalCount;
-
-private:
   Ty const * const m_data;
   Ty const m_rawmin;
   Ty const m_rawmax;
