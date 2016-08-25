@@ -7,7 +7,7 @@
 
 #include <bd/io/buffer.h>
 #include <tbb/tbb.h>
-
+#include <limits>
 namespace bd
 {
 namespace
@@ -26,16 +26,34 @@ public:
       : m_data{ b->ptr() }
         , m_rawmin{ rawmin }
         , m_rawmax{ rawmax }
+        , m_totalCount{ 0 }
   {
     m_buckets = new unsigned int[ NUM_BUCKETS ];
+    m_histMin = new Ty[ NUM_BUCKETS ];
+    m_histMax = new Ty[ NUM_BUCKETS ];
+
+    for(int i{ 0 }; i < NUM_BUCKETS; ++i){
+      m_buckets[i] = 0;
+      m_histMin[i] = std::numeric_limits<Ty>::max();
+      m_histMax[i] = std::numeric_limits<Ty>::lowest();
+    }
   }
 
   ParallelHistogram(ParallelHistogram<Ty> &o, tbb::split)
       : m_data{ o.m_data }
         , m_rawmin{ o.m_rawmin }
         , m_rawmax{ o.m_rawmax }
+        , m_totalCount{ 0 }
   {
     m_buckets = new unsigned int[ NUM_BUCKETS ];
+    m_histMin = new Ty[ NUM_BUCKETS ];
+    m_histMax = new Ty[ NUM_BUCKETS ];
+
+    for(int i{ 0 }; i < NUM_BUCKETS; ++i){
+      m_buckets[i] = 0;
+      m_histMin[i] = std::numeric_limits<Ty>::max();
+      m_histMax[i] = std::numeric_limits<Ty>::lowest();
+    }
   }
 
   ~ParallelHistogram() { }
@@ -43,14 +61,18 @@ public:
   void
   operator()(tbb::blocked_range<size_t> const &r)
   {
+    unsigned int * const buckets{ m_buckets };
+    Ty const * const data{ m_data };
     Ty const rawmin{ m_rawmin };
     Ty const rawmax{ m_rawmax };
-    unsigned int * const buckets{ m_buckets };
-//    Ty histmin{ m_histMin };
-//    Ty histmax{ m_histMax };
+
+    Ty * const histmin{ m_histMin };
+    Ty * const histmax{ m_histMax };
+    long long totalCount{ m_totalCount };
+
 
     for(size_t i{ r.begin() }; i != r.end(); ++i) {
-      Ty val{ m_data[i] };
+      Ty val{ data[i] };
 
       // Compute the bucket index.
       long long idx{
@@ -62,9 +84,15 @@ public:
       if (idx > MAX_IDX)
         idx = MAX_IDX;
 
+      if (val < histmin[idx]) histmin[idx] = val;
+      if (val > histmax[idx]) histmax[idx] = val;
+
       // Accumulate frequency.
       buckets[idx] += 1;
+      totalCount += 1;
     }
+
+    m_totalCount = totalCount;
   }
 
   void
@@ -73,25 +101,32 @@ public:
     // Accumulate histogram frequences from the joinee.
     for(size_t i{ 0 }; i < NUM_BUCKETS; ++i) {
       m_buckets[i] += rhs.m_buckets[i];
+
+      if (rhs.m_histMin[i] < m_histMin[i])
+        m_histMin[i] = rhs.m_histMin[i];
+
+      if (rhs.m_histMax[i] > m_histMax[i])
+        m_histMax[i] = rhs.m_histMax[i];
     }
   }
 
-  unsigned int
-  get(size_t i)
-  {
-    return m_buckets[i];
-  }
+//  unsigned int
+//  get(size_t i)
+//  {
+//    return m_buckets[i];
+//  }
+
+public:
+  unsigned int * m_buckets; // [NUM_BUCKETS];
+  Ty * m_histMin;
+  Ty * m_histMax;
+  long long m_totalCount;
 
 private:
-  unsigned int *m_buckets; // [NUM_BUCKETS];
   Ty const * const m_data;
   Ty const m_rawmin;
   Ty const m_rawmax;
-//  Ty m_histMin;
-//  Ty m_histMax;
 };
-
-
 
 } // namespace bd
 
