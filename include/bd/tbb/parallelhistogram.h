@@ -63,8 +63,8 @@ public:
   {
     unsigned int * const buckets{ m_buckets };
     Ty const * const data{ m_data };
-    Ty const rawmin{ m_rawmin };
-    Ty const rawmax{ m_rawmax };
+    double const rawmin{ m_rawmin };
+    double const rawmax{ m_rawmax };
 
     Ty * const histmin{ m_histMin };
     Ty * const histmax{ m_histMax };
@@ -76,7 +76,7 @@ public:
 
       // Compute the bucket index.
       long long idx{
-          static_cast<long long>((val - rawmin)/(rawmax - rawmin) * MAX_IDX + Ty(0.5)) };
+          static_cast<long long>((val - rawmin)/(rawmax - rawmin) * MAX_IDX + 0.5) };
 
       // Reset idx if it is out of range.
       if (idx < 0)
@@ -108,20 +108,22 @@ public:
       if (rhs.m_histMax[i] > m_histMax[i])
         m_histMax[i] = rhs.m_histMax[i];
     }
+    m_totalCount += rhs.m_totalCount;
   }
 
-  unsigned int* buckets() { return m_buckets; }
-  Ty* histMin() { return m_histMin; }
-  Ty* histMax() { return m_histMax; }
+  unsigned int* buckets() const { return m_buckets; }
+  Ty* histMin() const { return m_histMin; }
+  Ty* histMax() const { return m_histMax; }
+  long long totalCount() const { return m_totalCount; }
 
 private:
-  unsigned int * m_buckets; // [NUM_BUCKETS];
-  Ty * m_histMin;
-  Ty * m_histMax;
-  long long m_totalCount;
   Ty const * const m_data;
   Ty const m_rawmin;
   Ty const m_rawmax;
+  long long m_totalCount;
+  unsigned int * m_buckets; // [NUM_BUCKETS];
+  Ty * m_histMin;
+  Ty * m_histMax;
 };
 
 } // namespace bd

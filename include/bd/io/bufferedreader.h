@@ -110,7 +110,7 @@ bool
 BufferedReader<Ty>::open(const std::string &path)
 {
   m_path = path;
-  m_pool = new BufferPool<Ty>(m_bufSizeBytes, 2);
+  m_pool = new BufferPool<Ty>(m_bufSizeBytes, 4);
   m_pool->allocate();
   return true;
 
