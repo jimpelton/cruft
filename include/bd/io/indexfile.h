@@ -69,10 +69,10 @@ const uint32_t HEAD_LEN{ sizeof(IndexFileHeader) };
 /// \brief Allows using the FileBlockCollection template without
 ///        exposing the templated-ness of FileBlockCollection, since we don't
 ///        know what type of BC2 we need until runtime.
-class blockcollection2_wrapper_base
+class FileBlockCollectionWrapper_Base
 {
 public:
-  virtual ~blockcollection2_wrapper_base()
+  virtual ~FileBlockCollectionWrapper_Base()
   {
   }
 
@@ -98,11 +98,11 @@ public:
 /// \sa base_collection_wrapper
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
-class blockcollection2_wrapper : public blockcollection2_wrapper_base
+class FileBlockCollectionWrapper : public FileBlockCollectionWrapper_Base
 {
 public:
 
-  blockcollection2_wrapper(glm::u64vec3 volDims, glm::u64vec3 numBlocks)
+  FileBlockCollectionWrapper(glm::u64vec3 volDims, glm::u64vec3 numBlocks)
       : c{ volDims, numBlocks }
   {
   }
@@ -211,7 +211,7 @@ public:
   std::vector<FileBlock*> const& blocks() const;
 
 
-  static blockcollection2_wrapper_base*
+  static FileBlockCollectionWrapper_Base*
   make_wrapper(DataType type,
                uint64_t const num_vox[3],
                uint64_t const numblocks[3]);
@@ -224,7 +224,7 @@ private:
 private:
   IndexFileHeader m_header;
   std::string m_fileName;
-  blockcollection2_wrapper_base* m_col;
+  FileBlockCollectionWrapper_Base* m_col;
 
 };
 

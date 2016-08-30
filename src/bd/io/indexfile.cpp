@@ -76,9 +76,8 @@ IndexFile::fromRawFile(std::string const & path, size_t bufsz, DataType type,
   std::unique_ptr<IndexFile> idxfile{ std::unique_ptr<IndexFile>{ new IndexFile{} }};
   idxfile->m_fileName = path;
 
-  // make blockcollection2 object.
+  // make FileBlockCollection object.
   idxfile->m_col = IndexFile::make_wrapper(type, num_vox, numblocks);
-
 
   // build the block collection
   idxfile->m_col->create(idxfile->m_fileName, bufsz, minmax);
@@ -119,7 +118,6 @@ IndexFile::fromRawFile(std::string const & path, size_t bufsz, DataType type,
   idxfile->m_header.blocks_extent[1] = blkExt.y;
   idxfile->m_header.blocks_extent[2] = blkExt.z;
 
-//  idxfile->m_header.vol_empty_voxels = idxfile->m_col->volume().emptyVoxels();
 
   idxfile->m_header.vol_avg = idxfile->m_col->volume().avg();
   idxfile->m_header.vol_max = idxfile->m_col->volume().max();
@@ -134,7 +132,6 @@ IndexFile::fromRawFile(std::string const & path, size_t bufsz, DataType type,
 std::unique_ptr<IndexFile>
 IndexFile::fromBinaryIndexFile(const std::string& path)
 {
-  //std::shared_ptr<IndexFile> idxfile{ std::make_shared<IndexFile>() };
   std::unique_ptr<IndexFile> idxfile{ new IndexFile() };
   idxfile->m_fileName = path;
   bool success = idxfile->readBinaryIndexFile();
@@ -171,7 +168,7 @@ IndexFile::getHeader() const
 
 
 ///////////////////////////////////////////////////////////////////////////////
-blockcollection2_wrapper_base*
+FileBlockCollectionWrapper_Base*
 IndexFile::make_wrapper
 (
   DataType type,
@@ -179,36 +176,36 @@ IndexFile::make_wrapper
   const uint64_t numblocks[3]
   )
 {
-  blockcollection2_wrapper_base *col{ nullptr };
+  FileBlockCollectionWrapper_Base *col{ nullptr };
 
   switch (type) {
 
   case bd::DataType::UnsignedCharacter:
-    col = new blockcollection2_wrapper<unsigned char> {
+    col = new FileBlockCollectionWrapper<unsigned char> {
         { num_vox[0], num_vox[1], num_vox[2] },
         { numblocks[0], numblocks[1], numblocks[2] } };
     break;
 
   case bd::DataType::Character:
-    col = new blockcollection2_wrapper<char>
+    col = new FileBlockCollectionWrapper<char>
         { { num_vox[0], num_vox[1], num_vox[2] },
           { numblocks[0], numblocks[1], numblocks[2] } };
     break;
 
   case bd::DataType::UnsignedShort:
-    col = new blockcollection2_wrapper<unsigned short>
+    col = new FileBlockCollectionWrapper<unsigned short>
     {{ num_vox[0], num_vox[1], num_vox[2] },
     { numblocks[0], numblocks[1], numblocks[2] }};
     break;
 
   case bd::DataType::Short:
-    col = new blockcollection2_wrapper<short>
+    col = new FileBlockCollectionWrapper<short>
         { { num_vox[0], num_vox[1], num_vox[2] },
           { numblocks[0], numblocks[1], numblocks[2] } };
     break;
 
   case bd::DataType::Float:
-    col = new blockcollection2_wrapper<float>
+    col = new FileBlockCollectionWrapper<float>
     { { num_vox[0], num_vox[1], num_vox[2] },
     { numblocks[0], numblocks[1], numblocks[2] } };
     break;

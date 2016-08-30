@@ -15,10 +15,7 @@
 namespace bd
 {
 
-//////////////////////////////////////////////////////////////////////////
 /// \brief Compute the relevance of voxels in the blocked_range.
-///
-//////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 class ParallelBlockStats{
 
@@ -26,7 +23,6 @@ class ParallelBlockStats{
 
 public:
 
-//  using Relevance = uint64_t;
 
   ParallelBlockStats(Buffer<Ty> *b, Volume const *v, std::function<bool(Ty)> isEmpty)
     : m_data{ b->ptr() }
@@ -36,7 +32,6 @@ public:
     , isRelevant{ isEmpty }
   {
     m_empties = new uint64_t[m_volume->lower().total_block_count()]();
-//    memset(m_empties, 0, v->lower().total_block_count()*sizeof(uint64_t));
   }
 
   ParallelBlockStats(ParallelBlockStats<Ty> &o, tbb::split)
@@ -47,7 +42,6 @@ public:
       , isRelevant{ o.isRelevant }
   {
     m_empties = new uint64_t[o.m_volume->lower().total_block_count()]();
-//    memset(m_empties, 0, o.m_volume->lower().total_block_count()*sizeof(uint64_t));
   }
 
   ~ParallelBlockStats()
@@ -71,7 +65,11 @@ public:
     uint64_t const bcY{ m_volume->lower().block_count().y };
     uint64_t const bcZ{ m_volume->lower().block_count().z };
 
-    uint64_t vIdx, bI, bJ, bK, bIdx;
+    uint64_t vIdx, // voxel 1D index
+        bI,        // block i index
+        bJ,        // block j index
+        bK,        // block k index
+        bIdx;      // block 1D index
     for (size_t i{ r.begin() }; i != r.end(); ++i) {
 
       // Convert vIdx (the voxel index within the entire volume data set)
@@ -116,15 +114,6 @@ private:
   uint64_t * m_empties;
 
   std::function<bool(Ty)> isRelevant; //< Is the element a relevant voxel or not.
-
-//  Ty const * const data;
-//
-//   uint64_t const vdX, vdY;         // volume dims along X, Y axis
-//   uint64_t const bdX, bdY, bdZ;    // block dims along X, Y, Z axis
-//   uint64_t const bcX, bcY, bcZ;    // block count along X, Y, Z axis
-//   uint64_t const voxel_start;      // global voxel index this buffer starts at.
-
-
 
 }; // class ParallelBlockStats
 

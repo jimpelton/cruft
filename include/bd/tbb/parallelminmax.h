@@ -2,14 +2,11 @@
 #define minmax_h__
 
 #include <bd/io/buffer.h>
-//#include <bd/io/indexfile.h>
-//#include <bd/volume/volume.h>
 
 #include <tbb/parallel_reduce.h>
 #include <tbb/blocked_range.h>
 
 #include <limits>
-//#include <vector>
 #include <functional>
 
 namespace bd
@@ -66,14 +63,11 @@ public:
     if (y.max_value>max_value) {
       max_value = y.max_value;
     }
-//    empty_voxels += y.empty_voxels;
   }
 
 
-//  std::function<bool(Ty)> isRelevant;
   Ty min_value;
   Ty max_value;
-//  uint64_t empty_voxels;
 
 private:
   Ty const * const data;
