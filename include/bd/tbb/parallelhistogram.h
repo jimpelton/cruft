@@ -63,8 +63,8 @@ public:
   {
     unsigned int * const buckets{ m_buckets };
     Ty const * const data{ m_data };
-    double const rawmin{ m_rawmin };
-    double const rawmax{ m_rawmax };
+    double const rawmin{ static_cast<double>(m_rawmin) };
+    double const rawmax{ static_cast<double>(m_rawmax) };
 
     Ty * const histmin{ m_histMin };
     Ty * const histmax{ m_histMax };
