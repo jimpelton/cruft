@@ -109,7 +109,7 @@ public:
   /// \brief Create logger that logs to stdout.
   /////////////////////////////////////////////////////////////////////////////
   logger()
-    : m_out{ std::cout }
+    : m_out{ &std::cout }
 //    , m_level{ LogLevel::INFO }
     , m_levelString{ "INFO" }
   {
@@ -120,14 +120,14 @@ public:
   /////////////////////////////////////////////////////////////////////////////
   ~logger()
   {
-    m_out << "\n";
-    m_out.flush();
+    *m_out << "\n";
+    m_out->flush();
     s_instance = nullptr;
   }
 
 
   /////////////////////////////////////////////////////////////////////////////
-  static logger& get(const char* level = "INFO")
+  static logger& get(const char* level = "INFO", std::ostream *os = &std::cout)
   {
     if (s_instance == nullptr) {
       s_instance = new logger();
@@ -135,6 +135,7 @@ public:
     }
 
     s_instance->m_levelString = level;
+    s_instance->m_out = os;
 
     return *s_instance;
   }
@@ -151,7 +152,7 @@ public:
   void start_line()
   {
     std::thread::id tid = std::this_thread::get_id();
-    m_out << "- " << now() << " (" << std::hex << tid << std::dec << ") "
+    *m_out << "- " << now() << " (" << std::hex << tid << std::dec << ") "
         << m_levelString << ":\t";
 
   }
@@ -159,7 +160,7 @@ public:
   /////////////////////////////////////////////////////////////////////////////
   void end_line()
   {
-    m_out << '\n'; //std::endl;
+    *m_out << '\n'; //std::endl;
   }
 
 
@@ -167,7 +168,7 @@ public:
   template<typename T>
   void do_log(const T& t)
   {
-    m_out << t;
+    *m_out << t;
   }
 
 
@@ -218,7 +219,7 @@ private:   // members
 
   static logger *s_instance;
 
-  std::ostream &m_out;
+  std::ostream *m_out;
 //  LogLevel m_level;
   const char *m_levelString;
 
@@ -238,7 +239,7 @@ inline logger& Dbg()
 }
 inline logger& Err()
 {
-  return logger::get("ERROR");
+  return logger::get("ERROR", &std::cerr);
 }
 
 inline logger& Info()

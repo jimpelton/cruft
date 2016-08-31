@@ -169,17 +169,12 @@ bool
 BufferedReader<Ty>::hasNext() const
 {
   // if no buffers in pool, check if the reader thread is done.
-  // If it hasn't, then we should return true.
+  // If it is still reading, then we should return true because there will
+  // be a full buffer available soon.
   if (!m_pool->hasNext()) {
     // if no buffers in pool, but reader is still reading, then
     // we will have a next buffer soon.
-    if (!isReading()){
-      return true;
-    } else {
-      // if there are no buffers and the reader is done, we are
-      // done reading.
-      return false;
-    }
+    return !isReading();
   } else {
     // if there are buffers in the pool, then return true.
     return true;

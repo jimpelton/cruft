@@ -34,7 +34,7 @@ const std::array<GLenum, 2> gl_target
 bool
 Compiler::compile(Shader& shader, const char* code)
 {
-  unsigned int shaderId = shader.id();
+  unsigned int shaderId{ shader.id() };
 
   gl_check(glShaderSource(shaderId, 1, &code, nullptr));
 
@@ -104,7 +104,10 @@ Shader::loadFromFile(const std::string& filepath)
   const char* ptrCode{ code.c_str() };
   file.close();
 
-  Compiler::compile(*this, ptrCode); //compileShader(ptrCode);
+  bool result{ Compiler::compile(*this, ptrCode) }; //compileShader(ptrCode);
+  if (! result) {
+    Err() << "Shader " << this->to_string() << " failed to compile.";
+  }
 }
 
 
@@ -112,7 +115,10 @@ Shader::loadFromFile(const std::string& filepath)
 void
 Shader::loadFromString(const std::string& shaderString)
 {
-  Compiler::compile(*this, shaderString.c_str());
+  bool result{ Compiler::compile(*this, shaderString.c_str()) };
+  if (! result) {
+    Err() << "Shader " << this->to_string() << " failed to compile.";
+  }
   //return compileShader(shaderString.c_str());
 }
 
@@ -233,6 +239,9 @@ ShaderProgram::linkProgram()
       &programErrorMessage[0]));
     Dbg() << &programErrorMessage[0];
   }
+
+  if (! result)
+    return 0;
 
   return m_programId;
 }
