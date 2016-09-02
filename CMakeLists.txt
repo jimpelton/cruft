@@ -65,17 +65,17 @@ set(CRUFT_RESOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/res")
 
 # Enables gl_check() macros.
 add_definitions(-DBD_DEBUG)
-add_definitions(-DGLEW_STATIC)  #Link statically to Glew
+#Link statically to GLEW
+add_definitions(-DGLEW_STATIC)
 
 include_directories(
         "${GLEW_INCLUDE_DIR}"
         "${GLM_INCLUDE_DIR}"
         "${GLFW_INCLUDE_DIRS}"
         "${INTELTBB_INCLUDE_DIR}"
-)
+        "${CMAKE_CURRENT_SOURCE_DIR}/include" )
 
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
-
+include_directories()
 
 add_subdirectory("include/bd")
 add_subdirectory("src/bd")
@@ -90,7 +90,7 @@ target_link_libraries(crufterly
     debug "${INTELTBB_DEBUG_LIBRARY}"
     optimized "${INTELTBB_RELEASE_LIBRARY}"
 )
-#add_subdirectory("test")
+
 
 # Install the static library.
 install(TARGETS crufterly ARCHIVE
@@ -109,3 +109,5 @@ add_custom_target(install_${PROJECT_NAME}
         COMMENT "Installing ${PROJECT_NAME}"
 )
 endif()
+
+add_subdirectory("test")

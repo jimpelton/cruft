@@ -79,8 +79,8 @@ public:
           static_cast<long long>((val - rawmin)/(rawmax - rawmin) * MAX_IDX + 0.5) };
 
       // Reset idx if it is out of range.
-      if (idx < 0)
-        idx = 0;
+//      if (idx < 0)
+//        idx = 0;
       if (idx > MAX_IDX)
         idx = MAX_IDX;
 
@@ -111,9 +111,9 @@ public:
     m_totalCount += rhs.m_totalCount;
   }
 
-  unsigned int* buckets() const { return m_buckets; }
-  Ty* histMin() const { return m_histMin; }
-  Ty* histMax() const { return m_histMax; }
+  unsigned int const * buckets() const { return m_buckets; }
+  Ty const * histMin() const { return m_histMin; }
+  Ty const * histMax() const { return m_histMax; }
   long long totalCount() const { return m_totalCount; }
 
 private:
