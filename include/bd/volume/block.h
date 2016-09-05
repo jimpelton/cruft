@@ -57,7 +57,7 @@ public:
 
 
   /// \brief Get the center coordinates of this block.
-  glm::vec3 origin() const;
+  glm::vec3 const & origin() const;
 
 
   /// \brief Get the texture assoc'd with this block.
@@ -78,6 +78,7 @@ public:
 private:
   FileBlock m_fb;
   glm::u64vec3 m_ijk;    ///< Block's location in block coordinates.
+  glm::vec3 m_origin;    ///< This blocks center in world coordinates.
   glm::mat4 m_transform; ///< Block's model-to-world transform matrix.
   Texture m_tex;         ///< Texture data assoc'd with this block.
   bool m_empty;          ///< True if this block was determined empty.

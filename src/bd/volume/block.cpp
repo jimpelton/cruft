@@ -19,6 +19,7 @@ namespace bd
 Block::Block(const glm::u64vec3& ijk, const glm::vec3 &dims, const FileBlock &fb)
   : m_fb{ fb }
   , m_ijk{ ijk }
+  , m_origin{ fb.world_oigin[0], fb.world_oigin[1], fb.world_oigin[2] }
   , m_transform{ 1.0f }  // identity matrix
   , m_tex{ bd::Texture::Target::Tex3D }
 {
@@ -79,10 +80,10 @@ Block::empty(bool b)
 
 
 ///////////////////////////////////////////////////////////////////////////////
-glm::vec3
+glm::vec3 const &
 Block::origin() const
 {
-  return { m_fb.world_oigin[0], m_fb.world_oigin[1], m_fb.world_oigin[2] };
+  return m_origin; // { m_fb.world_oigin[0], m_fb.world_oigin[1], m_fb.world_oigin[2] };
 }
 
 

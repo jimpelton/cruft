@@ -448,12 +448,9 @@ FileBlockCollection<Ty>::addBlock(const FileBlock& b)
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 void
-FileBlockCollection<Ty>::createFromRawFile
-(
-  const std::string &file,
-  size_t bufSize,
-  std::function<bool(Ty)> isVoxelEmpty
-)
+FileBlockCollection<Ty>::createFromRawFile(const std::string &file,
+                                           size_t bufSize,
+                                           std::function<bool(Ty)> isVoxelEmpty)
 {
   BufferedReader<Ty> r{ bufSize };
   if (!r.open(file)) {

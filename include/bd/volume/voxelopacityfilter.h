@@ -5,17 +5,13 @@
 #ifndef voxelopacityfilter_h__
 #define voxelopacityfilter_h__
 
+#include <bd/volume/transferfunction.h>
+
 #include <limits>
+#include <vector>
 
 namespace bd
 {
-
-/// \brief A knot in an opacity transfer function
-struct OpacityKnot
-{
-  double scalar;
-  double alpha;
-};
 
 template<typename Ty>
 class VoxelOpacityFilter
@@ -57,6 +53,7 @@ public:
     for(size_t i = 1; i < m_func.size(); ++i) {
       b = m_func[i];
 
+      //TODO: fix unsafe comparison 
       if (v == b.scalar) {
         return b.alpha;
       } else if (v < b.scalar) {

@@ -13,6 +13,10 @@
 namespace bd
 {
 
+/*****************************************************************************
+ * I n d e x F i l e H e a d e r                                             *
+*****************************************************************************/
+
 ///////////////////////////////////////////////////////////////////////////////
 IndexFileHeader
 IndexFileHeader::fromStream(std::istream& is)
@@ -68,10 +72,17 @@ IndexFileHeader::getTypeInt(DataType ty)
   }
 }
 
+/*****************************************************************************
+ * I n d e x F i l e                                                         *
+*****************************************************************************/
 
 std::unique_ptr<IndexFile>
-IndexFile::fromRawFile(std::string const & path, size_t bufsz, DataType type,
-    uint64_t const num_vox[3], uint64_t const numblocks[3], float const minmax[2])
+IndexFile::fromRawFile(std::string const & path, 
+                       size_t bufsz, 
+                       DataType type,
+                       uint64_t const num_vox[3], 
+                       uint64_t const numblocks[3], 
+                       float const minmax[2])
 {
   std::unique_ptr<IndexFile> idxfile{ std::unique_ptr<IndexFile>{ new IndexFile{} }};
   idxfile->m_fileName = path;

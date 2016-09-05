@@ -2,8 +2,8 @@
 // Created by Jim Pelton on 3/5/16.
 //
 
-#ifndef fileblock_h__
-#define fileblock_h__
+#ifndef crufterly_fileblock_h
+#define crufterly_fileblock_h
 
 #include <cstdint>
 #include <ostream>
@@ -20,29 +20,6 @@ namespace bd
 /// 
 ///   All values in the FileBlock struct are initialized to 0 by the c'tor.
 /// 
-
-///   -----------------------------------------
-///   For each block:
-///   block index       | 8 bytes unsigned
-///   block st. offset  | 8 bytes unsigned
-///   --
-///   block dims X      | 8 bytes unsigned
-///   block dims Y      | 8 bytes unsigned
-///   block dims Z      | 8 bytes unsigned
-///   --
-///   block X pos       | 8 bytes float
-///   block Y pos       | 8 bytes float
-///   block Z pos       | 8 bytes float
-///   --
-///   max val           | 8 bytes float
-///   min val           | 8 bytes float
-///   avg val           | 8 bytes float
-///
-///   isRelevant           | 4 bytes unsigned
-///   -----------------------------------------
-///   Dat file section (unimplemented)
-///   DAT file sz         | 2 bytes unsigned
-///   DAT contents        | n bytes ascii with unix newline chars
 ///////////////////////////////////////////////////////////////////////////////
 struct FileBlock
 {
@@ -82,4 +59,4 @@ std::ostream& operator<<(std::ostream&, const FileBlock&);
 
 } // namespace bd
 
-#endif //! fileblock_h__
+#endif //! crufterly_fileblock_h
