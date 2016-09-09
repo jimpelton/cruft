@@ -5,6 +5,10 @@
 #ifndef CRUFTERLY_TRANSFERFUNCTION_H
 #define CRUFTERLY_TRANSFERFUNCTION_H
 
+#include <string>
+#include <memory>
+#include <vector>
+
 namespace bd
 {
 
@@ -15,5 +19,8 @@ struct OpacityKnot
   double alpha;
 };
 
-}
-#endif //CRUFTERLY_TRANSFERFUNCTION_H
+std::unique_ptr<std::vector<OpacityKnot>>
+load1dtScalar(std::string const &filename);
+
+} // namespace bd
+#endif // ! CRUFTERLY_TRANSFERFUNCTION_H

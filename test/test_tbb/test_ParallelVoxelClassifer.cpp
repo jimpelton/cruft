@@ -29,7 +29,7 @@ const std::vector<bd::OpacityKnot> func{
     { 0.60, 0.9 },
     { 1.0,  1.0 } };
 
-const bd::VoxelOpacityFilter<unsigned char> vof{
+const bd::VoxelOpacityFunction<unsigned char> vof{
     func,
     0.8, 1.0,
     static_cast<unsigned char>(0),
@@ -70,10 +70,10 @@ TEST_CASE("ParallelVoxelClassifer test")
 
   std::vector<bool> map(contents.size(), false);
 
-  bd::ParallelVoxelClassifier<unsigned char> classifier{
-      &map,
-      reinterpret_cast<unsigned char*>(contents.data()),
-      rel };
+  bd::Buffer<unsigned char> buf{
+      reinterpret_cast<unsigned char*>(contents.data()), contents.size() };
+
+  bd::ParallelVoxelClassifier<unsigned char, decltype(rel)> classifier{ &map, &buf, rel };
 
   tbb::blocked_range<size_t> range{ 0, contents.size() };
   tbb::parallel_for(range, classifier);

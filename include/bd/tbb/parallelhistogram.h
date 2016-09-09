@@ -23,7 +23,7 @@ class ParallelHistogram
 {
 public:
   ParallelHistogram(Buffer<Ty> *b, Ty rawmin, Ty rawmax)
-      : m_data{ b->ptr() }
+      : m_data{ b->getPtr() }
         , m_rawmin{ rawmin }
         , m_rawmax{ rawmax }
         , m_totalCount{ 0 }
@@ -65,7 +65,6 @@ public:
     Ty const * const data{ m_data };
     double const rawmin{ static_cast<double>(m_rawmin) };
     double const rawmax{ static_cast<double>(m_rawmax) };
-
     Ty * const histmin{ m_histMin };
     Ty * const histmax{ m_histMax };
     long long totalCount{ m_totalCount };
@@ -111,10 +110,10 @@ public:
     m_totalCount += rhs.m_totalCount;
   }
 
-  unsigned int const * buckets() const { return m_buckets; }
-  Ty const * histMin() const { return m_histMin; }
-  Ty const * histMax() const { return m_histMax; }
-  long long totalCount() const { return m_totalCount; }
+  unsigned int const * getBuckets() const { return m_buckets; }
+  Ty const * getHistMin() const { return m_histMin; }
+  Ty const * getHistMax() const { return m_histMax; }
+  long long getTotalCount() const { return m_totalCount; }
 
 private:
   Ty const * const m_data;

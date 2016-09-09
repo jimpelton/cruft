@@ -2,8 +2,8 @@
 // Created by Jim Pelton on 8/31/16.
 //
 
-#ifndef CRUFTERLY_PARALLELVOXELCLASSIFIER_H
-#define CRUFTERLY_PARALLELVOXELCLASSIFIER_H
+#ifndef bd_parallelvoxelclassifier_h__
+#define bd_parallelvoxelclassifier_h__
 
 #include <bd/io/buffer.h>
 
@@ -18,23 +18,23 @@ namespace bd
 /// \brief Classifies voxels as relevant or irrelevant.
 ///        The classification is saved in the voxel relevance map.
 ///        A 1 means relevant, a 0 means irrelevant.
-template<typename Ty>
+template<typename Ty, typename Function>
 class ParallelVoxelClassifier
 {
 public:
 
   ParallelVoxelClassifier(std::vector<bool> *map,
-                          Ty const * input,
-                          std::function<bool(Ty)> relevant)
+                          Buffer<Ty> const *buf,
+                          Function const &relevant)
       : m_map{ map }
-      , m_input{ input }
+      , m_buf{ buf }
       , m_isRel{ relevant }
   {
   }
 
-  ParallelVoxelClassifier(ParallelVoxelClassifier<Ty> const &rhs, tbb::split)
+  ParallelVoxelClassifier(ParallelVoxelClassifier<Ty, Function> const &rhs, tbb::split)
       : m_map{ rhs.m_map }
-      , m_input{ rhs.m_input }
+      , m_buf{ rhs.m_buf }
       , m_isRel{ rhs.m_isRel }
   {
   }
@@ -45,18 +45,21 @@ public:
 
   void operator()(tbb::blocked_range<size_t> const &r) const
   {
+    Ty const * const data{ m_buf->getPtr() };
+    size_t const offset{ m_buf->getIndexOffset() };
+
     for(size_t i{ r.begin() }; i != r.end(); ++i) {
-      (*m_map)[i] = m_isRel( m_input[i] );
+      (*m_map)[i+offset] = m_isRel( data[i] );
     }
   }
 
 private:
   std::vector<bool> * m_map;  ///< Relevance map
-  Ty const * const m_input;
-  std::function<bool(Ty)> &m_isRel;
+  Buffer<Ty> const * m_buf;
+  Function m_isRel;
 
 }; // class ParallelVoxelClassifier
 
 } // namespace bd
 
-#endif // ! CRUFTERLY_PARALLELVOXELCLASSIFIER_H
+#endif // ! bd_parallelvoxelclassifier_h__

@@ -254,8 +254,8 @@ void
 BufferPool<Ty>::reset()
 {
   for(Buffer<Ty> *b : m_allBuffers) {
-    b->elements(bufferSizeElements());
-    b->index(0);
+    b->setNumElements(bufferSizeElements());
+    b->setIndexOffset(0);
     m_emptyBuffers.push(b);
   }
   while (! m_fullBuffers.empty()) {

@@ -7,15 +7,15 @@
 
 /// \brief Test if a value is within given range.
 template<typename Ty>
-class ValueRangeFilter
+class ValueRangeFunction
 {
 public:
-  ValueRangeFilter(Ty min, Ty max)
+  ValueRangeFunction(Ty min, Ty max)
       : m_min{ min }
       , m_max{ max }
   { }
 
-  ~ValueRangeFilter() {}
+  ~ValueRangeFunction() {}
 
   /// \brief return true if val between m_min and m_max.
   bool operator()(Ty val) {

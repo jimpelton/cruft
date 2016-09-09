@@ -40,8 +40,8 @@ public:
   ////////////////////////////////////////////////////////////////////////////////
   ParallelBlockMinMax(Volume const *v, Buffer<Ty> const *b)
     : m_volume{ v }
-    , m_data{ b->ptr() }
-    , m_voxelStart{ b->index() }
+    , m_data{ b->getPtr() }
+    , m_voxelStart{ b->getIndexOffset() }
     , m_pairs{ new MinMaxPairDouble[ v->lower().total_block_count() ] }
   {
   }

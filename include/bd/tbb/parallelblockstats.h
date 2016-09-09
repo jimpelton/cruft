@@ -25,9 +25,9 @@ public:
 
 
   ParallelBlockStats(Buffer<Ty> *b, Volume const *v, std::function<bool(Ty)> isEmpty)
-    : m_data{ b->ptr() }
+    : m_data{ b->getPtr() }
     , m_volume{ v }
-    , m_voxelStart{ b->index() }
+    , m_voxelStart{ b->getIndexOffset() }
     , m_empties{ nullptr }
     , isRelevant{ isEmpty }
   {

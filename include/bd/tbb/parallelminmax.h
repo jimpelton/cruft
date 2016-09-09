@@ -1,5 +1,5 @@
-#ifndef minmax_h__
-#define minmax_h__
+#ifndef bd_parallelminmax_h__
+#define bd_parallelminmax_h__
 
 #include <bd/io/buffer.h>
 
@@ -23,7 +23,7 @@ public:
   ParallelMinMax(const Buffer<Ty>* b /*, const std::function<bool(Ty)> &isRelevant*/)
     : min_value{ std::numeric_limits<Ty>::max() }
     , max_value{ std::numeric_limits<Ty>::lowest() }
-    , data{ b->ptr() }
+    , data{ b->getPtr() }
   {
   }
 

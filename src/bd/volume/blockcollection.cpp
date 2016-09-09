@@ -25,7 +25,7 @@ BlockCollection::initBlocksFromIndexFile(std::shared_ptr<IndexFile const> index)
   bd::IndexFileHeader const &header = m_indexFile->getHeader();
 
   Dbg() << "Initializing blocks from index file."; //<< fileName;
-  initBlocksFromFileBlocks(m_indexFile->blocks(),
+  initBlocksFromFileBlocks(m_indexFile->getBlocks(),
                            { header.numblocks[0],
                              header.numblocks[1],
                              header.numblocks[2] });

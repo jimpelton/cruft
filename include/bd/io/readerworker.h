@@ -48,8 +48,8 @@ public:
       Dbg() << "Reader waiting for empty buffer.";
 
       Buffer<Ty> *buf = m_pool->nextEmpty();
-      buf->index(total_read_bytes / sizeof(Ty));  // element index this buffer starts at.
-      Ty *data = buf->ptr();
+      buf->setIndexOffset(total_read_bytes/sizeof(Ty));  // element index this buffer starts at.
+      Ty *data = buf->getPtr();
         
       Dbg() << "Reader filling buffer.";
       m_is->read(reinterpret_cast<char*>(data), buffer_size_bytes);
@@ -59,7 +59,7 @@ public:
       // the last buffer filled may not be a full buffer, so resize!
       if ( amount < static_cast<long long>(buffer_size_bytes) ) {
 
-        buf->elements(amount/sizeof(Ty));
+        buf->setNumElements(amount/sizeof(Ty));
         if (amount == 0) {
           Dbg() << "Reader read 0 bytes.";
           m_pool->returnEmpty(buf);

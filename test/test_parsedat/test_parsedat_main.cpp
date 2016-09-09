@@ -6,13 +6,12 @@
 #include <bd/io/datfile.h>
 #include <bd/io/datatypes.h>
 
-//#include <iostream>
 
-//#define RES_FOLDER "./res"
+#define RES_DIR RESOURCE_FOLDER
 
 TEST_CASE("parseDat parses", "[file][parsedat]")
 {
-    const std::string fileName{ RES_FOLDER"/walnut.dat" };
+    const std::string fileName{ RES_DIR"/walnut.dat" };
 
     bd::DatFileData dfd;
     bool result = bd::parseDat(fileName, dfd);
