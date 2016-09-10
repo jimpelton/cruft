@@ -15,11 +15,12 @@ namespace bd
 std::unique_ptr<std::vector<OpacityKnot>>
 load1dtScalar(std::string const &filename)
 {
-  bd::Dbg() << "Reading 1dt formatted transfer function file and generating texture.";
+  bd::Dbg() << "Reading 1dt formatted scalar transfer function.";
 
   size_t lineNum{ 0 };
   size_t numKnots{ 0 };
-  std::unique_ptr<std::vector<OpacityKnot>> knots{ new std::vector<OpacityKnot>() };
+  std::unique_ptr<std::vector<OpacityKnot>>
+      knots{ new std::vector<OpacityKnot>() };
 
   std::ifstream file;
   file.exceptions(std::ifstream::failbit | std::ifstream::badbit);

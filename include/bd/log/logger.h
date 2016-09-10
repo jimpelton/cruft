@@ -14,8 +14,8 @@
 #include <sys/time.h>
 #include <ctime>
 
-namespace bd {
-
+namespace bd
+{
 
 class logger
 {
@@ -29,19 +29,20 @@ public:
     logger &log;
 
   public:
-    
+
     /////////////////////////////////////////////////////////////////////////////
     sentry(logger &l)
-      : log(l)
+        : log(l)
     {
       log.lock();
 //      std::cout << "sentry ctor after lock.\n";
       log.start_line();
     }
 
+
     /////////////////////////////////////////////////////////////////////////////
-    sentry(const sentry& o)
-      : log{o.log}
+    sentry(sentry const &o)
+        : log{ o.log }
     {
 //      std::cout << "sentry copy ctor.\n";
     }
@@ -49,7 +50,7 @@ public:
 
     /////////////////////////////////////////////////////////////////////////////
     sentry(sentry &&o)
-      : log{ o.log }
+        : log{ o.log }
     {
 //      std::cout << "sentry move ctor.\n";
     }
@@ -68,7 +69,8 @@ public:
     /// \brief Log a message for parameter t.
     /////////////////////////////////////////////////////////////////////////////
     template<typename T>
-    sentry& operator<<(const T& t)
+    sentry &
+    operator<<(T const &t)
     {
       log.do_log(t);
       return *this;
@@ -78,7 +80,8 @@ public:
     /////////////////////////////////////////////////////////////////////////////
     /// \brief Handle ostream manipulators.
     /////////////////////////////////////////////////////////////////////////////
-    sentry& operator<<(std::ostream & (*man)(std::ostream &))
+    sentry &
+    operator<<(std::ostream &(*man)(std::ostream &))
     {
       // Handles manipulators like endl.
       log.do_log(man);
@@ -86,7 +89,8 @@ public:
     }
 
 
-    sentry& operator<<(std::ios_base & (*man)(std::ios_base &))
+    sentry &
+    operator<<(std::ios_base &(*man)(std::ios_base &))
     {
       log.do_log(man);
       // Handles manipulators like hex.
@@ -109,11 +113,12 @@ public:
   /// \brief Create logger that logs to stdout.
   /////////////////////////////////////////////////////////////////////////////
   logger()
-    : m_out{ &std::cout }
+      : m_out{ &std::cout }
 //    , m_level{ LogLevel::INFO }
-    , m_levelString{ "INFO" }
+      , m_levelString{ "INFO" }
   {
   }
+
 
   /////////////////////////////////////////////////////////////////////////////
   /// \brief And new line and flush output stream.
@@ -127,9 +132,11 @@ public:
 
 
   /////////////////////////////////////////////////////////////////////////////
-  static logger& get(const char* level = "INFO", std::ostream *os = &std::cout)
+  static
+  logger &
+  get(char const *level = "INFO", std::ostream *os = &std::cout)
   {
-    if (s_instance == nullptr) {
+    if (s_instance==nullptr) {
       s_instance = new logger();
       s_instance->do_log("Logger initialized.\n");
     }
@@ -142,23 +149,29 @@ public:
 
 
   /////////////////////////////////////////////////////////////////////////////
-  static void shutdown()
+  static
+  void
+  shutdown()
   {
     get().do_log("\nShutdown logger.");
     delete s_instance;
   }
 
+
   /////////////////////////////////////////////////////////////////////////////
-  void start_line()
+  void
+  start_line()
   {
     std::thread::id tid = std::this_thread::get_id();
     *m_out << "- " << now() << " (" << std::hex << tid << std::dec << ") "
-        << m_levelString << ":\t";
+           << m_levelString << ":\t";
 
   }
 
+
   /////////////////////////////////////////////////////////////////////////////
-  void end_line()
+  void
+  end_line()
   {
     *m_out << '\n'; //std::endl;
   }
@@ -166,7 +179,8 @@ public:
 
   /////////////////////////////////////////////////////////////////////////////
   template<typename T>
-  void do_log(const T& t)
+  void
+  do_log(T const &t)
   {
     *m_out << t;
   }
@@ -174,23 +188,27 @@ public:
 
   /////////////////////////////////////////////////////////////////////////////
   template<typename T>
-  sentry operator<<(const T& t)
+  sentry
+  operator<<(T const &t)
   {
     sentry s(*this);
     s << t;
     return s;
   }
 
-  void lock()
+
+  void
+  lock()
   {
     m_mutex.lock();
   }
 
-  void unlock()
+
+  void
+  unlock()
   {
     m_mutex.unlock();
   }
-
 
 
 private:
@@ -215,34 +233,43 @@ private:
     return std::string(buf2);
   }
 
+
 private:   // members
 
   static logger *s_instance;
 
   std::ostream *m_out;
 //  LogLevel m_level;
-  const char *m_levelString;
+  char const *m_levelString;
 
   std::mutex m_mutex;
 
 
 }; // class logger
 
-inline logger& Gl_Dbg()
+inline logger &
+Gl_Dbg()
 {
   return logger::get("GL_DEBUG");
 }
 
-inline logger& Dbg()
+
+inline logger &
+Dbg()
 {
   return logger::get("DEBUG");
 }
-inline logger& Err()
+
+
+inline logger &
+Err()
 {
   return logger::get("ERROR", &std::cerr);
 }
 
-inline logger& Info()
+
+inline logger &
+Info()
 {
   return logger::get("INFO");
 }

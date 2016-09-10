@@ -27,28 +27,32 @@ public:
 
   ~ReaderWorker()
   {
-    if (m_is) delete m_is;
+    if (m_is)
+      delete m_is;
   }
 
+  /// \brief Pop buffers and fill them from the ifstream.
+  /// \returns -1 if file could not be opened, or the total bytes read.
   long long
-  operator()(const std::atomic_bool &quit)
+  operator()(std::atomic_bool const &quit)
   {
     if (! open()) {
-        Err() << "Could not open file " << m_path <<
-            ". Exiting readerworker loop.";
+        Err() << "Could not open file " << m_path << ". Exiting readerworker loop.";
         return -1;
     }
 
     // bytes to attempt to read from file.
-    const size_t buffer_size_bytes{ m_pool->bufferSizeElements() * sizeof(Ty) };
+    size_t const buffer_size_bytes{ m_pool->bufferSizeElements() * sizeof(Ty) };
     size_t total_read_bytes{ 0 };
 
     Dbg() << "Reader entering loop.";
-    while(!(m_is->eof()) || !quit) {
+    while(!m_is->eof() && !quit) {
       Dbg() << "Reader waiting for empty buffer.";
 
+      // wait for the next empty buffer in the pool.
       Buffer<Ty> *buf = m_pool->nextEmpty();
-      buf->setIndexOffset(total_read_bytes/sizeof(Ty));  // element index this buffer starts at.
+      // set the element index this buffer starts at.
+      buf->setIndexOffset(total_read_bytes/sizeof(Ty));
       Ty *data = buf->getPtr();
         
       Dbg() << "Reader filling buffer.";
@@ -77,12 +81,13 @@ public:
 
     m_is->close();
     Dbg() << "Reader leaving IO loop after reading " << total_read_bytes << " bytes";
+    m_pool->kickThreads();
     return total_read_bytes;
   }
 
     
   void
-  setPath(const std::string &path)
+  setPath(std::string const &path)
   {
     m_path = path;
   }
@@ -96,9 +101,6 @@ private:
     m_is->open(m_path, std::ios::binary);
     return m_is->is_open();
   }
-
-
-
 
   Reader *m_reader;
   Pool *m_pool;

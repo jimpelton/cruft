@@ -30,7 +30,7 @@ IndexFileHeader::fromStream(std::istream &is)
 
 ///////////////////////////////////////////////////////////////////////////////
 void
-IndexFileHeader::writeToStream(std::ostream &os, const IndexFileHeader &ifh)
+IndexFileHeader::writeToStream(std::ostream &os, IndexFileHeader const &ifh)
 {
   os.write(reinterpret_cast<const char *>(&ifh), sizeof(IndexFileHeader));
 }
@@ -38,7 +38,7 @@ IndexFileHeader::writeToStream(std::ostream &os, const IndexFileHeader &ifh)
 
 ///////////////////////////////////////////////////////////////////////////////
 DataType
-IndexFileHeader::getType(const IndexFileHeader &ifh)
+IndexFileHeader::getType(IndexFileHeader const &ifh)
 {
   uint32_t type{ ifh.dataType };
   switch (type) {
@@ -146,7 +146,7 @@ FileBlockCollectionWrapper<Ty>::getNonEmptyBlocks()
 
 ///////////////////////////////////////////////////////////////////////////////
 std::unique_ptr<IndexFile>
-IndexFile::fromBinaryIndexFile(const std::string &path)
+IndexFile::fromBinaryIndexFile(std::string const &path)
 {
   std::unique_ptr<IndexFile> idxfile{ new IndexFile() };
   idxfile->m_fileName = path;
@@ -188,7 +188,8 @@ IndexFile::getHeader() const
 
 ///////////////////////////////////////////////////////////////////////////////
 FileBlockCollectionWrapper_Base *
-IndexFile::instantiate_wrapper(DataType type, uint64_t const *num_vox,
+IndexFile::instantiate_wrapper(DataType type,
+                               uint64_t const *num_vox,
                                uint64_t const *numblocks)
 {
   FileBlockCollectionWrapper_Base *col{ nullptr };

@@ -27,7 +27,7 @@ public:
   /// \brief Open the raw file at path.
   /// \return True if opened, false otherwise.
   ///////////////////////////////////////////////////////////////////////////////
-  bool open(const std::string &path);
+  bool open(std::string const &path);
 
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -107,7 +107,7 @@ BufferedReader<Ty>::~BufferedReader()
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 bool
-BufferedReader<Ty>::open(const std::string &path)
+BufferedReader<Ty>::open(std::string const &path)
 {
   m_path = path;
   m_pool = new BufferPool<Ty>(m_bufSizeBytes, 4);
@@ -158,7 +158,7 @@ template<typename Ty>
 bool
 BufferedReader<Ty>::isReading() const
 {
-  return m_future.wait_for(std::chrono::seconds(0)) ==
+  return m_future.wait_for(std::chrono::seconds(0)) !=
       std::future_status::ready;
 }
 
@@ -171,14 +171,7 @@ BufferedReader<Ty>::hasNext() const
   // if no buffers in pool, check if the reader thread is done.
   // If it is still reading, then we should return true because there will
   // be a full buffer available soon.
-  if (!m_pool->hasNext()) {
-    // if no buffers in pool, but reader is still reading, then
-    // we will have a next buffer soon.
-    return !isReading();
-  } else {
-    // if there are buffers in the pool, then return true.
-    return true;
-  }
+  return m_pool->hasNext() || isReading();
 }
 
 
