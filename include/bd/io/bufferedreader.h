@@ -13,13 +13,14 @@
 namespace bd
 {
 
-
 template<typename Ty>
-class BufferedReader 
+class BufferedReader
 {
 
 public:
   BufferedReader(size_t bufSize);
+
+
   ~BufferedReader();
 
 
@@ -27,13 +28,15 @@ public:
   /// \brief Open the raw file at path.
   /// \return True if opened, false otherwise.
   ///////////////////////////////////////////////////////////////////////////////
-  bool open(std::string const &path);
+  bool
+  open(std::string const &path);
 
 
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Start readering the file.
   ///////////////////////////////////////////////////////////////////////////////
-  void start();
+  void
+  start();
 
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -41,45 +44,57 @@ public:
   ///////////////////////////////////////////////////////////////////////////////
 //  void stop();
 
-  
+
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Stop reading and wait for the read thread to exit.
   /// \return The number of bytes read so far by the thread.
   ///////////////////////////////////////////////////////////////////////////////
-  long long int reset();
+  long long int
+  reset();
 
 
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Return true if the read thread is still active.
   ///////////////////////////////////////////////////////////////////////////////
-  bool isReading() const;
+  bool
+  isReading() const;
 
 
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Return true if the buffer pool has full buffers and/or the reader
   ///        is still reading from the file.
   ///////////////////////////////////////////////////////////////////////////////
-  bool hasNext() const;
+  bool
+  hasNext() const;
 
 
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Grab the next buffer data from the pool as soon as it is ready.
   /// \note Blocks until a full buffer is ready.
   ///////////////////////////////////////////////////////////////////////////////
-  Buffer<Ty>* waitNext() { return m_pool->nextFull(); }
+  Buffer<Ty> *
+  waitNext()
+  {
+    return m_pool->nextFull();
+  }
 
 
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Return a buffer to the empty pool to be filled again.
   ///////////////////////////////////////////////////////////////////////////////
-  void waitReturn(Buffer<Ty>* buf) { return m_pool->returnEmpty(buf); }
-  
+  void
+  waitReturn(Buffer<Ty> *buf)
+  {
+    return m_pool->returnEmpty(buf);
+  }
+
+
 private:
   std::string m_path;
 
   size_t m_bufSizeBytes;
 
-  BufferPool<Ty> *m_pool;  
+  BufferPool<Ty> *m_pool;
   std::future<long long int> m_future;
   std::atomic_bool m_stopThread;
 
@@ -89,18 +104,21 @@ private:
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 BufferedReader<Ty>::BufferedReader(size_t bufSize)
-  : m_path{ }
-  , m_bufSizeBytes{ bufSize }
-  , m_pool{ nullptr }
-  , m_future{ }
-{ }
+    : m_path{ }
+    , m_bufSizeBytes{ bufSize }
+    , m_pool{ nullptr }
+    , m_future{ }
+{
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 BufferedReader<Ty>::~BufferedReader()
 {
-  if (m_pool) delete m_pool;
+  if (m_pool) {
+    delete m_pool;
+  }
 }
 
 
@@ -123,12 +141,14 @@ void
 BufferedReader<Ty>::start()
 {
   m_stopThread = false;
-  m_future = std::async(std::launch::async,
-      [&]()-> long long int {
-          ReaderWorker<BufferedReader<Ty>, BufferPool<Ty>, Ty> worker(this, m_pool);
-          worker.setPath(m_path);
-          return worker(std::ref(m_stopThread));
-      });
+  m_future =
+      std::async(std::launch::async,
+                 [&]() -> long long int {
+                   ReaderWorker<BufferedReader<Ty>, BufferPool<Ty>, Ty>
+                       worker(this, m_pool);
+                   worker.setPath(m_path);
+                   return worker(std::ref(m_stopThread));
+                 });
 }
 
 
@@ -173,7 +193,6 @@ BufferedReader<Ty>::hasNext() const
   // be a full buffer available soon.
   return m_pool->hasNext() || isReading();
 }
-
 
 
 } // namespace preproc

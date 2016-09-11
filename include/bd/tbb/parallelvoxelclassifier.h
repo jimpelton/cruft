@@ -48,15 +48,28 @@ public:
     Ty const * const data{ m_buf->getPtr() };
     size_t const offset{ m_buf->getIndexOffset() };
 
-    for(size_t i{ r.begin() }; i != r.end(); ++i) {
-      (*m_map)[i+offset] = m_isRel( data[i] );
+    /**
+     * +--------------------------------------------------+
+     * |   Giant block of data                            |
+     * +--------------------------------------------------+
+     *                      ^
+     *                      |
+     *                      data points to start of buffer
+     *                      offset = element index of data
+     * Since m_map is a ptr to vector<bool>, accesses need to
+     * be offset into the same element index that the buffer
+     * starts at.
+     */
+    size_t mIdx{ r.begin() + offset };
+    for(size_t i{ r.begin() }; i != r.end(); ++i, ++mIdx) {
+      (*m_map)[mIdx] = m_isRel( data[i] );
     }
   }
 
 private:
-  std::vector<bool> * m_map;  ///< Relevance map
+  std::vector<bool> * const m_map;  ///< Relevance map
   Buffer<Ty> const * m_buf;
-  Function m_isRel;
+  Function const &m_isRel;
 
 }; // class ParallelVoxelClassifier
 
