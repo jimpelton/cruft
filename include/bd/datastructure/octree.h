@@ -25,17 +25,21 @@ template<typename Vec3Ty, typename DataTy>
 class Octree
 {
 public:
-  Octree(Vec3Ty const &origin, Vec3Ty const &halfDim, int depth)
+  explicit Octree(Vec3Ty const &origin, Vec3Ty const &halfDim, short maxDepth)
+    : Octree{ origin, halfDim, 0 }
+    , m_maxDepth{ maxDepth }
+  {
+  }
+
+  ~Octree()
+  {
+  }
+
+  explicit Octree(Vec3Ty const &origin, Vec3Ty const &halfDim, int depth)
       : m_origin{ origin }
       , m_halfDim{ halfDim }
       , m_data{ nullptr }
       , m_depth{ depth }
-
-  {
-  }
-
-
-  ~Octree()
   {
   }
 
@@ -68,7 +72,7 @@ public:
 
 
   void
-  insert(DataTy *data, Vec3Ty const &point)
+  insert(DataTy *data, Vec3Ty point)
   {
     // If this node doesn't have a data point yet assigned
     // and it is a leaf, then we're done!
@@ -84,7 +88,7 @@ public:
 
         // Save this data point that was here for a later re-insert
         DataTy *oldData= m_data;
-//        Vec3Ty oldPoint = m_origin;
+        Vec3Ty oldPoint = m_origin;
         m_data = nullptr;
 
         // Split the current node and create new empty trees for each
@@ -101,14 +105,14 @@ public:
         // Re-insert the old point, and insert this new point
         // (We wouldn't need to insert from the root, because we already
         // know it's guaranteed to be in this section of the tree)
-        m_nodes[getOctantContainingPoint(oldPoint->getPosition())]->insert(oldPoint);
-        m_nodes[getOctantContainingPoint(point->getPosition())]->insert(point);
+        m_nodes[8 * m_depth + getOctantContainingPoint(oldPoint)].insert(oldData, oldPoint);
+        m_nodes[8 * m_depth + getOctantContainingPoint(point)].insert(data, point);
       }
     } else {
       // We are at an interior node. Insert recursively into the
       // appropriate child octant
-      int octant = getOctantContainingPoint(point->getPosition());
-      m_nodes[8 * m_depth + octant]->insert(point);
+      int octant = getOctantContainingPoint(point);
+      m_nodes[8 * m_depth + octant]->insert(data, point);
     }
   }
 
@@ -163,6 +167,7 @@ private:
   Vec3Ty m_halfDim;
   int m_depth;   ///< Depth of this node.
   DataTy *m_data; ///< The data inside this node.
+  int m_maxDepth;
 
 }; // class Octree
 

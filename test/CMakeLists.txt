@@ -11,4 +11,5 @@ add_subdirectory("test_parsedat")
 add_subdirectory("test_util")
 add_subdirectory("test_volume")
 add_subdirectory("test_tbb")
+add_subdirectory("test_datastructure")
 
