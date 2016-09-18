@@ -25,17 +25,23 @@ template<typename Vec3Ty, typename DataTy>
 class Octree
 {
 public:
-  explicit Octree(Vec3Ty const &origin, Vec3Ty const &halfDim, short maxDepth)
-    : Octree{ origin, halfDim, 0 }
-    , m_maxDepth{ maxDepth }
-  {
-  }
 
   ~Octree()
   {
   }
 
-  explicit Octree(Vec3Ty const &origin, Vec3Ty const &halfDim, int depth)
+  Octree(Vec3Ty const &origin, Vec3Ty const &halfDim, int maxDepth, int /*startDepth=0*/)
+      : m_origin{ origin }
+      , m_halfDim{ halfDim }
+      , m_data{ nullptr }
+      , m_depth{ 0 }
+      , m_maxDepth{ maxDepth }
+  {
+  }
+
+private:
+
+  Octree(Vec3Ty const &origin, Vec3Ty const &halfDim, int depth)
       : m_origin{ origin }
       , m_halfDim{ halfDim }
       , m_data{ nullptr }
@@ -96,7 +102,8 @@ public:
         for (int i = 1; i <= 8; ++i) {
           // Compute new bounding box for this child
           Vec3Ty newOrigin = m_origin;
-          newOrigin.x += m_halfDim.x * ( i & 4 ? 0.5f : -0.5f );
+          newOrigin.x +=
+              static_cast<decltype(newOrigin.x)>(m_halfDim.x * ( i & 4 ? 0.5f : -0.5f ));
           newOrigin.y += m_halfDim.y * ( i & 2 ? 0.5f : -0.5f );
           newOrigin.z += m_halfDim.z * ( i & 1 ? 0.5f : -0.5f );
           m_nodes[8 * m_depth + i] = new Octree(newOrigin, m_halfDim * 0.5f, m_depth + 1);
@@ -163,11 +170,11 @@ public:
 
 private:
   static std::vector<Octree<Vec3Ty, DataTy>> m_nodes;
+  static int m_maxDepth;
   Vec3Ty m_origin;
   Vec3Ty m_halfDim;
   int m_depth;   ///< Depth of this node.
   DataTy *m_data; ///< The data inside this node.
-  int m_maxDepth;
 
 }; // class Octree
 
