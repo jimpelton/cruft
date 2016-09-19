@@ -3,6 +3,7 @@
 #
 
 #add_subdirectory(context)
+add_subdirectory(datastructure)
 add_subdirectory(io)
 add_subdirectory(geo)
 add_subdirectory(graphics)
@@ -21,6 +22,7 @@ add_subdirectory(volume)
 
 set(bd_SOURCES
 #	"${context_SOURCES}"
+    "${datastructure_SOURCES}"
     "${file_SOURCES}"
     "${geo_SOURCES}"
     "${graphics_SOURCES}"

@@ -35,8 +35,8 @@ public:
       , m_halfDim{ halfDim }
       , m_data{ nullptr }
       , m_depth{ 0 }
-      , m_maxDepth{ maxDepth }
   {
+    m_maxDepth = maxDepth;
   }
 
 private:
@@ -102,10 +102,14 @@ private:
         for (int i = 1; i <= 8; ++i) {
           // Compute new bounding box for this child
           Vec3Ty newOrigin = m_origin;
+
           newOrigin.x +=
               static_cast<decltype(newOrigin.x)>(m_halfDim.x * ( i & 4 ? 0.5f : -0.5f ));
-          newOrigin.y += m_halfDim.y * ( i & 2 ? 0.5f : -0.5f );
-          newOrigin.z += m_halfDim.z * ( i & 1 ? 0.5f : -0.5f );
+          newOrigin.y +=
+              static_cast<decltype(newOrigin.y)>(m_halfDim.y * ( i & 2 ? 0.5f : -0.5f ));
+          newOrigin.z +=
+              static_cast<decltype(newOrigin.z)>(m_halfDim.z * ( i & 1 ? 0.5f : -0.5f ));
+
           m_nodes[8 * m_depth + i] = new Octree(newOrigin, m_halfDim * 0.5f, m_depth + 1);
         }
 
