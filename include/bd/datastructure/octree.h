@@ -12,6 +12,7 @@
 #include <glm/glm.hpp>
 #include <array>
 #include <vector>
+#include <tuple>
 
 namespace bd
 {
@@ -21,9 +22,10 @@ namespace bd
 ///   Vec3Ty -  The type of 3D vector to use for origin coordinates.
 ///   DataTy - The data type stored in this tree.
 ///
-template<typename Vec3Ty, typename DataTy>
+template<typename DataTy, typename Vec3Ty=glm::vec3>
 class Octree
 {
+
 public:
 
   ~Octree()
@@ -33,8 +35,8 @@ public:
   Octree(Vec3Ty const &origin, Vec3Ty const &halfDim, int maxDepth, int /*startDepth=0*/)
       : m_origin{ origin }
       , m_halfDim{ halfDim }
-      , m_data{ nullptr }
       , m_depth{ 0 }
+      , m_data{ nullptr }
   {
     m_maxDepth = maxDepth;
   }
@@ -44,11 +46,12 @@ private:
   Octree(Vec3Ty const &origin, Vec3Ty const &halfDim, int depth)
       : m_origin{ origin }
       , m_halfDim{ halfDim }
-      , m_data{ nullptr }
       , m_depth{ depth }
+      , m_data{ nullptr }
   {
   }
 
+public:
 
   // Determine which octant of the tree would contain 'point'
   int
@@ -73,7 +76,7 @@ private:
   {
     // We are a leaf iff we have no children. Since we either have none, or
     // all eight, it is sufficient to just check the first.
-    return m_nodes[8 * m_depth + 1] == nullptr;
+    return m_nodes[8 * m_depth + 1] == EmptyNode;
   }
 
 
@@ -110,14 +113,14 @@ private:
           newOrigin.z +=
               static_cast<decltype(newOrigin.z)>(m_halfDim.z * ( i & 1 ? 0.5f : -0.5f ));
 
-          m_nodes[8 * m_depth + i] = new Octree(newOrigin, m_halfDim * 0.5f, m_depth + 1);
+          m_nodes[8 * m_depth + i] = new Octree<DataTy, Vec3Ty>(newOrigin, m_halfDim * 0.5f, m_depth + 1);
         }
 
         // Re-insert the old point, and insert this new point
         // (We wouldn't need to insert from the root, because we already
         // know it's guaranteed to be in this section of the tree)
-        m_nodes[8 * m_depth + getOctantContainingPoint(oldPoint)].insert(oldData, oldPoint);
-        m_nodes[8 * m_depth + getOctantContainingPoint(point)].insert(data, point);
+        m_nodes[8 * m_depth + getOctantContainingPoint(oldPoint)]->insert(oldData, oldPoint);
+        m_nodes[8 * m_depth + getOctantContainingPoint(point)]->insert(data, point);
       }
     } else {
       // We are at an interior node. Insert recursively into the
@@ -125,6 +128,21 @@ private:
       int octant = getOctantContainingPoint(point);
       m_nodes[8 * m_depth + octant]->insert(data, point);
     }
+  }
+
+
+  bool
+  operator==(Octree const &rhs) const
+  {
+    return std::tie(m_origin, m_halfDim, m_depth) ==
+        std::tie(rhs.m_origin, rhs.m_halfDim, rhs.m_depth);
+  }
+
+
+  bool
+  operator!=(Octree const &rhs) const
+  {
+    return !( rhs == *this );
   }
 
 
@@ -173,7 +191,7 @@ private:
 
 
 private:
-  static std::vector<Octree<Vec3Ty, DataTy>> m_nodes;
+  static std::vector<Octree<DataTy, Vec3Ty>*> m_nodes;
   static int m_maxDepth;
   Vec3Ty m_origin;
   Vec3Ty m_halfDim;
@@ -181,6 +199,13 @@ private:
   DataTy *m_data; ///< The data inside this node.
 
 }; // class Octree
+
+template<class DataTy, class Vec3Ty>
+int Octree<DataTy, Vec3Ty>::m_maxDepth{ 0 };
+
+template<class DataTy, class Vec3Ty>
+std::vector<Octree<DataTy, Vec3Ty> *>
+    Octree<DataTy, Vec3Ty>::m_nodes;
 
 } // namespace bd
 

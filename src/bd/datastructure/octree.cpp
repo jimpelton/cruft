@@ -7,6 +7,6 @@
 namespace bd
 {
 
-int Octree::m_maxDepth{ 0 };
+
 
 }  // namespace bd
