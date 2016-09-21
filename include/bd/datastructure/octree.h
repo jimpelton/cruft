@@ -17,6 +17,7 @@
 namespace bd
 {
 
+
 /// \brief A very simple Octree implementation.
 /// Template Parameters:
 ///   Vec3Ty -  The type of 3D vector to use for origin coordinates.
@@ -27,31 +28,61 @@ class Octree
 {
 
 public:
-
-  ~Octree()
+  Octree()
+      : Octree({0,0,0}, {0,0,0}, 0, true)
   {
   }
 
-  Octree(Vec3Ty const &origin, Vec3Ty const &halfDim, int maxDepth, int /*startDepth=0*/)
+  Octree(Vec3Ty const &origin, Vec3Ty const &halfDim, int maxDepth)
       : m_origin{ origin }
       , m_halfDim{ halfDim }
       , m_depth{ 0 }
-      , m_data{ nullptr }
+      , m_treeDepth{ 0 }
+      , m_data{ }
+      , m_isEmpty{ true }
   {
-    m_maxDepth = maxDepth;
+    if (m_nodes == nullptr) {
+      m_maxDepth = maxDepth;
+      m_nodes = new Octree<DataTy, Vec3Ty>[ std::pow(8, maxDepth) ];
+    }
   }
 
-private:
-
-  Octree(Vec3Ty const &origin, Vec3Ty const &halfDim, int depth)
-      : m_origin{ origin }
-      , m_halfDim{ halfDim }
-      , m_depth{ depth }
-      , m_data{ nullptr }
+  Octree(Octree const &rhs)
+    : m_origin { rhs.m_origin}
+    , m_halfDim { rhs.m_halfDim}
+    , m_depth { rhs.m_depth}
+    , m_data { rhs.m_data}
+    , m_isEmpty { rhs.m_isEmpty}
   {
   }
+
+  ~Octree()
+  {
+    if (m_nodes) {
+      delete [] m_nodes;
+      m_nodes = nullptr;
+      m_maxDepth = 0;
+    }
+  }
+
+
+
 
 public:
+
+  bool
+  operator==(Octree const &rhs) const
+  {
+    return std::tie(m_origin, m_halfDim, m_depth) ==
+        std::tie(rhs.m_origin, rhs.m_halfDim, rhs.m_depth);
+  }
+
+
+  bool
+  operator!=(Octree const &rhs) const
+  {
+    return !( rhs == *this );
+  }
 
   // Determine which octant of the tree would contain 'point'
   int
@@ -76,17 +107,18 @@ public:
   {
     // We are a leaf iff we have no children. Since we either have none, or
     // all eight, it is sufficient to just check the first.
-    return m_nodes[8 * m_depth + 1] == EmptyNode;
+    return m_nodes[8 * m_depth + 1].m_depth == m_treeDepth;
   }
 
 
   void
-  insert(DataTy *data, Vec3Ty point)
+  insert(DataTy const &data, Vec3Ty const &point)
   {
     // If this node doesn't have a data point yet assigned
     // and it is a leaf, then we're done!
     if (isLeafNode()) {
-      if (m_data == nullptr) {
+      if (m_isEmpty) {
+//      if (m_data == nullptr) {
         m_data = data;
         return;
       } else {
@@ -96,9 +128,10 @@ public:
         // this new data point
 
         // Save this data point that was here for a later re-insert
-        DataTy *oldData= m_data;
+        DataTy oldData = m_data;
         Vec3Ty oldPoint = m_origin;
-        m_data = nullptr;
+        m_data = DataTy();
+        m_isEmpty = true;
 
         // Split the current node and create new empty trees for each
         // child octant.
@@ -113,37 +146,34 @@ public:
           newOrigin.z +=
               static_cast<decltype(newOrigin.z)>(m_halfDim.z * ( i & 1 ? 0.5f : -0.5f ));
 
-          m_nodes[8 * m_depth + i] = new Octree<DataTy, Vec3Ty>(newOrigin, m_halfDim * 0.5f, m_depth + 1);
+          // make 8 empty nodes
+          m_nodes[8 * m_depth + i] =
+              Octree<DataTy, Vec3Ty>(newOrigin, m_halfDim * 0.5f, m_depth + 1, true);
         }
 
+        Octree<DataTy, Vec3Ty> *node;
         // Re-insert the old point, and insert this new point
         // (We wouldn't need to insert from the root, because we already
         // know it's guaranteed to be in this section of the tree)
-        m_nodes[8 * m_depth + getOctantContainingPoint(oldPoint)]->insert(oldData, oldPoint);
-        m_nodes[8 * m_depth + getOctantContainingPoint(point)]->insert(data, point);
+        // put old point into correct child node.
+        node = &m_nodes[8 * m_depth + getOctantContainingPoint(oldPoint)];
+        node->insert(oldData, oldPoint);
+        node->m_isEmpty = false;
+
+        // put new point into correct child node.
+        node = &m_nodes[8 * m_depth + getOctantContainingPoint(point)];
+        node->insert(data, point);
+        node->m_isEmpty = false;
       }
     } else {
       // We are at an interior node. Insert recursively into the
       // appropriate child octant
       int octant = getOctantContainingPoint(point);
-      m_nodes[8 * m_depth + octant]->insert(data, point);
+      m_nodes[8 * m_depth + octant].insert(data, point);
     }
   }
 
 
-  bool
-  operator==(Octree const &rhs) const
-  {
-    return std::tie(m_origin, m_halfDim, m_depth) ==
-        std::tie(rhs.m_origin, rhs.m_halfDim, rhs.m_depth);
-  }
-
-
-  bool
-  operator!=(Octree const &rhs) const
-  {
-    return !( rhs == *this );
-  }
 
 
   // This is a really simple routine for querying the tree for points
@@ -191,21 +221,35 @@ public:
 
 
 private:
-  static std::vector<Octree<DataTy, Vec3Ty>*> m_nodes;
+
+  Octree(Vec3Ty const &origin, Vec3Ty const &halfDim, int depth, bool isEmpty)
+      : m_origin{ origin }
+      , m_halfDim{ halfDim }
+      , m_depth{ depth }
+      , m_data{ }
+      , m_isEmpty{ isEmpty }
+  {
+  }
+
+
+  static Octree<DataTy, Vec3Ty> *m_nodes; ///< All nodes in the tree.
   static int m_maxDepth;
+  static int m_treeDepth;
   Vec3Ty m_origin;
   Vec3Ty m_halfDim;
   int m_depth;   ///< Depth of this node.
-  DataTy *m_data; ///< The data inside this node.
+
+  DataTy m_data; ///< The data inside this node.
+  bool m_isEmpty;
 
 }; // class Octree
 
 template<class DataTy, class Vec3Ty>
 int Octree<DataTy, Vec3Ty>::m_maxDepth{ 0 };
 
+
 template<class DataTy, class Vec3Ty>
-std::vector<Octree<DataTy, Vec3Ty> *>
-    Octree<DataTy, Vec3Ty>::m_nodes;
+Octree<DataTy, Vec3Ty> * Octree<DataTy, Vec3Ty>::m_nodes{ nullptr };
 
 } // namespace bd
 
