@@ -19,10 +19,10 @@ const long long MAX_IDX{ NUM_BUCKETS - 1 };
 }
 
 template<typename Ty>
-class ParallelHistogram
+class ParallelReduceHistogram
 {
 public:
-  ParallelHistogram(Buffer<Ty> *b, Ty rawmin, Ty rawmax)
+  ParallelReduceHistogram(Buffer<Ty> *b, Ty rawmin, Ty rawmax)
       : m_data{ b->getPtr() }
         , m_rawmin{ rawmin }
         , m_rawmax{ rawmax }
@@ -39,7 +39,7 @@ public:
     }
   }
 
-  ParallelHistogram(ParallelHistogram<Ty> &o, tbb::split)
+  ParallelReduceHistogram(ParallelReduceHistogram<Ty> &o, tbb::split)
       : m_data{ o.m_data }
         , m_rawmin{ o.m_rawmin }
         , m_rawmax{ o.m_rawmax }
@@ -56,7 +56,7 @@ public:
     }
   }
 
-  ~ParallelHistogram() { }
+  ~ParallelReduceHistogram() { }
 
   void
   operator()(tbb::blocked_range<size_t> const &r)
@@ -95,7 +95,7 @@ public:
   }
 
   void
-  join(ParallelHistogram<Ty> const &rhs)
+  join(ParallelReduceHistogram<Ty> const &rhs)
   {
     // Accumulate histogram frequences from the joinee.
     for(size_t i{ 0 }; i < NUM_BUCKETS; ++i) {

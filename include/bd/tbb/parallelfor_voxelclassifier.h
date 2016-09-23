@@ -19,11 +19,11 @@ namespace bd
 ///        The classification is saved in the voxel relevance map.
 ///        A 1 means relevant, a 0 means irrelevant.
 template<typename Ty, typename Function>
-class ParallelVoxelClassifier
+class ParallelForVoxelClassifier
 {
 public:
 
-  ParallelVoxelClassifier(std::vector<bool> *map,
+  ParallelForVoxelClassifier(std::vector<bool> *map,
                           Buffer<Ty> const *buf,
                           Function const &relevant)
       : m_map{ map }
@@ -32,14 +32,14 @@ public:
   {
   }
 
-  ParallelVoxelClassifier(ParallelVoxelClassifier<Ty, Function> const &rhs, tbb::split)
+  ParallelForVoxelClassifier(ParallelForVoxelClassifier<Ty, Function> const &rhs, tbb::split)
       : m_map{ rhs.m_map }
       , m_buf{ rhs.m_buf }
       , m_isRel{ rhs.m_isRel }
   {
   }
 
-  ~ParallelVoxelClassifier()
+  ~ParallelForVoxelClassifier()
   {
   }
 
@@ -71,7 +71,7 @@ private:
   Buffer<Ty> const * m_buf;
   Function const &m_isRel;
 
-}; // class ParallelVoxelClassifier
+}; // class ParallelForVoxelClassifier
 
 } // namespace bd
 

@@ -4,7 +4,7 @@
 
 #include <bd/volume/transferfunction.h>
 #include <bd/filter/voxelopacityfilter.h>
-#include <bd/tbb/parallelvoxelclassifier.h>
+#include <bd/tbb/parallelfor_voxelclassifier.h>
 #include <bd/filter/valuerangefilter.h>
 
 
@@ -73,7 +73,7 @@ TEST_CASE("ParallelVoxelClassifer test")
   bd::Buffer<unsigned char> buf{
       reinterpret_cast<unsigned char*>(contents.data()), contents.size() };
 
-  bd::ParallelVoxelClassifier<unsigned char, decltype(rel)> classifier{ &map, &buf, rel };
+  bd::ParallelForVoxelClassifier<unsigned char, decltype(rel)> classifier{ &map, &buf, rel };
 
   tbb::blocked_range<size_t> range{ 0, contents.size() };
   tbb::parallel_for(range, classifier);

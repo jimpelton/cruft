@@ -15,12 +15,12 @@ namespace bd
 /// \brief Simply compute the min/max of the given blocked_range.
 /// \note Use this with TBB's parallel_reduce.
 template<typename Ty>
-class ParallelMinMax
+class ParallelReduceMinMax
 {
 public:
 
   ////////////////////////////////////////////////////////////////////////////////
-  ParallelMinMax(const Buffer<Ty>* b /*, const std::function<bool(Ty)> &isRelevant*/)
+  ParallelReduceMinMax(const Buffer<Ty>* b /*, const std::function<bool(Ty)> &isRelevant*/)
     : min_value{ std::numeric_limits<Ty>::max() }
     , max_value{ std::numeric_limits<Ty>::lowest() }
     , data{ b->getPtr() }
@@ -29,7 +29,7 @@ public:
 
 
   ////////////////////////////////////////////////////////////////////////////////
-  ParallelMinMax(ParallelMinMax& x, tbb::split)
+  ParallelReduceMinMax(ParallelReduceMinMax& x, tbb::split)
     : min_value{ std::numeric_limits<Ty>::max() }
     , max_value{ std::numeric_limits<Ty>::lowest() }
     , data{ x.data }
@@ -54,7 +54,7 @@ public:
 
   ////////////////////////////////////////////////////////////////////////////////
   void
-  join(const ParallelMinMax& y)
+  join(const ParallelReduceMinMax& y)
   {
     // Reduce to a global minimum and maximum for the volume.
     if (y.min_value<min_value) {
@@ -72,7 +72,7 @@ public:
 private:
   Ty const * const data;
 
-}; // class ParallelMinMax
+}; // class ParallelReduceMinMax
 
 } // namespace bd
 

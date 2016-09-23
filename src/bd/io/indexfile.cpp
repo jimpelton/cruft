@@ -84,61 +84,6 @@ IndexFileHeader::getTypeInt(DataType ty)
   }
 }
 
-
-/*****************************************************************************
- * FileBlockCollectionWrapper                                              *
-*****************************************************************************/
-
-template<typename Ty>
-FileBlockCollectionWrapper<Ty>::FileBlockCollectionWrapper(glm::u64vec3 volDims,
-                                                           glm::u64vec3 numBlocks)
-    : c{ volDims, numBlocks }
-{
-}
-
-
-template<typename Ty>
-void
-FileBlockCollectionWrapper<Ty>::generateBlocksFromRawFile(std::string const &rawFile,
-                                                          size_t buffSize)
-{
-//  VoxelOpacityFunction f;
-//  c.createFromRawFile(rawFile, buffSize, f);
-}
-
-
-template<typename Ty>
-void
-FileBlockCollectionWrapper<Ty>::addBlock(FileBlock const &b)
-{
-  c.addBlock(b);
-}
-
-
-template<typename Ty>
-Volume const &
-FileBlockCollectionWrapper<Ty>::getVolume()
-{
-  return c.volume();
-}
-
-
-template<typename Ty>
-std::vector<FileBlock *> const &
-FileBlockCollectionWrapper<Ty>::getBlocks()
-{
-  return c.blocks();
-}
-
-
-template<typename Ty>
-std::vector<FileBlock *> const &
-FileBlockCollectionWrapper<Ty>::getNonEmptyBlocks()
-{
-  return c.nonEmptyBlocks();
-}
-
-
 /*****************************************************************************
  * IndexFile                                                                 *
 *****************************************************************************/

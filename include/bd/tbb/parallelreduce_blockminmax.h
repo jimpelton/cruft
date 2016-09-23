@@ -32,13 +32,13 @@ class MinMaxPairDouble : public MinMaxTotalPair<double> {};
 ///        Also compute the total for each block.
 /// \note  For use with parallel_reduce() in Intel TBB.
 template<typename Ty>
-class ParallelBlockMinMax
+class ParallelReduceBlockMinMax
 {
 public:
 
 
   ////////////////////////////////////////////////////////////////////////////////
-  ParallelBlockMinMax(Volume const *v, Buffer<Ty> const *b)
+  ParallelReduceBlockMinMax(Volume const *v, Buffer<Ty> const *b)
     : m_volume{ v }
     , m_data{ b->getPtr() }
     , m_voxelStart{ b->getIndexOffset() }
@@ -48,7 +48,7 @@ public:
 
 
   ////////////////////////////////////////////////////////////////////////////////
-  ~ParallelBlockMinMax()
+  ~ParallelReduceBlockMinMax()
   {
     if (m_pairs)
       delete [] m_pairs;
@@ -56,7 +56,7 @@ public:
 
 
   ////////////////////////////////////////////////////////////////////////////////
-  ParallelBlockMinMax(ParallelBlockMinMax const &o, tbb::split)
+  ParallelReduceBlockMinMax(ParallelReduceBlockMinMax const &o, tbb::split)
     : m_volume{ o.m_volume }
     , m_data{ o.m_data }
     , m_voxelStart{ o.m_voxelStart }
@@ -67,7 +67,7 @@ public:
 
   ////////////////////////////////////////////////////////////////////////////////
   void
-  join(ParallelBlockMinMax &rhs)
+  join(ParallelReduceBlockMinMax &rhs)
   {
     for(uint64_t i{ 0 }; i < m_volume->lower().total_block_count(); ++i) {
       if (m_pairs[i].min > rhs.m_pairs[i].min)
@@ -141,7 +141,7 @@ private:
   MinMaxPairDouble * const m_pairs;
 
 
-}; // class ParallelBlockMinMax
+}; // class ParallelReduceBlockMinMax
 
 } // namespace bd
 

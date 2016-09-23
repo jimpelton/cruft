@@ -18,11 +18,11 @@ namespace bd
 /// \brief Counts the number of empty voxels in each block.
 ///
 template<typename Ty>
-class ParallelBlockEmpties
+class ParallelReduceBlockEmpties
 {
 public:
 
-  ParallelBlockEmpties(Buffer<Ty> *b, Volume const *v, std::function<bool(Ty)> isEmpty)
+  ParallelReduceBlockEmpties(Buffer<Ty> *b, Volume const *v, std::function<bool(Ty)> isEmpty)
     : m_data{ b->getPtr() }
     , m_volume{ v }
     , m_voxelStart{ b->getIndexOffset() }
@@ -32,7 +32,7 @@ public:
     m_empties = new uint64_t[m_volume->lower().total_block_count()]();
   }
 
-  ParallelBlockEmpties(ParallelBlockEmpties<Ty> &o, tbb::split)
+  ParallelReduceBlockEmpties(ParallelReduceBlockEmpties<Ty> &o, tbb::split)
       : m_data{ o.m_data }
       , m_volume{ o.m_volume }
       , m_voxelStart{ o.m_voxelStart }
@@ -42,7 +42,7 @@ public:
     m_empties = new uint64_t[o.m_volume->lower().total_block_count()]();
   }
 
-  ~ParallelBlockEmpties()
+  ~ParallelReduceBlockEmpties()
   {
     if (m_empties) {
       delete [] m_empties;
@@ -62,6 +62,7 @@ public:
     uint64_t const bcX{ m_volume->lower().block_count().x };
     uint64_t const bcY{ m_volume->lower().block_count().y };
     uint64_t const bcZ{ m_volume->lower().block_count().z };
+    uint64_t const voxelStart{ m_voxelStart };
 
     uint64_t vIdx, // voxel 1D index
         bI,        // block i index
@@ -75,7 +76,7 @@ public:
       // into a 3D index, then convert the 3D voxel index obtained from
       // vIdx into a 3D block index to be used in determining if our voxel
       // is within the part of the volume covered by our blocks.
-      vIdx = i + m_voxelStart;
+      vIdx = i + voxelStart;
       bI = (vIdx % vdX) / bdX;
       bJ = ((vIdx / vdX) % vdY) / bdY;
       bK = ((vIdx / vdX) / vdY) / bdZ;
@@ -92,7 +93,7 @@ public:
   }
 
   void
-  join(ParallelBlockEmpties<Ty> const &rhs)
+  join(ParallelReduceBlockEmpties<Ty> const &rhs)
   {
     for(uint64_t i{ 0 }; i < m_volume->lower().total_block_count(); ++i) {
       m_empties[i] += rhs.m_empties[i];
@@ -114,7 +115,7 @@ private:
 
   std::function<bool(Ty)> isRelevant; //< Is the element a relevant voxel or not.
 
-}; // class ParallelBlockEmpties
+}; // class ParallelReduceBlockEmpties
 
 } // namespace preproc
 

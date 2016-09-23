@@ -94,29 +94,19 @@ public:
   getNonEmptyBlocks() = 0;
 
 
-  /// \brief Create the blocks using Function as the relevance test.
-  virtual void
-  generateBlocksFromRawFile(std::string const &rawFile, size_t buffSize) = 0;
-
-
   virtual const Volume &
   getVolume() = 0;
 
 };
 
 /// \sa FileBlockCollectionWrapper_Base
-template<typename DataType>
-class FileBlockCollectionWrapper
-    : public FileBlockCollectionWrapper_Base
+template<typename Ty>
+class FileBlockCollectionWrapper : public FileBlockCollectionWrapper_Base
 {
 public:
 
   FileBlockCollectionWrapper(glm::u64vec3 volDims, glm::u64vec3 numBlocks);
-
-
-  void
-  generateBlocksFromRawFile(std::string const &rawFile, size_t buffSize) override;
-
+  FileBlockCollectionWrapper(FileBlockCollection<Ty> const &col);
 
   void
   addBlock(FileBlock const &b) override;
@@ -135,7 +125,7 @@ public:
 
 
 private:
-  FileBlockCollection<DataType> c;
+  FileBlockCollection<Ty> c;
 
 };
 
@@ -145,23 +135,11 @@ class IndexFile
 {
 public:
 
-  /// \brief Create IndexFile from an existing raw file.
-  /// \param path The path to the raw file.
-  /// \param dataType The data type in the file (\sa bd::DataType)
-  /// \param numVox number of voxels along x, y, and z axis.
-  /// \param numBlks number of blocks along x, y, and z axis.
-  /// \param nummax The min and max block averages to use for threshold values 
-  ///               when filtering blocks.
-  /// \param function The voxel relevance function.
-  /// \returns A unique_ptr to the IndexFile generated.
-  template<typename DataType>
+  template<typename Ty>
   static std::unique_ptr<IndexFile>
-  fromRawFile(std::string const &path,
-              size_t bufsz,
-              bd::DataType dataType,
-              uint64_t const numVox[3],
-              uint64_t const numBlks[3],
-              std::function<bool(DataType)> function);
+  fromBlockCollection(std::string const &path,
+                      FileBlockCollection<Ty> &col,
+                      bd::DataType dt);
 
 
   /// \brief Create IndexFile from an existing binary index file.
@@ -206,7 +184,7 @@ public:
 
 private:
 
-  /// \brief Instantiate a FileBlockCollection<Ty> with Ty determined by
+  /// \brief Instantiate a FileBlockCollection<Ty> with \c Ty determined by
   ///        the \c type parameter.
   static FileBlockCollectionWrapper_Base*
   instantiate_wrapper(DataType type, const uint64_t* num_vox, const uint64_t* numblocks);
@@ -222,32 +200,72 @@ private:
   FileBlockCollectionWrapper_Base* m_col;
 };  // class IndexFile
 
+/*****************************************************************************
+ * FileBlockCollectionWrapper                                              *
+*****************************************************************************/
+
+template<typename Ty>
+FileBlockCollectionWrapper<Ty>::FileBlockCollectionWrapper(glm::u64vec3 volDims,
+                                                           glm::u64vec3 numBlocks)
+    : c{ volDims, numBlocks }
+{
+}
+
+template<typename Ty>
+FileBlockCollectionWrapper<Ty>::FileBlockCollectionWrapper(
+    FileBlockCollection<Ty> const &col)
+  : c{ col }
+{
+}
+
+template<typename Ty>
+void
+FileBlockCollectionWrapper<Ty>::addBlock(FileBlock const &b)
+{
+  c.addBlock(b);
+}
+
+
+template<typename Ty>
+Volume const &
+FileBlockCollectionWrapper<Ty>::getVolume()
+{
+  return c.volume();
+}
+
+
+template<typename Ty>
+std::vector<FileBlock *> const &
+FileBlockCollectionWrapper<Ty>::getBlocks()
+{
+  return c.blocks();
+}
+
+
+template<typename Ty>
+std::vector<FileBlock *> const &
+FileBlockCollectionWrapper<Ty>::getNonEmptyBlocks()
+{
+  return c.nonEmptyBlocks();
+}
+
 
 /// \brief IndexFileHeader output stream operator.
 std::ostream &
 operator<<(std::ostream &os, IndexFileHeader const &h);
 
 
-// static
+//static
 template<typename Ty>
-std::unique_ptr<IndexFile>
-IndexFile::fromRawFile(std::string const &path,
-                       size_t bufsz,
-                       bd::DataType dataType,
-                       uint64_t const num_vox[3],
-                       uint64_t const numblocks[3],
-                       std::function<bool(Ty)> function)
+std::unique_ptr<bd::IndexFile>
+IndexFile::fromBlockCollection(std::string const &path,
+                               bd::FileBlockCollection<Ty> &col,
+                               bd::DataType dt)
 {
   std::unique_ptr<IndexFile> idxfile{ std::unique_ptr<IndexFile>{ new IndexFile{ }}};
   idxfile->m_fileName = path;
 
-  // instantiate FileBlockCollection object.
-  idxfile->m_col =
-      new FileBlockCollectionWrapper<Ty>{{ num_vox[0],   num_vox[1],   num_vox[2] },
-                                         { numblocks[0], numblocks[1], numblocks[2] }};
-
-  // build the block collection
-  idxfile->m_col->generateBlocksFromRawFile(idxfile->m_fileName, bufsz);
+  idxfile->m_col = new FileBlockCollectionWrapper<Ty>(col);
 
   idxfile->m_header.magic_number = MAGIC;
   idxfile->m_header.version = VERSION;
@@ -265,7 +283,7 @@ IndexFile::fromRawFile(std::string const &path,
              .z; // + idxfile->m_col->getVolume().upper().block_count().z;
 
 
-  idxfile->m_header.dataType = IndexFileHeader::getTypeInt(dataType);
+  idxfile->m_header.dataType = IndexFileHeader::getTypeInt(dt);
 
   idxfile->m_header.volume_extent[0] = idxfile->m_col->getVolume().dims().x;
   idxfile->m_header.volume_extent[1] = idxfile->m_col->getVolume().dims().y;
@@ -281,9 +299,7 @@ IndexFile::fromRawFile(std::string const &path,
   idxfile->m_header.vol_min = idxfile->m_col->getVolume().min();
 
   return idxfile;
-
 }
-
 
 } // namespace bd
 

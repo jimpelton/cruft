@@ -6,10 +6,10 @@
 #include <bd/io/buffer.h>
 #include <bd/log/logger.h>
 #include <bd/util/util.h>
-#include <bd/tbb/parallelminmax.h>
-#include <bd/tbb/parallelblockempties.h>
-#include <bd/tbb/parallelblockminmax.h>
-#include <bd/tbb/parallelvoxelclassifier.h>
+#include <bd/tbb/parallelreduce_minmax.h>
+#include <bd/tbb/parallelreduce_blockempties.h>
+#include <bd/tbb/parallelreduce_blockminmax.h>
+#include <bd/tbb/parallelfor_voxelclassifier.h>
 #include <bd/volume/volume.h>
 #include <bd/filter/valuerangefilter.h>
 
@@ -46,8 +46,6 @@ public:
 
   /// \brief Callable type used for the relevance function
   using RFunc = std::function<bool(Ty)>;
-  ///\brief Container type used for relevance map.
-  using RMap = std::vector<bool>;
 
 
   FileBlockCollection();
@@ -96,18 +94,18 @@ public:
 
 
   //////////////////////////////////////////////////////////////////////////////
-  std::vector<FileBlock*> const &
+  std::vector<FileBlock *> const &
   blocks() const
   {
-    return m_blocks;
+    return *m_blocks;
   }
 
 
   //////////////////////////////////////////////////////////////////////////////
-  std::vector<FileBlock*> const &
+  std::vector<FileBlock *> const &
   nonEmptyBlocks() const
   {
-    return m_nonEmptyBlocks;
+    return *m_nonEmptyBlocks;
   }
 
 
@@ -130,25 +128,25 @@ private:
   //////////////////////////////////////////////////////////////////////////////
   /// \brief Sum the given buffer in parallel.
   double
-  doBufferSum(Buffer<Ty>*);
+  doBufferSum(Buffer<Ty> *);
 
 
   //////////////////////////////////////////////////////////////////////////////
   /// \brief Find buffer global min/max.
   void
-  doBufferMinMax(Buffer<Ty>*);
+  doBufferMinMax(Buffer<Ty> *);
 
 
   //////////////////////////////////////////////////////////////////////////////
   /// \brief Find block local min/max and total values.
   void
-  doBlockMinMax(Buffer<Ty>*);
+  doBlockMinMax(Buffer<Ty> *);
 
 
   //////////////////////////////////////////////////////////////////////////////
   /// \brief Count the relevant voxels for each block in the given buffer.
-  void
-  doBlockVoxelRelevance(Buffer<Ty>*, RFunc const &);
+//  void
+//  doBlockVoxelRelevance(Buffer<Ty> *, RFunc const &);
 
   //////////////////////////////////////////////////////////////////////////////
   /// \brief Count the relevant voxels for each block in the given buffer.
@@ -177,9 +175,9 @@ private: //members
 
   Volume m_volume;
 
-  std::vector<FileBlock*> m_blocks;
-  std::vector<FileBlock*> m_nonEmptyBlocks;
-  RMap m_map;
+  std::shared_ptr<std::vector<FileBlock *>> m_blocks;
+  std::shared_ptr<std::vector<FileBlock *>> m_nonEmptyBlocks;
+//  RMap m_map;
 
 
 }; // class FileBlockCollection
@@ -197,9 +195,12 @@ FileBlockCollection<Ty>::FileBlockCollection()
 template<typename Ty>
 FileBlockCollection<Ty>::FileBlockCollection(glm::u64vec3 volDims, glm::u64vec3 numBlocks)
     : m_volume{ volDims, numBlocks }
-    , m_blocks{ }
-    , m_nonEmptyBlocks{ }
+    , m_blocks{ new std::vector<FileBlock *>() }
+    , m_nonEmptyBlocks{ new std::vector<FileBlock *>() }
 {
+  if (numBlocks.x > 0 && numBlocks.y > 0 && numBlocks.z > 0) {
+    initBlocks();
+  }
 }
 
 
@@ -208,7 +209,7 @@ template<typename Ty>
 FileBlockCollection<Ty>::~FileBlockCollection()
 {
   std::cout << "FileBlockCollection destructor\n";
-  for (auto b : m_blocks) {
+  for (auto b : *m_blocks) {
     delete b;
   }
 }
@@ -256,7 +257,7 @@ FileBlockCollection<Ty>::initBlocks()
   glm::u64vec3 bd{ m_volume.lower().block_dims() };
 
   // block world dims
-  glm::vec3 wld_dims{ 1.0f/glm::vec3(bc) };
+  glm::vec3 wld_dims{ 1.0f / glm::vec3(bc) };
 
   Info() << "Starting block init: "
       " # blocks: "
@@ -268,61 +269,62 @@ FileBlockCollection<Ty>::initBlocks()
 
 
   // Loop through all our blocks (identified by <bxi,byj,bzk>) and populate block fields.
-  for (auto bzk = 0ull; bzk<bc.z; ++bzk) {
-    for (auto byj = 0ull; byj<bc.y; ++byj) {
-      for (auto bxi = 0ull; bxi<bc.x; ++bxi) {
+  for (auto bzk = 0ull; bzk < bc.z; ++bzk) {
+    for (auto byj = 0ull; byj < bc.y; ++byj) {
+      for (auto bxi = 0ull; bxi < bc.x; ++bxi) {
         // i,j,k block identifier
         const glm::u64vec3 blkId{ bxi, byj, bzk };
         // lower left corner in world coordinates
-        const glm::vec3 worldLoc{ wld_dims*glm::vec3(blkId)-0.5f }; // - 0.5f;
+        const glm::vec3 worldLoc{ wld_dims * glm::vec3(blkId) - 0.5f }; // - 0.5f;
         // origin (centroid) in world coordiates
-        const glm::vec3 blkOrigin{ ( worldLoc+( worldLoc+wld_dims ))*0.5f };
+        const glm::vec3 blkOrigin{ ( worldLoc + ( worldLoc + wld_dims )) * 0.5f };
         // voxel start of block within volume
-        const glm::u64vec3 startVoxel{ blkId*m_volume.lower().block_dims() };
+        const glm::u64vec3 startVoxel{ blkId * m_volume.lower().block_dims() };
 
-        FileBlock* blk = new FileBlock(); // { std::make_shared<FileBlock>() };
+        FileBlock *blk = new FileBlock();
         blk->block_index = bd::to1D(bxi, byj, bzk, bc.x, bc.y);
         blk->data_offset = bd::to1D(startVoxel.x, startVoxel.y, startVoxel.z, vd.x, vd.y);
         blk->data_offset *= sizeof(Ty);
 
-        blk->voxel_dims[0] = static_cast< decltype(blk->voxel_dims[0]) >(bd.x);
-        blk->voxel_dims[1] = static_cast< decltype(blk->voxel_dims[1]) >(bd.y);
-        blk->voxel_dims[2] = static_cast< decltype(blk->voxel_dims[2]) >(bd.z);
+        blk->voxel_dims[0] = static_cast<decltype(blk->voxel_dims[0])>(bd.x);
+        blk->voxel_dims[1] = static_cast<decltype(blk->voxel_dims[1])>(bd.y);
+        blk->voxel_dims[2] = static_cast<decltype(blk->voxel_dims[2])>(bd.z);
 
         blk->world_oigin[0] = blkOrigin.x;
         blk->world_oigin[1] = blkOrigin.y;
         blk->world_oigin[2] = blkOrigin.z;
 
-        m_blocks.push_back(blk);
+        m_blocks->push_back(blk);
       }
     }
   }
 
-  Info() << "Finished block init: total blocks is " << m_blocks.size();
+  Info() << "Finished block init: total blocks is " << m_blocks->size();
 }
 
 
 //////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 double
-FileBlockCollection<Ty>::doBufferSum(Buffer<Ty>* buf)
+FileBlockCollection<Ty>::doBufferSum(Buffer<Ty> *buf)
 {
-  Ty* p = buf->getPtr();
+  Ty *p = buf->getPtr();
 
   Info() << "CO: Summing buffer\n";
   double volsum{ tbb::parallel_reduce(
-      tbb::blocked_range<Ty*>(p, p+buf->getNumElements()),
+      tbb::blocked_range<Ty *>(p, p + buf->getNumElements()),
 
       0.0,
 
-      [](tbb::blocked_range<Ty*> &br, double partial_sum) -> double {
+      [](tbb::blocked_range<Ty *> &br, double partial_sum) -> double {
         return std::accumulate(br.begin(), br.end(), partial_sum);
       },
 
-      std::plus<double>() )
+      std::plus<double>())
   };
 
-  m_volume.total(m_volume.total()+volsum);
+  // update volume with new totals.
+  m_volume.total(m_volume.total() + volsum);
 
   return volsum;
 }
@@ -331,20 +333,21 @@ FileBlockCollection<Ty>::doBufferSum(Buffer<Ty>* buf)
 //////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 void
-FileBlockCollection<Ty>::doBufferMinMax(Buffer<Ty>* buf)
+FileBlockCollection<Ty>::doBufferMinMax(Buffer<Ty> *buf)
 {
   tbb::blocked_range<size_t> range(0, buf->getNumElements());
-  ParallelMinMax<Ty> mm(buf);
+  ParallelReduceMinMax<Ty> mm(buf);
   tbb::parallel_reduce(range, mm);
 
+  // update the volume with new min/max values
   double vol_min{ m_volume.min() };
   double vol_max{ m_volume.max() };
 
-  if (mm.min_value<vol_min) {
+  if (mm.min_value < vol_min) {
     m_volume.min(mm.min_value);
   }
 
-  if (mm.max_value>vol_max) {
+  if (mm.max_value > vol_max) {
     m_volume.max(mm.max_value);
   }
 }
@@ -353,21 +356,21 @@ FileBlockCollection<Ty>::doBufferMinMax(Buffer<Ty>* buf)
 //////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 void
-FileBlockCollection<Ty>::doBlockMinMax(Buffer<Ty>* buf)
+FileBlockCollection<Ty>::doBlockMinMax(Buffer<Ty> *buf)
 {
-  ParallelBlockMinMax<Ty> blockMinMax{ &m_volume, buf };
+  ParallelReduceBlockMinMax<Ty> blockMinMax{ &m_volume, buf };
 
   tbb::blocked_range<size_t> range{ 0, buf->getNumElements() };
   tbb::parallel_reduce(range, blockMinMax);
 
   // update the blocks with this buffers min max data.
-  MinMaxPairDouble const* pairs{ blockMinMax.pairs() };
-  for (uint64_t i{ 0 }; i<m_volume.lower().total_block_count(); ++i) {
-    FileBlock* b{ m_blocks[i] };
-    if (b->min_val>pairs[i].min) {
+  MinMaxPairDouble const *pairs{ blockMinMax.pairs() };
+  for (uint64_t i{ 0 }; i < m_volume.lower().total_block_count(); ++i) {
+    FileBlock *b{ (*m_blocks)[i] };
+    if (b->min_val > pairs[i].min) {
       b->min_val = pairs[i].min;
     }
-    if (b->max_val<pairs[i].max) {
+    if (b->max_val < pairs[i].max) {
       b->max_val = pairs[i].max;
     }
     b->total_val += pairs[i].total;
@@ -376,34 +379,23 @@ FileBlockCollection<Ty>::doBlockMinMax(Buffer<Ty>* buf)
 }
 
 
-///////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
-void
-FileBlockCollection<Ty>::doBlockVoxelRelevance(Buffer<Ty>* buf, RFunc const &f)
-{
-  ParallelBlockEmpties<Ty> stats{ buf, &m_volume, f };
-
-  tbb::blocked_range<size_t> range{ 0, buf->getNumElements() };
-  tbb::parallel_reduce(range, stats);
-  uint64_t const* empties{ stats.empties() };
-  for (uint64_t i{ 0 }; i<m_volume.lower().total_block_count(); ++i) {
-    FileBlock* b{ m_blocks[i] };
-    b->empty_voxels += empties[i];
-  }
-
-}
-
-
 //template<typename Ty>
 //void
-//FileBlockCollection<Ty>::doCreateVoxelRelevanceMap(Buffer<Ty> *buf,
-//                                                   RMap &map,
-//                                                   RFunc const &f)
+//FileBlockCollection<Ty>::doBlockVoxelRelevance(Buffer<Ty> *buf, RFunc const &f)
 //{
-//  ParallelVoxelClassifier<Ty> classifier{ &map, buf, f };
+//  ParallelReduceBlockEmpties<Ty> stats{ buf, &m_volume, f };
+//
 //  tbb::blocked_range<size_t> range{ 0, buf->getNumElements() };
-//  tbb::parallel_for(range, classifier);
+//  tbb::parallel_reduce(range, stats);
+//  uint64_t const *empties{ stats.empties() };
+//  for (uint64_t i{ 0 }; i < m_volume.lower().total_block_count(); ++i) {
+//    FileBlock *b{ m_blocks[i] };
+//    b->empty_voxels += empties[i];
+//  }
+//
 //}
+
+
 
 //////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
@@ -411,9 +403,9 @@ void
 FileBlockCollection<Ty>::finishBlockAverages()
 {
 //  uint64_t volume_empty_voxels{ 0 };
-  for (FileBlock* b : m_blocks) {
-    uint64_t total_vox{ b->voxel_dims[0]*b->voxel_dims[1]*b->voxel_dims[2] };
-    b->avg_val = b->total_val/total_vox;
+  for (FileBlock *b : *m_blocks) {
+    uint64_t total_vox{ b->voxel_dims[0] * b->voxel_dims[1] * b->voxel_dims[2] };
+    b->avg_val = b->total_val / total_vox;
 //    volume_empty_voxels += b->empty_voxels;
   }
 
@@ -430,48 +422,27 @@ FileBlockCollection<Ty>::computeVolumeStatistics(BufferedReader<Ty> &r,
   Info() << "Computing volume statistics...";
 
   size_t total_bytes_processed{ 0 };
-  size_t numVoxels{ m_volume.lower().extent().x*
-                        m_volume.lower().extent().y*
-                        m_volume.lower().extent().z };
-
-  // Initialize the relevance map.
-  m_map.resize(numVoxels, false);
 
   while (r.hasNext()) {
-    Buffer<Ty>* buf = r.waitNext();
-    Dbg() << "CO: Got buffer of " << buf->getNumElements() << " elements.";
+    Buffer<Ty> *buf = r.waitNext();
 
-    Dbg() << "CO: Computing volume stats for this buffer.";
     // Sum values in this buffer
     doBufferSum(buf);
-    // Compute the min/max values of the volume and a bunch of work on each block.
+    // Compute the min/max values of the buffer (used for volume min max).
     doBufferMinMax(buf);
-
-    Dbg() << "CO: Computing block stats for this buffer.";
+    // Compute block minimum and maximum.
     doBlockMinMax(buf);
-//    doBlockVoxelRelevance(buf, isRelevant);
-//    doCreateVoxelRelevanceMap(buf, m_map, isRelevant);
 
-
-    // classify voxels, generate the relevance map.
-    ParallelVoxelClassifier<Ty, RFunc> classifier{ &m_map, buf, f };
-    tbb::blocked_range<size_t> range{ 0, buf->getNumElements() };
-    tbb::parallel_for(range, classifier);
-
-    Dbg() << "CO: Returning empty buffer.";
     r.waitReturn(buf);
 
-
-//    Dbg() << "bufMin: " << double(mm.min_value) << " bufMax: " << double(mm.max_value)
-//           << " volMin: " << double(vol_min) << " volMax: " << double(vol_max);
-
-    total_bytes_processed += buf->getNumElements()*sizeof(Ty);
+    total_bytes_processed += buf->getNumElements() * sizeof(Ty);
+    Info() << "Processed (kB): " << total_bytes_processed * 1e-3;
 
   } // while(...
 
   // Save final volume min/max/avg.
-  m_volume.avg(m_volume.total()/
-                   ( m_volume.dims().x*m_volume.dims().y*m_volume.dims().z ));
+  m_volume.avg(m_volume.total() /
+                   ( m_volume.dims().x * m_volume.dims().y * m_volume.dims().z ));
 
   // Average the blocks!
   finishBlockAverages();
@@ -488,11 +459,11 @@ template<typename Ty>
 void
 FileBlockCollection<Ty>::addBlock(const FileBlock &b)
 {
-  FileBlock* ptr{ new FileBlock(b) }; //{ std::make_shared<FileBlock>(b) };
-  m_blocks.push_back(ptr);
+  FileBlock *ptr{ new FileBlock(b) }; //{ std::make_shared<FileBlock>(b) };
+  m_blocks->push_back(ptr);
 
   if (!b.is_empty) {
-    m_nonEmptyBlocks.push_back(ptr);
+    m_nonEmptyBlocks->push_back(ptr);
   }
 
 }
@@ -507,16 +478,14 @@ FileBlockCollection<Ty>::createFromRawFile(std::string const &file,
 {
   BufferedReader<Ty> r{ bufSize };
   if (!r.open(file)) {
-    throw std::runtime_error("Could not open file "+file);
+    throw std::runtime_error("Could not open file " + file);
   }
 
   r.start();
 
-  initBlocks();
-
   computeVolumeStatistics(r, relevance);
 
-  Info() << m_blocks.size()-m_nonEmptyBlocks.size() << "/" << m_blocks.size() <<
+  Info() << m_blocks->size() - m_nonEmptyBlocks->size() << "/" << m_blocks->size() <<
          " blocks marked empty.";
 }
 
