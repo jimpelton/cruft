@@ -15,7 +15,7 @@
 namespace bd
 {
 
-/// \brief Classifies voxels as relevant or irrelevant.
+/// \brief Classifies individual voxels as relevant or irrelevant.
 ///        The classification is saved in the voxel relevance map.
 ///        A 1 means relevant, a 0 means irrelevant.
 template<typename Ty, typename Function>

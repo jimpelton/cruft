@@ -42,33 +42,119 @@ public:
 
 private:
 
+  /// \brief initialize block texture from the raw data at \c file.
   template<typename Ty>
   bool do_initBlockTextures(std::string const &file);
 
-  /////////////////////////////////////////////////////////////////////////////////
-  /// \brief Fills \c out_blockData with part of \c in_data corresponding to block (i,j,k).
-  /// \param ijk[in]     ijk coords of the block whos data to get.
-  /// \param bsz[in]     The size of the block data.
-  /// \param volsz[in]   The size of the volume data s.t.
-  ///                    volsz.x*volsz.y*volsz.z == length(in_data).
-  /// \param in_data[in] Source data
-  /// \param out_blockData[out] Destination space for data.
-
+  /// \brief Fills \c blockBuffer with the data from \c infile corresponding to block (i,j,k).
+  /// \param b[in] The block for which data should be read.
+  /// \param infile[in] Source data
+  /// \param blockBuffer[out] Destination space for data.
   template<typename Ty>
   void fillBlockData( Block const &b, std::istream& infile, Ty* blockBuffer) const;
 
-//  static glm::u64vec3 m_blockDims; ///< Dimensions of a block in something.
-//  static glm::u64vec3 m_volDims; ///< Volume dimensions (# data points).
-//  static glm::u64vec3 m_numBlocks; ///< Number of blocks volume is divided into.
-
   std::vector<Block *> m_blocks;
   std::vector<Block *> m_nonEmptyBlocks;
-
   std::shared_ptr<IndexFile const> m_indexFile;
 
   //TODO: volume member in BlockCollection.
 
 };
+
+
+template< typename Ty >
+bool
+BlockCollection::do_initBlockTextures(std::string const &file)
+{
+  std::ifstream is(file, std::ios::binary);
+  if (!is.is_open()) {
+    Err() << "Could not open rawfile: " << file << ".";
+    return false;
+  }
+
+  //TODO: Handle multiple block sizes: find largest block and use that for buf_size.
+  // Since all the blocks are the same size, just use the first block's size
+  // to get the voxel dimensions for all the blocks. These dimensions are the
+  // size for the buffer used for handing the texture data to OpenGL.
+  size_t buf_size{ m_blocks[0]->voxel_extent().x *
+                       m_blocks[0]->voxel_extent().y *
+                       m_blocks[0]->voxel_extent().z };
+
+  Ty *buf{ new Ty[buf_size] };
+  float *tex{ new float[buf_size] };
+
+  std::cout << std::endl;
+  int i{ 0 };
+  for (auto *b : m_nonEmptyBlocks) {
+    std::cout << "\rInitializing texture block " << ++i << "/" << m_nonEmptyBlocks.size();
+
+    // Read data for this block from the disk.
+    fillBlockData< Ty >(*b, is, buf);
+
+    // Normalize the data prior to generating the texture.
+    for (size_t idx{ 0 }; idx < buf_size; ++idx) {
+      tex[idx] = buf[idx] / static_cast<float>(m_indexFile->getHeader().vol_max);
+    }
+
+    b->texture().genGLTex3d(bd::Texture::Format::RED,
+                            bd::Texture::Format::RED,
+                            b->voxel_extent().x,
+                            b->voxel_extent().y,
+                            b->voxel_extent().z,
+                            DataType::Float,
+                            tex);
+  } //for
+  std::cout << " ...done." << std::endl;
+
+  delete[] buf;
+  delete[] tex;
+
+  return true;
+}
+
+
+template< typename Ty >
+void
+BlockCollection::fillBlockData(Block const& b, std::istream& infile,
+                               Ty * blockBuffer) const
+{
+//  const glm::u64vec3 &nb{ m_volume.lower().block_count() };
+//  const glm::u64vec3 &bd{ m_volume.lower().block_dims() };
+//  const glm::u64vec3 &vd{ m_volume.dims() };
+
+  glm::u64vec3 const & bd{ b.voxel_extent() };
+  glm::u64vec2 const & vd{ m_indexFile->getHeader().volume_extent[0],
+                           m_indexFile->getHeader().volume_extent[1] };
+
+  // start element = block index w/in volume * block size
+  const glm::u64vec3 start{ b.ijk() * bd };
+  // block end element = block voxel start dims + block size
+  const glm::u64vec3 end{ start + bd };
+  // byte offset into file to read from
+  size_t offset{ b.fileBlock().data_offset };
+
+  // Loop through rows and slabs of volume reading rows of voxels into memory.
+  const size_t blockRowLength{ bd.x };
+  for (auto slab = start.z; slab < end.z; ++slab) {
+    for (auto row = start.y; row < end.y; ++row) {
+
+      // seek to start of row
+      infile.seekg(offset, infile.beg);
+
+      // read the bytes of current row
+      infile.read(reinterpret_cast<char *>(blockBuffer), blockRowLength * sizeof(Ty));
+      blockBuffer += blockRowLength;
+
+      // offset of next row
+      offset = bd::to1D(start.x, row + 1, slab, vd.x, vd.y);
+      offset *= sizeof(Ty);
+    }
+  }
+}
+
+
+
+
 } // namespace bd
 
 #endif // !block_collection_h__

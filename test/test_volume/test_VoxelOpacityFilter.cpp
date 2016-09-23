@@ -2,7 +2,7 @@
 // Created by Jim Pelton on 9/4/16.
 //
 
-#include <bd/volume/voxelopacityfilter.h>
+#include <bd/filter/voxelopacityfilter.h>
 #include <bd/volume/transferfunction.h>
 
 #include <vector>

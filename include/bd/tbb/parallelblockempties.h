@@ -1,9 +1,9 @@
-#ifndef parallelblockstats_h__
-#define parallelblockstats_h__
+#ifndef bd_parallelblockstats_h
+#define bd_parallelblockstats_h
 
 #include <bd/io/fileblock.h>
-#include <bd/volume/volume.h>
 #include <bd/io/buffer.h>
+#include <bd/volume/volume.h>
 
 
 #include <tbb/parallel_for.h>
@@ -15,16 +15,14 @@
 namespace bd
 {
 
-/// \brief Compute the relevance of voxels in the blocked_range.
+/// \brief Counts the number of empty voxels in each block.
+///
 template<typename Ty>
-class ParallelBlockStats{
-
-
-
+class ParallelBlockEmpties
+{
 public:
 
-
-  ParallelBlockStats(Buffer<Ty> *b, Volume const *v, std::function<bool(Ty)> isEmpty)
+  ParallelBlockEmpties(Buffer<Ty> *b, Volume const *v, std::function<bool(Ty)> isEmpty)
     : m_data{ b->getPtr() }
     , m_volume{ v }
     , m_voxelStart{ b->getIndexOffset() }
@@ -34,7 +32,7 @@ public:
     m_empties = new uint64_t[m_volume->lower().total_block_count()]();
   }
 
-  ParallelBlockStats(ParallelBlockStats<Ty> &o, tbb::split)
+  ParallelBlockEmpties(ParallelBlockEmpties<Ty> &o, tbb::split)
       : m_data{ o.m_data }
       , m_volume{ o.m_volume }
       , m_voxelStart{ o.m_voxelStart }
@@ -44,7 +42,7 @@ public:
     m_empties = new uint64_t[o.m_volume->lower().total_block_count()]();
   }
 
-  ~ParallelBlockStats()
+  ~ParallelBlockEmpties()
   {
     if (m_empties) {
       delete [] m_empties;
@@ -70,6 +68,7 @@ public:
         bJ,        // block j index
         bK,        // block k index
         bIdx;      // block 1D index
+
     for (size_t i{ r.begin() }; i != r.end(); ++i) {
 
       // Convert vIdx (the voxel index within the entire volume data set)
@@ -93,7 +92,7 @@ public:
   }
 
   void
-  join(ParallelBlockStats<Ty> const &rhs)
+  join(ParallelBlockEmpties<Ty> const &rhs)
   {
     for(uint64_t i{ 0 }; i < m_volume->lower().total_block_count(); ++i) {
       m_empties[i] += rhs.m_empties[i];
@@ -115,45 +114,9 @@ private:
 
   std::function<bool(Ty)> isRelevant; //< Is the element a relevant voxel or not.
 
-}; // class ParallelBlockStats
+}; // class ParallelBlockEmpties
 
 } // namespace preproc
 
-#endif // ! parallelblockstats_h__
+#endif // ! bd_parallelblockstats_h
 
-//  FileBlock* copyBlocks(size_t rBegin, size_t rEnd) const
-//  {
-//
-//    uint64_t vIdx, bI, bJ, bK, bIdx;
-//    vIdx =  rBegin + voxel_start;
-//    bI = (vIdx % vdX) / bdX;
-//    bJ = ((vIdx / vdX) % vdY) / bdY;
-//    bK = ((vIdx / vdX) / vdY) / bdZ;
-//    uint64_t startBlock = bI + bcX * (bJ + bK * bcY);
-//
-//    // end block
-//    vIdx =  rEnd + voxel_start;
-//    bI = (vIdx % vdX) / bdX;
-//    bJ = ((vIdx / vdX) % vdY) / bdY;
-//    bK = ((vIdx / vdX) / vdY) / bdZ;
-//    uint64_t endBlock = bI + bcX * (bJ + bK * bcY);
-//
-//    // Copy the blocks covered by the blocked_range r.
-//    size_t sz{ endBlock - startBlock };
-//    FileBlock *my_blocks = new FileBlock[sz];
-//    for(size_t i{ 0 }; i < sz; ++i) {
-//      my_blocks[i] = *m_blocks[startBlock];
-//      startBlock++;
-//    }
-//
-//    return my_blocks;
-//  }
-
-
-//  FileBlock* copyBlocks(const FileBlock * const *theBlocks, size_t numBlocks) {
-//    m_myBlocks = new FileBlock[numBlocks];
-//    for(size_t i{ 0 }; i<numBlocks; ++i)
-//      m_myBlocks[i] = *theBlocks[i];
-//
-//    return m_myBlocks;
-//  }

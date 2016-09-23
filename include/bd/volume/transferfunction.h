@@ -2,8 +2,8 @@
 // Created by Jim Pelton on 9/4/16.
 //
 
-#ifndef CRUFTERLY_TRANSFERFUNCTION_H
-#define CRUFTERLY_TRANSFERFUNCTION_H
+#ifndef bd_transferfunction_h
+#define bd_transferfunction_h
 
 #include <string>
 #include <memory>
@@ -23,4 +23,5 @@ std::unique_ptr<std::vector<OpacityKnot>>
 load1dtScalar(std::string const &filename);
 
 } // namespace bd
-#endif // ! CRUFTERLY_TRANSFERFUNCTION_H
+
+#endif // ! bd_transferfunction_h

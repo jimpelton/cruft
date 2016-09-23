@@ -7,6 +7,7 @@
 namespace bd
 {
 
+/// \brief Filters FileBlocks based on the average value.
 class BlockAverageFilter
 {
 

@@ -1,12 +1,12 @@
 
 #include <bd/io/indexfile.h>
-#include <bd/volume/blockaveragefilter.h>
+#include <bd/filter/blockaveragefilter.h>
 
 #include <glm/glm.hpp>
 
 #include <istream>
 #include <ostream>
-#include <bd/volume/voxelopacityfilter.h>
+#include <bd/filter/voxelopacityfilter.h>
 
 namespace bd
 {

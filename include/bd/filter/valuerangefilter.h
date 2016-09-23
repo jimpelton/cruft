@@ -2,8 +2,8 @@
 // Created by jim on 5/31/16.
 //
 
-#ifndef CRUFTERLY_VALUERANGEFILTER_H
-#define CRUFTERLY_VALUERANGEFILTER_H
+#ifndef bd_valuerangefilter_h
+#define bd_valuerangefilter_h
 
 /// \brief Test if a value is within given range.
 template<typename Ty>
@@ -28,4 +28,4 @@ private:
 
 
 
-#endif //CRUFTERLY_VALUERANGEFILTER_H
+#endif //bd_valuerangefilter_h

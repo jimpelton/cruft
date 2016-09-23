@@ -7,11 +7,11 @@
 #include <bd/log/logger.h>
 #include <bd/util/util.h>
 #include <bd/tbb/parallelminmax.h>
-#include <bd/tbb/parallelblockstats.h>
+#include <bd/tbb/parallelblockempties.h>
 #include <bd/tbb/parallelblockminmax.h>
 #include <bd/tbb/parallelvoxelclassifier.h>
 #include <bd/volume/volume.h>
-#include <bd/volume/valuerangefilter.h>
+#include <bd/filter/valuerangefilter.h>
 
 #include <tbb/parallel_reduce.h>
 #include <tbb/blocked_range.h>
@@ -45,9 +45,9 @@ class FileBlockCollection
 public:
 
   /// \brief Callable type used for the relevance function
-  typedef std::function<bool(Ty)> RelFuncType;
+  using RFunc = std::function<bool(Ty)>;
   ///\brief Container type used for relevance map.
-  typedef std::vector<bool> RelMapType;
+  using RMap = std::vector<bool>;
 
 
   FileBlockCollection();
@@ -66,7 +66,7 @@ public:
   /// \param tmax[in] max average block value to filter against.
   ///////////////////////////////////////////////////////////////////////////////
   void
-  createFromRawFile(const std::string &file, size_t bufSize, RelFuncType const &f);
+  createFromRawFile(const std::string &file, size_t bufSize, RFunc const &f);
 
 
   //////////////////////////////////////////////////////////////////////////////
@@ -148,7 +148,7 @@ private:
   //////////////////////////////////////////////////////////////////////////////
   /// \brief Count the relevant voxels for each block in the given buffer.
   void
-  doBlockVoxelRelevance(Buffer<Ty>*, RelFuncType const &);
+  doBlockVoxelRelevance(Buffer<Ty>*, RFunc const &);
 
   //////////////////////////////////////////////////////////////////////////////
   /// \brief Count the relevant voxels for each block in the given buffer.
@@ -164,7 +164,7 @@ private:
   //////////////////////////////////////////////////////////////////////////////
   /// \brief Compute and save a few stats from provided raw file.
   void
-  computeVolumeStatistics(BufferedReader<Ty> &r, RelFuncType const &);
+  computeVolumeStatistics(BufferedReader<Ty> &r, RFunc const &);
 
 
   //////////////////////////////////////////////////////////////////////////////
@@ -179,7 +179,7 @@ private: //members
 
   std::vector<FileBlock*> m_blocks;
   std::vector<FileBlock*> m_nonEmptyBlocks;
-  RelMapType m_map;
+  RMap m_map;
 
 
 }; // class FileBlockCollection
@@ -379,9 +379,9 @@ FileBlockCollection<Ty>::doBlockMinMax(Buffer<Ty>* buf)
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 void
-FileBlockCollection<Ty>::doBlockVoxelRelevance(Buffer<Ty>* buf, RelFuncType const &f)
+FileBlockCollection<Ty>::doBlockVoxelRelevance(Buffer<Ty>* buf, RFunc const &f)
 {
-  ParallelBlockStats<Ty> stats{ buf, &m_volume, f };
+  ParallelBlockEmpties<Ty> stats{ buf, &m_volume, f };
 
   tbb::blocked_range<size_t> range{ 0, buf->getNumElements() };
   tbb::parallel_reduce(range, stats);
@@ -397,8 +397,8 @@ FileBlockCollection<Ty>::doBlockVoxelRelevance(Buffer<Ty>* buf, RelFuncType cons
 //template<typename Ty>
 //void
 //FileBlockCollection<Ty>::doCreateVoxelRelevanceMap(Buffer<Ty> *buf,
-//                                                   RelMapType &map,
-//                                                   RelFuncType const &f)
+//                                                   RMap &map,
+//                                                   RFunc const &f)
 //{
 //  ParallelVoxelClassifier<Ty> classifier{ &map, buf, f };
 //  tbb::blocked_range<size_t> range{ 0, buf->getNumElements() };
@@ -425,7 +425,7 @@ FileBlockCollection<Ty>::finishBlockAverages()
 template<typename Ty>
 void
 FileBlockCollection<Ty>::computeVolumeStatistics(BufferedReader<Ty> &r,
-                                                 RelFuncType const &f)
+                                                 RFunc const &f)
 {
   Info() << "Computing volume statistics...";
 
@@ -454,7 +454,7 @@ FileBlockCollection<Ty>::computeVolumeStatistics(BufferedReader<Ty> &r,
 
 
     // classify voxels, generate the relevance map.
-    ParallelVoxelClassifier<Ty, RelFuncType> classifier{ &m_map, buf, f };
+    ParallelVoxelClassifier<Ty, RFunc> classifier{ &m_map, buf, f };
     tbb::blocked_range<size_t> range{ 0, buf->getNumElements() };
     tbb::parallel_for(range, classifier);
 

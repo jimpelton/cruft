@@ -3,9 +3,9 @@
 //
 
 #include <bd/volume/transferfunction.h>
-#include <bd/volume/voxelopacityfilter.h>
+#include <bd/filter/voxelopacityfilter.h>
 #include <bd/tbb/parallelvoxelclassifier.h>
-#include <bd/volume/valuerangefilter.h>
+#include <bd/filter/valuerangefilter.h>
 
 
 #include <tbb/blocked_range.h>

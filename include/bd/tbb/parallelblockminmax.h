@@ -11,10 +11,10 @@ namespace bd
 {
 
 template<typename Ty>
-class MinMaxPair
+class MinMaxTotalPair
 {
 public:
-  MinMaxPair()
+  MinMaxTotalPair()
     : min{ std::numeric_limits<Ty>::max() }
     , max{ std::numeric_limits<Ty>::lowest() }
     , total{ 0 }
@@ -25,7 +25,7 @@ public:
   Ty total;
 };
 
-class MinMaxPairDouble : public MinMaxPair<double> {};
+class MinMaxPairDouble : public MinMaxTotalPair<double> {};
 
 /// \brief Compute the min and max values for each block
 ///        associated with values in the blocked_range.

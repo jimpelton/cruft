@@ -15,12 +15,12 @@
 namespace bd
 {
 
-///////////////////////////////////////////////////////////////////////////////
-///   \brief Describes a block in the IndexFile.
+///   \brief Describes a Block in the IndexFile.
 /// 
-///   All values in the FileBlock struct are initialized to 0 by the c'tor.
+///   \note All values in the FileBlock struct are initialized to 0 by the c'tor,
+///         except for min_val and max_val. min_val is init'd to its max value, and
+///         max_val is init'd to its lowest possible value.
 /// 
-///////////////////////////////////////////////////////////////////////////////
 struct FileBlock
 {
 

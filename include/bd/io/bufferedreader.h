@@ -1,5 +1,5 @@
-#ifndef buffered_reader__
-#define buffered_reader__
+#ifndef bd_buffered_reader
+#define bd_buffered_reader
 
 #include "readerworker.h"
 #include "bufferpool.h"
