@@ -86,7 +86,7 @@ public:
   addBlock(FileBlock const &) = 0;
 
 
-  virtual std::vector<FileBlock*> const &
+  virtual std::vector<FileBlock> const &
   getBlocks() = 0;
 
 
@@ -105,7 +105,10 @@ class FileBlockCollectionWrapper : public FileBlockCollectionWrapper_Base
 {
 public:
 
+  /// \brief Create a wrapper around a FileBlockCollection<Ty>
   FileBlockCollectionWrapper(glm::u64vec3 volDims, glm::u64vec3 numBlocks);
+
+  /// \brief Create a wrapper around the provided FileBlockCollection<Ty>.
   FileBlockCollectionWrapper(FileBlockCollection<Ty> const &col);
 
   void
@@ -116,7 +119,7 @@ public:
   getVolume() override;
 
 
-  std::vector<FileBlock*> const &
+  std::vector<FileBlock> const &
   getBlocks() override;
 
 
@@ -178,7 +181,7 @@ public:
   getHeader() const;
 
 
-  std::vector<FileBlock*> const &
+  std::vector<FileBlock> const &
   getBlocks() const;
 
 
@@ -235,7 +238,7 @@ FileBlockCollectionWrapper<Ty>::getVolume()
 
 
 template<typename Ty>
-std::vector<FileBlock *> const &
+std::vector<FileBlock> const &
 FileBlockCollectionWrapper<Ty>::getBlocks()
 {
   return c.blocks();

@@ -53,6 +53,7 @@ public:
 
   FileBlockCollection(glm::u64vec3 volDims, glm::u64vec3 numBlocks);
 
+  FileBlockCollection(FileBlockCollection const &other);
 
   ~FileBlockCollection();
 
@@ -94,18 +95,23 @@ public:
 
 
   //////////////////////////////////////////////////////////////////////////////
-  std::vector<FileBlock *> const &
+  std::vector<FileBlock> const &
   blocks() const
   {
-    return *m_blocks;
+    return m_blocks;
   }
 
+  std::vector<FileBlock> &
+  blocks()
+  {
+    return m_blocks;
+  }
 
   //////////////////////////////////////////////////////////////////////////////
-  std::vector<FileBlock *> const &
+  std::vector<FileBlock*> const &
   nonEmptyBlocks() const
   {
-    return *m_nonEmptyBlocks;
+    return m_nonEmptyBlocks;
   }
 
 
@@ -175,8 +181,8 @@ private: //members
 
   Volume m_volume;
 
-  std::shared_ptr<std::vector<FileBlock *>> m_blocks;
-  std::shared_ptr<std::vector<FileBlock *>> m_nonEmptyBlocks;
+  std::vector<FileBlock> m_blocks;
+  std::vector<FileBlock*> m_nonEmptyBlocks;
 //  RMap m_map;
 
 
@@ -195,11 +201,23 @@ FileBlockCollection<Ty>::FileBlockCollection()
 template<typename Ty>
 FileBlockCollection<Ty>::FileBlockCollection(glm::u64vec3 volDims, glm::u64vec3 numBlocks)
     : m_volume{ volDims, numBlocks }
-    , m_blocks{ new std::vector<FileBlock *>() }
-    , m_nonEmptyBlocks{ new std::vector<FileBlock *>() }
+    , m_blocks{ } //new std::vector<FileBlock *>() }
+    , m_nonEmptyBlocks{ } // new std::vector<FileBlock *>() }
 {
   if (numBlocks.x > 0 && numBlocks.y > 0 && numBlocks.z > 0) {
     initBlocks();
+  }
+}
+
+template<typename Ty>
+FileBlockCollection<Ty>::FileBlockCollection(FileBlockCollection const &other)
+  : m_blocks{ other.m_blocks }
+  , m_volume{ other.m_volume }
+{
+  for (auto &b : m_blocks){
+    if (! b.is_empty) {
+      m_nonEmptyBlocks.push_back(&b);
+    }
   }
 }
 
@@ -209,9 +227,9 @@ template<typename Ty>
 FileBlockCollection<Ty>::~FileBlockCollection()
 {
   std::cout << "FileBlockCollection destructor\n";
-  for (auto b : *m_blocks) {
-    delete b;
-  }
+//  for (auto b : *m_blocks) {
+//    delete b;
+//  }
 }
 
 
@@ -281,25 +299,25 @@ FileBlockCollection<Ty>::initBlocks()
         // voxel start of block within volume
         const glm::u64vec3 startVoxel{ blkId * m_volume.lower().block_dims() };
 
-        FileBlock *blk = new FileBlock();
-        blk->block_index = bd::to1D(bxi, byj, bzk, bc.x, bc.y);
-        blk->data_offset = bd::to1D(startVoxel.x, startVoxel.y, startVoxel.z, vd.x, vd.y);
-        blk->data_offset *= sizeof(Ty);
+        FileBlock blk; // = new FileBlock();
+        blk.block_index = bd::to1D(bxi, byj, bzk, bc.x, bc.y);
+        blk.data_offset =
+            sizeof(Ty) * bd::to1D(startVoxel.x, startVoxel.y, startVoxel.z, vd.x, vd.y);
 
-        blk->voxel_dims[0] = static_cast<decltype(blk->voxel_dims[0])>(bd.x);
-        blk->voxel_dims[1] = static_cast<decltype(blk->voxel_dims[1])>(bd.y);
-        blk->voxel_dims[2] = static_cast<decltype(blk->voxel_dims[2])>(bd.z);
+        blk.voxel_dims[0] = static_cast<decltype(blk.voxel_dims[0])>(bd.x);
+        blk.voxel_dims[1] = static_cast<decltype(blk.voxel_dims[1])>(bd.y);
+        blk.voxel_dims[2] = static_cast<decltype(blk.voxel_dims[2])>(bd.z);
 
-        blk->world_oigin[0] = blkOrigin.x;
-        blk->world_oigin[1] = blkOrigin.y;
-        blk->world_oigin[2] = blkOrigin.z;
+        blk.world_oigin[0] = blkOrigin.x;
+        blk.world_oigin[1] = blkOrigin.y;
+        blk.world_oigin[2] = blkOrigin.z;
 
-        m_blocks->push_back(blk);
+        m_blocks.push_back(blk);
       }
     }
   }
 
-  Info() << "Finished block init: total blocks is " << m_blocks->size();
+  Info() << "Finished block init: total blocks is " << m_blocks.size();
 }
 
 
@@ -366,14 +384,14 @@ FileBlockCollection<Ty>::doBlockMinMax(Buffer<Ty> *buf)
   // update the blocks with this buffers min max data.
   MinMaxPairDouble const *pairs{ blockMinMax.pairs() };
   for (uint64_t i{ 0 }; i < m_volume.lower().total_block_count(); ++i) {
-    FileBlock *b{ (*m_blocks)[i] };
-    if (b->min_val > pairs[i].min) {
-      b->min_val = pairs[i].min;
+    FileBlock b{ m_blocks[i] };
+    if (b.min_val > pairs[i].min) {
+      b.min_val = pairs[i].min;
     }
-    if (b->max_val < pairs[i].max) {
-      b->max_val = pairs[i].max;
+    if (b.max_val < pairs[i].max) {
+      b.max_val = pairs[i].max;
     }
-    b->total_val += pairs[i].total;
+    b.total_val += pairs[i].total;
   }
 
 }
@@ -403,9 +421,9 @@ void
 FileBlockCollection<Ty>::finishBlockAverages()
 {
 //  uint64_t volume_empty_voxels{ 0 };
-  for (FileBlock *b : *m_blocks) {
-    uint64_t total_vox{ b->voxel_dims[0] * b->voxel_dims[1] * b->voxel_dims[2] };
-    b->avg_val = b->total_val / total_vox;
+  for (auto &b : m_blocks) {
+    uint64_t total_vox{ b.voxel_dims[0] * b.voxel_dims[1] * b.voxel_dims[2] };
+    b.avg_val = b.total_val / total_vox;
 //    volume_empty_voxels += b->empty_voxels;
   }
 
@@ -457,13 +475,13 @@ FileBlockCollection<Ty>::computeVolumeStatistics(BufferedReader<Ty> &r,
 //////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 void
-FileBlockCollection<Ty>::addBlock(const FileBlock &b)
+FileBlockCollection<Ty>::addBlock(FileBlock const &b)
 {
-  FileBlock *ptr{ new FileBlock(b) }; //{ std::make_shared<FileBlock>(b) };
-  m_blocks->push_back(ptr);
+  m_blocks.push_back(b);
 
   if (!b.is_empty) {
-    m_nonEmptyBlocks->push_back(ptr);
+    FileBlock *ptr{ &(*m_blocks.end()) };
+    m_nonEmptyBlocks.push_back(ptr);
   }
 
 }
@@ -485,7 +503,7 @@ FileBlockCollection<Ty>::createFromRawFile(std::string const &file,
 
   computeVolumeStatistics(r, relevance);
 
-  Info() << m_blocks->size() - m_nonEmptyBlocks->size() << "/" << m_blocks->size() <<
+  Info() << m_blocks.size() - m_nonEmptyBlocks.size() << "/" << m_blocks.size() <<
          " blocks marked empty.";
 }
 

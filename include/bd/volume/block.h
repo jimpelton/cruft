@@ -21,7 +21,7 @@ namespace bd
 /// 3D world space. The block's texture contains the GL id/name of the 3D
 /// texture that should be sampled by the proxy geometry.
 //////////////////////////////////////////////////////////////////////////
-class Block : public bd::BDObj
+class Block //: public bd::BDObj
 {
 public:
 
@@ -32,7 +32,7 @@ public:
   /// \param[in] dims The dimensions in data points of this block.
   /// \param[in] origin Center of this block in world coords
   ///            (or whatever coords you want...maybe...sigh...whatevs).
-  Block(const glm::u64vec3& ijk, const glm::vec3 &dims, const FileBlock &fb);
+  Block(glm::u64vec3 const &ijk, glm::vec3 const &dims, FileBlock const &fb);
 
   virtual ~Block();
 
@@ -43,7 +43,7 @@ public:
   /// \brief Get the ijk location of this block.
   const glm::u64vec3 & ijk() const;
   /// \brief Set the ijk location of this block.
-  void ijk(const glm::u64vec3& ijk);
+  void ijk(glm::u64vec3 const & ijk);
 
 
   /// \brief Set if this block is marked empty.
@@ -73,7 +73,7 @@ public:
 
 
   /// \brief String rep. of this blockeroo.
-  virtual std::string to_string() const override;
+  std::string to_string() const;
 
 private:
   FileBlock m_fb;

@@ -187,8 +187,8 @@ IndexFile::writeBinaryIndexFile(std::ostream &os) const
   // write header to stream.
   IndexFileHeader::writeToStream(os, m_header);
   // read all the blocks
-  for (FileBlock *b : m_col->getBlocks()) {
-    os.write(reinterpret_cast<const char *>(b), sizeof(FileBlock));
+  for (auto &b : m_col->getBlocks()) {
+    os.write(reinterpret_cast<const char *>(&b), sizeof(FileBlock));
   }
 }
 
@@ -221,11 +221,11 @@ IndexFile::writeAsciiIndexFile(std::ostream &os) const
   os << "{\n";
   os << m_header << ",\n\"blocks\": { \n";
 
-  auto blocks = m_col->getBlocks();
+  std::vector<FileBlock> const &blocks = m_col->getBlocks();
   for (size_t i{ 0 }; i<blocks.size()-1; ++i) {
-    os << *blocks[i] << ",\n";
+    os << blocks[i] << ",\n";
   }
-  os << *blocks[blocks.size()-1] << "\n";
+  os << blocks[blocks.size()-1] << "\n";
 
   os << "}}\n";
 }
@@ -250,7 +250,7 @@ IndexFile::writeAsciiIndexFile(std::string const &outpath) const
 
 
 ///////////////////////////////////////////////////////////////////////////////
-std::vector<FileBlock *> const &
+std::vector<FileBlock> const &
 IndexFile::getBlocks() const
 {
   return m_col->getBlocks();

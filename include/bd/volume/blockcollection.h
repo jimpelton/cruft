@@ -14,6 +14,8 @@ class BlockCollection
 public:
   BlockCollection();
   ~BlockCollection();
+  BlockCollection(BlockCollection const &) = delete;
+  BlockCollection(BlockCollection const &&) = delete;
 
 //  void initBlocksFromIndexFile(const std::string &fileName);
 //  void initBlocksFromIndexFile(std::unique_ptr<bd::IndexFile> index);
@@ -25,7 +27,7 @@ public:
   /// \note Blocks are sized to fit it within the world-extent of the volume data.
   /// \param fileBlocks[in] The FileBlocks generated from the IndexFile.
   /// \param numBlocks[in]  The number of blocks to generate in each dimension.
-  void initBlocksFromFileBlocks(std::vector<FileBlock*> const &fileBlocks,
+  void initBlocksFromFileBlocks(std::vector<FileBlock> const &fileBlocks,
                                 glm::u64vec3 const &numblocks);
 
   void filterBlocks(std::function<bool(Block const *)> isEmpty);

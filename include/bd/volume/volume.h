@@ -60,7 +60,7 @@ class Volume
 {
 
 public:
-  Volume() : Volume({}, {})
+  Volume() : Volume({ }, { 1, 1, 1 })
   { }
 
   Volume(const glm::u64vec3 &volDims, const glm::u64vec3 &numBlocks)

@@ -33,7 +33,7 @@ BlockCollection::initBlocksFromIndexFile(std::shared_ptr<IndexFile const> index)
 }
 
 void
-BlockCollection::initBlocksFromFileBlocks(std::vector<FileBlock *> const &fileBlocks,
+BlockCollection::initBlocksFromFileBlocks(std::vector<FileBlock> const &fileBlocks,
                                           glm::u64vec3 const &nb)
 {
   auto idx = 0ull;
@@ -41,10 +41,10 @@ BlockCollection::initBlocksFromFileBlocks(std::vector<FileBlock *> const &fileBl
     for (auto j = 0ull; j < nb.y; ++j)
       for (auto i = 0ull; i < nb.x; ++i) {
         std::cout << "\rCreating block " << idx;
-        FileBlock *file_block{ fileBlocks[idx] };
+//        FileBlock *file_block{ fileBlocks[idx] };
         Block *block{ new Block{{ i, j, k },
                                 { 1.0f / nb.x, 1.0f / nb.y, 1.0f / nb.z },
-                                *file_block }};
+                                fileBlocks[idx] }};
 
         m_blocks.push_back(block);
 
