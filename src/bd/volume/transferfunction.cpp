@@ -44,7 +44,7 @@ load1dtScalar(std::string const &filename)
 
     // read rest of file consisting of rgba colors
     float s, a;
-    while (lineNum<numKnots && file >> s >> a) {
+    while (lineNum <= numKnots && file >> s >> a) {
       knots->push_back(OpacityKnot{ s, a });
       lineNum++;
     }
