@@ -16,13 +16,16 @@ namespace bd
 {
 
 /// \brief Counts the number of empty voxels in each block.
-///
-template<typename Ty>
+/// Template parameter \c Function should be a callable type that
+/// takes a Ty as a parameter and returns a bool. The callable type
+/// should return true if the value it recieves is relevant, and
+/// false if the value is not relevant.
+template<typename Ty, typename Function>
 class ParallelReduceBlockEmpties
 {
 public:
 
-  ParallelReduceBlockEmpties(Buffer<Ty> *b, Volume const *v, std::function<bool(Ty)> isEmpty)
+  ParallelReduceBlockEmpties(Buffer<Ty> *b, Volume const *v, Function isEmpty)
     : m_data{ b->getPtr() }
     , m_volume{ v }
     , m_voxelStart{ b->getIndexOffset() }
@@ -32,7 +35,7 @@ public:
     m_empties = new uint64_t[m_volume->lower().total_block_count()]();
   }
 
-  ParallelReduceBlockEmpties(ParallelReduceBlockEmpties<Ty> &o, tbb::split)
+  ParallelReduceBlockEmpties(ParallelReduceBlockEmpties &o, tbb::split)
       : m_data{ o.m_data }
       , m_volume{ o.m_volume }
       , m_voxelStart{ o.m_voxelStart }
@@ -93,7 +96,7 @@ public:
   }
 
   void
-  join(ParallelReduceBlockEmpties<Ty> const &rhs)
+  join(ParallelReduceBlockEmpties const &rhs)
   {
     for(uint64_t i{ 0 }; i < m_volume->lower().total_block_count(); ++i) {
       m_empties[i] += rhs.m_empties[i];
@@ -113,7 +116,7 @@ private:
   size_t const m_voxelStart;
   uint64_t * m_empties;
 
-  std::function<bool(Ty)> isRelevant; //< Is the element a relevant voxel or not.
+  Function isRelevant; ///< Is the element a relevant voxel or not.
 
 }; // class ParallelReduceBlockEmpties
 

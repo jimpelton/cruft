@@ -6,6 +6,8 @@
 #define preproc_volume_h__
 
 #include <glm/glm.hpp>
+#include <bd/log/logger.h>
+
 namespace bd
 {
 
@@ -64,13 +66,28 @@ public:
   { }
 
   Volume(const glm::u64vec3 &volDims, const glm::u64vec3 &numBlocks)
-    : m_lowerRegion{ volDims / numBlocks, numBlocks }
+    : m_lowerRegion{ }
     , m_volDims{ volDims }
-//    , m_volEmptyVoxels{  }
+//  , m_volEmptyVoxels{  }
     , m_volMax{ std::numeric_limits<double>::lowest() }
     , m_volMin{ std::numeric_limits<double>::max() }
     , m_volAvg{ 0.0 }
     , m_volTot{ 0.0 }
+  {
+    assert(numBlocks.x != 0 && numBlocks.y != 0 && numBlocks.z != 0);
+    m_lowerRegion.block_dims(volDims / numBlocks);
+    m_lowerRegion.block_count(numBlocks);
+  }
+
+
+  Volume(Volume const &other)
+    : m_lowerRegion{ other.m_lowerRegion }
+    , m_volDims{ other.m_volDims }
+//  , m_volEmptyVoxels{ other.m_volEmptyVoxels  }
+    , m_volMax{ other.m_volMax }
+    , m_volMin{ other.m_volMin }
+    , m_volAvg{ other.m_volAvg }
+    , m_volTot{ other.m_volTot }
   { }
 
   ~Volume() { }
@@ -113,7 +130,7 @@ private:
   //Region m_upperRegion;
 
   glm::u64vec3 m_volDims;    ///< Volume dimensions in voxels.
-//  uint64_t m_volEmptyVoxels; ///< Number of non-relevant voxels.
+//uint64_t m_volEmptyVoxels; ///< Number of non-relevant voxels.
   double m_volMax;           ///< Max value found in volume.
   double m_volMin;           ///< Min value found in volume.
   double m_volAvg;           ///< Avg value found in volume.

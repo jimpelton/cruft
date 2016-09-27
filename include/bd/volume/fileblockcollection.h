@@ -31,13 +31,11 @@
 namespace bd
 {
 
-//////////////////////////////////////////////////////////////////////////////
 /// \brief Creates a list of blocks from a large binary raw file. The data type
 ///        in the binary raw file is supplied by the template parameter.
 ///
 /// \param Ty Data type in the istream this BlockCollection will be
 ///            generated from.
-//////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 class FileBlockCollection
 {
@@ -47,52 +45,62 @@ public:
   /// \brief Callable type used for the relevance function
   using RFunc = std::function<bool(Ty)>;
 
-
+  /// \brief Default construct a FileBlockCollection.
+  /// The default collection has 1x1x1 blocks and volume dimensions of 0x0x0.
   FileBlockCollection();
 
 
+  /// \brief Create a FileBlockCollection for a volume with \c volDims voxel dimensions
+  ///        and \c numBlocks block dimensions.
+  /// \param volDims The dimensions in voxels of this volume.
+  /// \param numBlocks The dimensions in blocks of this volume.
   FileBlockCollection(glm::u64vec3 volDims, glm::u64vec3 numBlocks);
 
+
   FileBlockCollection(FileBlockCollection const &other);
+
 
   ~FileBlockCollection();
 
 
-  //////////////////////////////////////////////////////////////////////////////
   /// \brief Marks blocks as empty and uploads GL textures if average is outside of [tmin..tmax].
   /// \param rawFile[in] Volume data set
   /// \param tmin[in] min average block value to filter against.
   /// \param tmax[in] max average block value to filter against.
-  ///////////////////////////////////////////////////////////////////////////////
   void
   createFromRawFile(const std::string &file, size_t bufSize, RFunc const &f);
 
 
-  //////////////////////////////////////////////////////////////////////////////
   /// \brief Read a single block into buffer \c out.
   /// \param b[in]      The FileBlock for the block that will be read.
   /// \param index[in]  i,j,k coords of the block whos data to get.
   /// \param infile[in] The raw data file.
   /// \param out[out]   Destination space for block data.
-  //////////////////////////////////////////////////////////////////////////////
 //void fillBlockData(const FileBlock &b, std::istream &infile, Ty *out) const;
 
 
-  //////////////////////////////////////////////////////////////////////////////
   /// \brief Add a reference to the pre-initialized block to this FileBlockCollection.
   /// \note  Adds block to non-empty list if block is not empty.
   /// \param b The block to add.
-  //////////////////////////////////////////////////////////////////////////////
   void
   addBlock(const FileBlock &b);
 
 
+  /// Get the volume for this FBC.
+  /// \return reference-to-const for the volume.
   const Volume &
-  volume()
+  volume() const
   {
     return m_volume;
   }
 
+  /// Get the volume for this FBC.
+  /// \return reference-to-non-const for the volume.
+  Volume &
+  volume()
+  {
+    return m_volume;
+  }
 
   //////////////////////////////////////////////////////////////////////////////
   std::vector<FileBlock> const &
@@ -117,13 +125,13 @@ public:
 
 private:
 
-  //////////////////////////////////////////////////////////////////////////////
   /// \brief Initializes \c nb blocks so that they fit within the extent of \c vd.
+  ///
+  /// Creates blocks of uniform size and spacing.
   void
   initBlocks();
 
 
-  //////////////////////////////////////////////////////////////////////////////
   /// \brief Determine if blocks fit evenly within volume, else add blocks in
   ///        appropriate dimensions and update the volume with new block counts.
   /// \note Does not update the voxel dimensions of the volume.
@@ -131,60 +139,50 @@ private:
 //  glm::u64vec3 updateBlockCount();
 
 
-  //////////////////////////////////////////////////////////////////////////////
   /// \brief Sum the given buffer in parallel.
   double
   doBufferSum(Buffer<Ty> *);
 
 
-  //////////////////////////////////////////////////////////////////////////////
   /// \brief Find buffer global min/max.
   void
   doBufferMinMax(Buffer<Ty> *);
 
 
-  //////////////////////////////////////////////////////////////////////////////
   /// \brief Find block local min/max and total values.
   void
   doBlockMinMax(Buffer<Ty> *);
 
 
-  //////////////////////////////////////////////////////////////////////////////
   /// \brief Count the relevant voxels for each block in the given buffer.
 //  void
 //  doBlockVoxelRelevance(Buffer<Ty> *, RFunc const &);
 
-  //////////////////////////////////////////////////////////////////////////////
   /// \brief Count the relevant voxels for each block in the given buffer.
 //  template<typename Function>
 //  void doCreateVoxelRelevanceMap(Buffer<Ty>*, RMapType &, RFType const&);
 
-  //////////////////////////////////////////////////////////////////////////////
   /// \brief Compute the averages for each block after min/max and sum is found.
   void
   finishBlockAverages();
 
 
-  //////////////////////////////////////////////////////////////////////////////
   /// \brief Compute and save a few stats from provided raw file.
   void
   computeVolumeStatistics(BufferedReader<Ty> &r, RFunc const &);
 
 
-  //////////////////////////////////////////////////////////////////////////////
   /// \brief Compute and save a few stats for each block.
-  //////////////////////////////////////////////////////////////////////////////
 //  void computeBlockStatistics(BufferedReader<Ty> &r);
 
 
-private: //members  
+private:
 
   Volume m_volume;
 
   std::vector<FileBlock> m_blocks;
-  std::vector<FileBlock*> m_nonEmptyBlocks;
-//  RMap m_map;
 
+  std::vector<FileBlock*> m_nonEmptyBlocks;
 
 }; // class FileBlockCollection
 
@@ -192,7 +190,7 @@ private: //members
 ///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 FileBlockCollection<Ty>::FileBlockCollection()
-    : FileBlockCollection({ 0, 0, 0 }, { 0, 0, 0 })
+    : FileBlockCollection({ 0, 0, 0 }, { 1, 1, 1 })
 {
 }
 
@@ -201,14 +199,15 @@ FileBlockCollection<Ty>::FileBlockCollection()
 template<typename Ty>
 FileBlockCollection<Ty>::FileBlockCollection(glm::u64vec3 volDims, glm::u64vec3 numBlocks)
     : m_volume{ volDims, numBlocks }
-    , m_blocks{ } //new std::vector<FileBlock *>() }
-    , m_nonEmptyBlocks{ } // new std::vector<FileBlock *>() }
+    , m_blocks{ }
+    , m_nonEmptyBlocks{ }
 {
-  if (numBlocks.x > 0 && numBlocks.y > 0 && numBlocks.z > 0) {
-    initBlocks();
-  }
+  assert(numBlocks.x != 0 && numBlocks.y != 0 && numBlocks.z != 0);
+  initBlocks();
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
 template<typename Ty>
 FileBlockCollection<Ty>::FileBlockCollection(FileBlockCollection const &other)
   : m_blocks{ other.m_blocks }
@@ -506,6 +505,8 @@ FileBlockCollection<Ty>::createFromRawFile(std::string const &file,
   Info() << m_blocks.size() - m_nonEmptyBlocks.size() << "/" << m_blocks.size() <<
          " blocks marked empty.";
 }
+
+
 
 
 ///////////////////////////////////////////////////////////////////////////////
