@@ -4,28 +4,38 @@
 
 #ifndef bd_valuerangefilter_h
 #define bd_valuerangefilter_h
-
+namespace bd
+{
 /// \brief Test if a value is within given range.
 template<typename Ty>
 class ValueRangeFunction
 {
 public:
-  ValueRangeFunction(Ty min, Ty max)
+  ValueRangeFunction(Ty const &min, Ty const &max)
       : m_min{ min }
       , m_max{ max }
-  { }
+  {
+  }
 
-  ~ValueRangeFunction() {}
+
+  ~ValueRangeFunction()
+  {
+  }
+
 
   /// \brief return true if val between m_min and m_max.
-  bool operator()(Ty val) {
+  bool
+  operator()(Ty const& val) const
+  {
     return val >= m_min && val <= m_max;
   }
+
 
 private:
   Ty m_min, m_max;
 };
 
+}
 
 
 #endif //bd_valuerangefilter_h

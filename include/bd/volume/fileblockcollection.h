@@ -140,18 +140,18 @@ private:
 
 
   /// \brief Sum the given buffer in parallel.
-  double
-  doBufferSum(Buffer<Ty> *);
+//  double
+//  doBufferSum(Buffer<Ty> *);
 
 
   /// \brief Find buffer global min/max.
-  void
-  doBufferMinMax(Buffer<Ty> *);
+//  void
+//  doBufferMinMax(Buffer<Ty> *);
 
 
   /// \brief Find block local min/max and total values.
-  void
-  doBlockMinMax(Buffer<Ty> *);
+//  void
+//  doBlockMinMax(Buffer<Ty> *);
 
 
   /// \brief Count the relevant voxels for each block in the given buffer.
@@ -321,79 +321,79 @@ FileBlockCollection<Ty>::initBlocks()
 
 
 //////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
-double
-FileBlockCollection<Ty>::doBufferSum(Buffer<Ty> *buf)
-{
-  Ty *p = buf->getPtr();
-
-  Info() << "CO: Summing buffer\n";
-  double volsum{ tbb::parallel_reduce(
-      tbb::blocked_range<Ty *>(p, p + buf->getNumElements()),
-
-      0.0,
-
-      [](tbb::blocked_range<Ty *> &br, double partial_sum) -> double {
-        return std::accumulate(br.begin(), br.end(), partial_sum);
-      },
-
-      std::plus<double>())
-  };
-
-  // update volume with new totals.
-  m_volume.total(m_volume.total() + volsum);
-
-  return volsum;
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
-void
-FileBlockCollection<Ty>::doBufferMinMax(Buffer<Ty> *buf)
-{
-  tbb::blocked_range<size_t> range(0, buf->getNumElements());
-  ParallelReduceMinMax<Ty> mm(buf);
-  tbb::parallel_reduce(range, mm);
-
-  // update the volume with new min/max values
-  double vol_min{ m_volume.min() };
-  double vol_max{ m_volume.max() };
-
-  if (mm.min_value < vol_min) {
-    m_volume.min(mm.min_value);
-  }
-
-  if (mm.max_value > vol_max) {
-    m_volume.max(mm.max_value);
-  }
-}
+//template<typename Ty>
+//double
+//FileBlockCollection<Ty>::doBufferSum(Buffer<Ty> *buf)
+//{
+//  Ty *p = buf->getPtr();
+//
+//  Info() << "CO: Summing buffer\n";
+//  double volsum{ tbb::parallel_reduce(
+//      tbb::blocked_range<Ty *>(p, p + buf->getNumElements()),
+//
+//      0.0,
+//
+//      [](tbb::blocked_range<Ty *> &br, double partial_sum) -> double {
+//        return std::accumulate(br.begin(), br.end(), partial_sum);
+//      },
+//
+//      std::plus<double>())
+//  };
+//
+//  // update volume with new totals.
+//  m_volume.total(m_volume.total() + volsum);
+//
+//  return volsum;
+//}
 
 
 //////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
-void
-FileBlockCollection<Ty>::doBlockMinMax(Buffer<Ty> *buf)
-{
-  ParallelReduceBlockMinMax<Ty> blockMinMax{ &m_volume, buf };
+//template<typename Ty>
+//void
+//FileBlockCollection<Ty>::doBufferMinMax(Buffer<Ty> *buf)
+//{
+//  tbb::blocked_range<size_t> range(0, buf->getNumElements());
+//  ParallelReduceMinMax<Ty> mm(buf);
+//  tbb::parallel_reduce(range, mm);
+//
+//  // update the volume with new min/max values
+//  double vol_min{ m_volume.min() };
+//  double vol_max{ m_volume.max() };
+//
+//  if (mm.min_value < vol_min) {
+//    m_volume.min(mm.min_value);
+//  }
+//
+//  if (mm.max_value > vol_max) {
+//    m_volume.max(mm.max_value);
+//  }
+//}
 
-  tbb::blocked_range<size_t> range{ 0, buf->getNumElements() };
-  tbb::parallel_reduce(range, blockMinMax);
 
-  // update the blocks with this buffers min max data.
-  MinMaxPairDouble const *pairs{ blockMinMax.pairs() };
-  for (uint64_t i{ 0 }; i < m_volume.lower().total_block_count(); ++i) {
-    FileBlock b{ m_blocks[i] };
-    if (b.min_val > pairs[i].min) {
-      b.min_val = pairs[i].min;
-    }
-    if (b.max_val < pairs[i].max) {
-      b.max_val = pairs[i].max;
-    }
-    b.total_val += pairs[i].total;
-  }
-
-}
+//////////////////////////////////////////////////////////////////////////////
+//template<typename Ty>
+//void
+//FileBlockCollection<Ty>::doBlockMinMax(Buffer<Ty> *buf)
+//{
+//  ParallelReduceBlockMinMax<Ty> blockMinMax{ &m_volume, buf };
+//
+//  tbb::blocked_range<size_t> range{ 0, buf->getNumElements() };
+//  tbb::parallel_reduce(range, blockMinMax);
+//
+//  // update the blocks with this buffers min max data.
+//  MinMaxPairDouble const *pairs{ blockMinMax.pairs() };
+//  for (uint64_t i{ 0 }; i < m_volume.lower().total_block_count(); ++i) {
+//    FileBlock b{ m_blocks[i] };
+//    if (b.min_val > pairs[i].min) {
+//      b.min_val = pairs[i].min;
+//    }
+//    if (b.max_val < pairs[i].max) {
+//      b.max_val = pairs[i].max;
+//    }
+//    b.total_val += pairs[i].total;
+//  }
+//
+//}
 
 
 //template<typename Ty>
@@ -444,11 +444,11 @@ FileBlockCollection<Ty>::computeVolumeStatistics(BufferedReader<Ty> &r,
     Buffer<Ty> *buf = r.waitNext();
 
     // Sum values in this buffer
-    doBufferSum(buf);
+//    doBufferSum(buf);
     // Compute the min/max values of the buffer (used for volume min max).
-    doBufferMinMax(buf);
+//    doBufferMinMax(buf);
     // Compute block minimum and maximum.
-    doBlockMinMax(buf);
+//    doBlockMinMax(buf);
 
     r.waitReturn(buf);
 
