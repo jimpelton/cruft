@@ -62,12 +62,15 @@ TEST_CASE("OTF returns alpha value on exact match", "[otf][interpolate]")
 
 TEST_CASE("interpolate returns interpolated values", "[otf][interpolate]")
 {
-
   const char* tf_path = RES_DIR "/scalar_opacity_tf.1dt";
   bd::OpacityTransferFunction otf{ tf_path };
 
   double val{ 0.0 };
 
   val = otf.interpolate(0.755);
-  REQUIRE(val == 0.75);
+  REQUIRE(val == 0.6225);
+
+  val = otf.interpolate(0.55);
+  REQUIRE(val == 1.0);
+
 }

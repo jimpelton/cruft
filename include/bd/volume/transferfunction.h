@@ -39,7 +39,6 @@ struct Color
 {
   double r, g, b;
 
-
   bool
   operator==(Color const &rhs) const
   {
@@ -47,7 +46,6 @@ struct Color
         g == rhs.g &&
         b == rhs.b;
   }
-
 
   bool
   operator!=(Color const &rhs) const
@@ -106,23 +104,24 @@ public:
   interpolate(double scalar) const = 0;
 
   size_t
-  getNumKnots()
-  {
-    return _knots.size();
-  }
+  getNumKnots() { return _knots.size(); }
+
 
   std::vector<Knot> const &
-  getKnotsVector() const
-  {
-    return _knots;
-  }
+  getKnotsVector() const { return _knots; }
 
 protected:
   std::vector<Knot> _knots;
 
 };
 
-
+/// \brief Represents an opacity transfer function
+///
+/// The file should have the number of knots on the first line
+/// with the following lines each containing one knot. The knots
+/// are pairs of double precision floating point values. The
+/// first value is the knot scalar value (normalized!) and
+/// the second value is the knot alpha value.
 class OpacityTransferFunction
     : public TransferFunction<OpacityKnot, double>
 {
@@ -145,6 +144,15 @@ public:
 }; // class OpacityTransferFunction
 
 
+/// \brief Represents an color transfer function (color map)
+///
+/// The file should have the number of knots on the first line
+/// with the following lines each containing one knot. The knots
+/// are quad tuples of double precision floating point values.
+/// Each value is separated by a space. The
+/// first value is the knot scalar value (normalized!) and
+/// the following three values are the knot red, gree, blue values.
+/// The r, g, b values range from 0.0 to 1.0.
 class ColorTransferFunction
     : public TransferFunction<ColorKnot, Color>
 {
@@ -153,7 +161,7 @@ public:
   Color interpolate(double scalar) const override { return {0,0,0}; }
 
 
-};
+}; // class ColorTransferFunction
 
 } // namespace bd
 

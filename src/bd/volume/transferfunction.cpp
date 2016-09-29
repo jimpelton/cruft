@@ -79,21 +79,26 @@ double
 OpacityTransferFunction::interpolate(double v) const
 {
 //  assert(v <= 1.0);
-  OpacityKnot a{ _knots[0] };
-  OpacityKnot b{ _knots[1] };
+  OpacityKnot prev{ _knots[0] };
 
+  if (v == prev.scalar)
+    return prev.alpha;
+
+  OpacityKnot next{ _knots[1] };
   int i = 1;
-  while(i < _knots.size() - 1 && v > b.scalar){
-    a = _knots[i];
-    ++i;
-    b = _knots[i];
+  while(i < _knots.size() - 1){
+    if (v > next.scalar) {
+      prev = next;
+      i += 1;
+      next = _knots[i];
+    } else break;
   }
 
-  if (b.scalar == v) {
-    return b.alpha;
+  if (v == next.scalar) {
+    return next.alpha;
   }
 
-  return a.alpha * (1.0 - v) + b.alpha * v;
+  return prev.alpha * (1.0 - v) + next.alpha * v;
 
 
 //  for (size_t i = 1; i<_knots.size(); ++i) {
