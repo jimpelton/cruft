@@ -100,7 +100,7 @@ public:
 };
 
 /// \sa FileBlockCollectionWrapper_Base
-template<typename Ty>
+template<class Ty>
 class FileBlockCollectionWrapper : public FileBlockCollectionWrapper_Base
 {
 public:
@@ -138,7 +138,7 @@ class IndexFile
 {
 public:
 
-  template<typename Ty>
+  template<class Ty>
   static std::unique_ptr<IndexFile>
   fromBlockCollection(std::string const &path,
                       FileBlockCollection<Ty> &col,
@@ -207,21 +207,21 @@ private:
  * FileBlockCollectionWrapper                                              *
 *****************************************************************************/
 
-template<typename Ty>
+template<class Ty>
 FileBlockCollectionWrapper<Ty>::FileBlockCollectionWrapper(glm::u64vec3 volDims,
                                                            glm::u64vec3 numBlocks)
     : c{ volDims, numBlocks }
 {
 }
 
-template<typename Ty>
+template<class Ty>
 FileBlockCollectionWrapper<Ty>::FileBlockCollectionWrapper(
     FileBlockCollection<Ty> const &col)
   : c{ col }
 {
 }
 
-template<typename Ty>
+template<class Ty>
 void
 FileBlockCollectionWrapper<Ty>::addBlock(FileBlock const &b)
 {
@@ -229,7 +229,7 @@ FileBlockCollectionWrapper<Ty>::addBlock(FileBlock const &b)
 }
 
 
-template<typename Ty>
+template<class Ty>
 Volume const &
 FileBlockCollectionWrapper<Ty>::getVolume()
 {
@@ -237,7 +237,7 @@ FileBlockCollectionWrapper<Ty>::getVolume()
 }
 
 
-template<typename Ty>
+template<class Ty>
 std::vector<FileBlock> const &
 FileBlockCollectionWrapper<Ty>::getBlocks()
 {
@@ -245,7 +245,7 @@ FileBlockCollectionWrapper<Ty>::getBlocks()
 }
 
 
-template<typename Ty>
+template<class Ty>
 std::vector<FileBlock *> const &
 FileBlockCollectionWrapper<Ty>::getNonEmptyBlocks()
 {
@@ -259,7 +259,7 @@ operator<<(std::ostream &os, IndexFileHeader const &h);
 
 
 //static
-template<typename Ty>
+template<class Ty>
 std::unique_ptr<bd::IndexFile>
 IndexFile::fromBlockCollection(std::string const &path,
                                bd::FileBlockCollection<Ty> &col,

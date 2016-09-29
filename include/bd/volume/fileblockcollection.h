@@ -36,7 +36,7 @@ namespace bd
 ///
 /// \param Ty Data type in the istream this BlockCollection will be
 ///            generated from.
-template<typename Ty>
+template<class Ty>
 class FileBlockCollection
 {
 
@@ -159,7 +159,7 @@ private:
 //  doBlockVoxelRelevance(Buffer<Ty> *, RFunc const &);
 
   /// \brief Count the relevant voxels for each block in the given buffer.
-//  template<typename Function>
+//  template<class Function>
 //  void doCreateVoxelRelevanceMap(Buffer<Ty>*, RMapType &, RFType const&);
 
   /// \brief Compute the averages for each block after min/max and sum is found.
@@ -188,7 +188,7 @@ private:
 
 
 ///////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
+template<class Ty>
 FileBlockCollection<Ty>::FileBlockCollection()
     : FileBlockCollection({ 0, 0, 0 }, { 1, 1, 1 })
 {
@@ -196,7 +196,7 @@ FileBlockCollection<Ty>::FileBlockCollection()
 
 
 ///////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
+template<class Ty>
 FileBlockCollection<Ty>::FileBlockCollection(glm::u64vec3 volDims, glm::u64vec3 numBlocks)
     : m_volume{ volDims, numBlocks }
     , m_blocks{ }
@@ -208,7 +208,7 @@ FileBlockCollection<Ty>::FileBlockCollection(glm::u64vec3 volDims, glm::u64vec3 
 
 
 ///////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
+template<class Ty>
 FileBlockCollection<Ty>::FileBlockCollection(FileBlockCollection const &other)
   : m_blocks{ other.m_blocks }
   , m_volume{ other.m_volume }
@@ -222,7 +222,7 @@ FileBlockCollection<Ty>::FileBlockCollection(FileBlockCollection const &other)
 
 
 ///////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
+template<class Ty>
 FileBlockCollection<Ty>::~FileBlockCollection()
 {
   std::cout << "FileBlockCollection destructor\n";
@@ -233,7 +233,7 @@ FileBlockCollection<Ty>::~FileBlockCollection()
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//template<typename Ty>
+//template<class Ty>
 //glm::u64vec3
 //FileBlockCollection<Ty>::updateBlockCount()
 //{
@@ -262,7 +262,7 @@ FileBlockCollection<Ty>::~FileBlockCollection()
 
 
 ///////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
+template<class Ty>
 void
 FileBlockCollection<Ty>::initBlocks()
 {
@@ -321,7 +321,7 @@ FileBlockCollection<Ty>::initBlocks()
 
 
 //////////////////////////////////////////////////////////////////////////////
-//template<typename Ty>
+//template<class Ty>
 //double
 //FileBlockCollection<Ty>::doBufferSum(Buffer<Ty> *buf)
 //{
@@ -348,7 +348,7 @@ FileBlockCollection<Ty>::initBlocks()
 
 
 //////////////////////////////////////////////////////////////////////////////
-//template<typename Ty>
+//template<class Ty>
 //void
 //FileBlockCollection<Ty>::doBufferMinMax(Buffer<Ty> *buf)
 //{
@@ -371,7 +371,7 @@ FileBlockCollection<Ty>::initBlocks()
 
 
 //////////////////////////////////////////////////////////////////////////////
-//template<typename Ty>
+//template<class Ty>
 //void
 //FileBlockCollection<Ty>::doBlockMinMax(Buffer<Ty> *buf)
 //{
@@ -396,7 +396,7 @@ FileBlockCollection<Ty>::initBlocks()
 //}
 
 
-//template<typename Ty>
+//template<class Ty>
 //void
 //FileBlockCollection<Ty>::doBlockVoxelRelevance(Buffer<Ty> *buf, RFunc const &f)
 //{
@@ -415,7 +415,7 @@ FileBlockCollection<Ty>::initBlocks()
 
 
 //////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
+template<class Ty>
 void
 FileBlockCollection<Ty>::finishBlockAverages()
 {
@@ -431,7 +431,7 @@ FileBlockCollection<Ty>::finishBlockAverages()
 
 
 //////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
+template<class Ty>
 void
 FileBlockCollection<Ty>::computeVolumeStatistics(BufferedReader<Ty> &r,
                                                  RFunc const &f)
@@ -472,7 +472,7 @@ FileBlockCollection<Ty>::computeVolumeStatistics(BufferedReader<Ty> &r,
 
 
 //////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
+template<class Ty>
 void
 FileBlockCollection<Ty>::addBlock(FileBlock const &b)
 {
@@ -487,7 +487,7 @@ FileBlockCollection<Ty>::addBlock(FileBlock const &b)
 
 
 ///////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
+template<class Ty>
 void
 FileBlockCollection<Ty>::createFromRawFile(std::string const &file,
                                            size_t bufSize,
@@ -510,7 +510,7 @@ FileBlockCollection<Ty>::createFromRawFile(std::string const &file,
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//template<typename Ty>
+//template<class Ty>
 //void
 //FileBlockCollection<Ty>::fillBlockData
 //(
@@ -558,7 +558,7 @@ FileBlockCollection<Ty>::createFromRawFile(std::string const &file,
 
 
 ////////////////////////////////////////////////////////////////////////////////
-//template<typename Ty>
+//template<class Ty>
 //void
 //FileBlockCollection<Ty>::computeBlockStatistics(BufferedReader<Ty> &r)
 //{

@@ -8,7 +8,7 @@ namespace bd
 /// \brief A buffer of elements.
 /// The buffer holds a raw pointer to it's memory, the number of elements contained
 /// in the buffer, and the offset into the original data that was copied into this buffer.
-template<typename ElementType>
+template<class ElementType>
 class Buffer
 {
 public:

@@ -19,7 +19,7 @@ namespace bd
 {
 
 /// \brief Manager a pool of buffers to hand out to consumers and producers.
-template<typename Ty>
+template<class Ty>
 class BufferPool
 {
 public:
@@ -95,7 +95,7 @@ private:
 
 
 ///////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
+template<class Ty>
 BufferPool<Ty>::BufferPool(size_t bufSize, int nbuf)
     : m_mem{ nullptr }
     , m_nBufs{ nbuf }
@@ -105,7 +105,7 @@ BufferPool<Ty>::BufferPool(size_t bufSize, int nbuf)
 
 
 ///////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
+template<class Ty>
 BufferPool<Ty>::~BufferPool()
 {
   for (auto buf : m_allBuffers) {
@@ -118,7 +118,7 @@ BufferPool<Ty>::~BufferPool()
 }
 
 
-template<typename Ty>
+template<class Ty>
 void
 BufferPool<Ty>::allocate()
 {
@@ -143,7 +143,7 @@ BufferPool<Ty>::allocate()
 
 
 ///////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
+template<class Ty>
 Buffer<Ty> *
 BufferPool<Ty>::nextFull()
 {
@@ -162,7 +162,7 @@ BufferPool<Ty>::nextFull()
 
 
 ///////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
+template<class Ty>
 void
 BufferPool<Ty>::returnEmpty(Buffer<Ty> *buf)
 {
@@ -184,7 +184,7 @@ BufferPool<Ty>::returnEmpty(Buffer<Ty> *buf)
 
 
 ///////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
+template<class Ty>
 Buffer<Ty> *
 BufferPool<Ty>::nextEmpty()
 {
@@ -204,7 +204,7 @@ BufferPool<Ty>::nextEmpty()
 
 
 ///////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
+template<class Ty>
 void
 BufferPool<Ty>::returnFull(Buffer<Ty> *buf)
 {
@@ -216,7 +216,7 @@ BufferPool<Ty>::returnFull(Buffer<Ty> *buf)
 
 
 ///////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
+template<class Ty>
 size_t
 BufferPool<Ty>::bufferSizeElements() const
 {
@@ -225,7 +225,7 @@ BufferPool<Ty>::bufferSizeElements() const
 
 
 ///////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
+template<class Ty>
 bool
 BufferPool<Ty>::hasNext()
 {
@@ -244,7 +244,7 @@ BufferPool<Ty>::hasNext()
 
 
 ///////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
+template<class Ty>
 void
 BufferPool<Ty>::kickThreads()
 {
@@ -254,7 +254,7 @@ BufferPool<Ty>::kickThreads()
 
 
 ///////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
+template<class Ty>
 void
 BufferPool<Ty>::reset()
 {

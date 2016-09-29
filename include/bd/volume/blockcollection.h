@@ -45,14 +45,14 @@ public:
 private:
 
   /// \brief initialize block texture from the raw data at \c file.
-  template<typename Ty>
+  template<class Ty>
   bool do_initBlockTextures(std::string const &file);
 
   /// \brief Fills \c blockBuffer with the data from \c infile corresponding to block (i,j,k).
   /// \param b[in] The block for which data should be read.
   /// \param infile[in] Source data
   /// \param blockBuffer[out] Destination space for data.
-  template<typename Ty>
+  template<class Ty>
   void fillBlockData( Block const &b, std::istream& infile, Ty* blockBuffer) const;
 
   std::vector<Block *> m_blocks;

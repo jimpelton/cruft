@@ -7,7 +7,7 @@
 namespace bd
 {
 /// \brief Test if a value is within given range.
-template<typename Ty>
+template<class Ty>
 class ValueRangeFunction
 {
 public:

@@ -13,14 +13,14 @@
 namespace bd
 {
 
-template<typename Ty>
-class VoxelOpacityFunction
+template<class Ty>
+class VoxelOpacityFilter
 {
 
 public:
   /// \brief Create a filter based on the given opacity function.
   /// \note Scalars in OpacityKnots should be normalized data values.
-  VoxelOpacityFunction(const std::vector<OpacityKnot>& function,
+  VoxelOpacityFilter(const std::vector<OpacityKnot>& function,
       double knotMin,
       double knotMax,
       const Ty& dataMin,
@@ -35,7 +35,7 @@ public:
   }
 
 
-  ~VoxelOpacityFunction()
+  ~VoxelOpacityFilter()
   {
   }
 

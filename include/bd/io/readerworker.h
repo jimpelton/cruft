@@ -15,7 +15,7 @@ namespace bd
 {
 
 
-template<typename Reader, typename Pool, typename Ty>
+template<class Reader, class Pool, class Ty>
 class ReaderWorker
 {
 public:

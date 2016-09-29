@@ -18,7 +18,7 @@ namespace bd
 ///        pushed back to a buffer pool.
 /// Template parameter \c Ty is the data type contained in the raw file, and is thus
 /// the element type contained in each Buffer.
-template<typename Ty>
+template<class Ty>
 class BufferedReader
 {
 
@@ -101,7 +101,7 @@ private:
 
 
 ///////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
+template<class Ty>
 BufferedReader<Ty>::BufferedReader(size_t bufSize)
     : m_path{ }
     , m_bufSizeBytes{ bufSize }
@@ -113,7 +113,7 @@ BufferedReader<Ty>::BufferedReader(size_t bufSize)
 
 
 ///////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
+template<class Ty>
 BufferedReader<Ty>::~BufferedReader()
 {
   if (m_pool) {
@@ -123,7 +123,7 @@ BufferedReader<Ty>::~BufferedReader()
 
 
 ///////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
+template<class Ty>
 bool
 BufferedReader<Ty>::open(std::string const &path)
 {
@@ -142,7 +142,7 @@ BufferedReader<Ty>::open(std::string const &path)
 
 
 ///////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
+template<class Ty>
 void
 BufferedReader<Ty>::start()
 {
@@ -159,7 +159,7 @@ BufferedReader<Ty>::start()
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//template<typename Ty>
+//template<class Ty>
 //void
 //BufferedReader<Ty>::stop()
 //{
@@ -168,7 +168,7 @@ BufferedReader<Ty>::start()
 
 
 ///////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
+template<class Ty>
 long long int
 BufferedReader<Ty>::reset()
 {
@@ -180,7 +180,7 @@ BufferedReader<Ty>::reset()
 
 
 ///////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
+template<class Ty>
 bool
 BufferedReader<Ty>::isReading() const
 {
@@ -190,7 +190,7 @@ BufferedReader<Ty>::isReading() const
 
 
 ///////////////////////////////////////////////////////////////////////////////
-template<typename Ty>
+template<class Ty>
 bool
 BufferedReader<Ty>::hasNext() const
 {

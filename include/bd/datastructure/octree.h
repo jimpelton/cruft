@@ -38,7 +38,7 @@ public:
       : m_maxPointsPerNode{ maxPointsPerNode }
       , m_maxDepth{ maxDepth }
   {
-    size_t totalNodes{ std::pow(8, maxDepth) };
+    size_t totalNodes{ static_cast<size_t>(std::pow(8, maxDepth)) };
     m_nodes = new OcNode[ totalNodes ];
   }
 

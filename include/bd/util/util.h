@@ -30,6 +30,11 @@ size_t to1D(size_t col, size_t row, size_t slab, size_t maxCols, size_t maxRows)
 unsigned long long vecCompMult(const glm::u64vec3 &v);
 
 
+//template<class VecType, class NumberType,
+//         typename =
+//         typename std::enable_if<
+//             std::is_arithmetic<NumberType>::value, NumberType>::type>
+//NumberType lerp(VecType x, VecType y, NumberType a);
 
 
 } // namespace bd

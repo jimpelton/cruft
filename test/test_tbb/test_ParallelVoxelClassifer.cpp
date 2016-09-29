@@ -29,7 +29,7 @@ const std::vector<bd::OpacityKnot> func{
     { 0.60, 0.9 },
     { 1.0,  1.0 } };
 
-const bd::VoxelOpacityFunction<unsigned char> vof{
+const bd::VoxelOpacityFilter<unsigned char> vof{
     func,
     0.8, 1.0,
     static_cast<unsigned char>(0),

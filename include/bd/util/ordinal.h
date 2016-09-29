@@ -20,7 +20,7 @@ namespace bd
 ///
 /// \return The ordinal value as a std::size_t
 ///////////////////////////////////////////////////////////////////////////////
-template <typename T>
+template <class T>
 BD_CONSTEXPR
 std::size_t
 ordinal(T t)

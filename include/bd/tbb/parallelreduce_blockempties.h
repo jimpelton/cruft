@@ -20,7 +20,7 @@ namespace bd
 /// takes a Ty as a parameter and returns a bool. The callable type
 /// should return true if the value it recieves is relevant, and
 /// false if the value is not relevant.
-template<typename Ty, typename Function>
+template<class Ty, class Function>
 class ParallelReduceBlockEmpties
 {
 public:

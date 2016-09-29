@@ -14,7 +14,7 @@ namespace bd
 
 /// \brief Simply compute the min/max of the given blocked_range.
 /// \note Use this with TBB's parallel_reduce.
-template<typename Ty>
+template<class Ty>
 class ParallelReduceMinMax
 {
 public:

@@ -18,7 +18,7 @@ const long long MAX_IDX{ NUM_BUCKETS - 1 };
 
 }
 
-template<typename Ty>
+template<class Ty>
 class ParallelReduceHistogram
 {
 public:

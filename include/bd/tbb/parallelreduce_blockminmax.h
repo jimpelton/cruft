@@ -10,7 +10,7 @@
 namespace bd
 {
 
-template<typename Ty>
+template<class Ty>
 class MinMaxTotalPair
 {
 public:
@@ -31,7 +31,7 @@ class MinMaxPairDouble : public MinMaxTotalPair<double> {};
 ///        associated with values in the blocked_range.
 ///        Also compute the total for each block.
 /// \note  For use with parallel_reduce() in Intel TBB.
-template<typename Ty>
+template<class Ty>
 class ParallelReduceBlockMinMax
 {
 public:

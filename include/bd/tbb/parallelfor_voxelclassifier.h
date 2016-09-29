@@ -17,7 +17,7 @@ namespace bd
 
 /// \brief Classifies individual voxels as relevant or irrelevant.
 ///        The classification is saved in the voxel relevance map.
-template<typename Ty, typename Function, typename Storage>
+template<class Ty, class Function, class Storage>
 class ParallelForVoxelClassifier
 {
 public:
