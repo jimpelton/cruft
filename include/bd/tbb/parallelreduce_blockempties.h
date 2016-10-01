@@ -25,12 +25,12 @@ class ParallelReduceBlockEmpties
 {
 public:
 
-  ParallelReduceBlockEmpties(Buffer<Ty> *b, Volume const *v, Function isEmpty)
+  ParallelReduceBlockEmpties(Buffer<Ty> *b, Volume const *v, Function isRelevant)
     : m_data{ b->getPtr() }
     , m_volume{ v }
     , m_voxelStart{ b->getIndexOffset() }
     , m_empties{ nullptr }
-    , isRelevant{ isEmpty }
+    , isRelevant{ isRelevant }
   {
     m_empties = new uint64_t[m_volume->lower().total_block_count()]();
   }
