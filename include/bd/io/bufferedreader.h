@@ -79,11 +79,13 @@ public:
 
   /// /brief Get the number of elements in a single buffer in the buffer pool.
   size_t
-  singleBufferElements() {
+  singleBufferElements()
+  {
     return m_pool->bufferSizeElements();
   }
 
-  size_t totalBufferBytes() {
+  size_t totalBufferBytes()
+  {
     return m_bufSizeBytes;
   }
 

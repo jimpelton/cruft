@@ -124,13 +124,13 @@ BufferPool<Ty>::allocate()
 {
   size_t buffer_size_elems{ bufferSizeElements() };
 
-  m_mem = new Ty[buffer_size_elems*m_nBufs];
-  Info() << "Allocated " << buffer_size_elems*m_nBufs << " elements ( " <<
+  m_mem = new Ty[buffer_size_elems * m_nBufs];
+  Info() << "Allocated " << buffer_size_elems * m_nBufs << " elements ( " <<
          m_szBytesTotal << " bytes).";
 
-  for (int i = 0; i<m_nBufs; ++i) {
-    size_t offset{ i*buffer_size_elems };
-    Ty *start{ m_mem+offset };
+  for (int i = 0; i < m_nBufs; ++i) {
+    size_t offset{ i * buffer_size_elems };
+    Ty *start{ m_mem + offset };
     Buffer<Ty> *buf{ new Buffer<Ty>{ start, buffer_size_elems }};
     m_allBuffers.push_back(buf);
     m_emptyBuffers.push(buf);
@@ -147,15 +147,17 @@ template<class Ty>
 Buffer<Ty> *
 BufferPool<Ty>::nextFull()
 {
-  m_fullBuffersLock.lock();
-  while (m_fullBuffers.size()==0) {
+//  m_fullBuffersLock.lock();
+
+  std::lock_guard<std::mutex> lck(m_fullBuffersLock);
+  while (m_fullBuffers.size() == 0) {
     m_fullBuffersAvailable.wait(m_fullBuffersLock);
   }
 
   Buffer<Ty> *buf = m_fullBuffers.front();
   m_fullBuffers.pop();
 
-  m_fullBuffersLock.unlock();
+//  m_fullBuffersLock.unlock();
 
   return buf;
 }
@@ -173,11 +175,12 @@ BufferPool<Ty>::returnEmpty(Buffer<Ty> *buf)
 //    return;
 //  }
 
-  m_emptyBuffersLock.lock();
+//  m_emptyBuffersLock.lock();
+  std::lock_guard<std::mutex> lck(m_emptyBuffersLock);
 
   m_emptyBuffers.push(buf);
 
-  m_emptyBuffersLock.unlock();
+//  m_emptyBuffersLock.unlock();
 
   m_emptyBuffersAvailable.notify_all();
 }
@@ -188,8 +191,9 @@ template<class Ty>
 Buffer<Ty> *
 BufferPool<Ty>::nextEmpty()
 {
-  m_emptyBuffersLock.lock();
-  while (m_emptyBuffers.size()==0) {
+//  m_emptyBuffersLock.lock();
+  std::lock_guard<std::mutex> lck(m_emptyBuffersLock);
+  while (m_emptyBuffers.size() == 0) {
     // all the buffers are in the full queue.
     m_emptyBuffersAvailable.wait(m_emptyBuffersLock);
   }
@@ -197,7 +201,7 @@ BufferPool<Ty>::nextEmpty()
   Buffer<Ty> *buf{ m_emptyBuffers.front() };
   m_emptyBuffers.pop();
 
-  m_emptyBuffersLock.unlock();
+//  m_emptyBuffersLock.unlock();
 
   return buf;
 }
@@ -208,9 +212,10 @@ template<class Ty>
 void
 BufferPool<Ty>::returnFull(Buffer<Ty> *buf)
 {
-  m_fullBuffersLock.lock();
+//  m_fullBuffersLock.lock();
+  std::lock_guard<std::mutex> lck(m_fullBuffersLock);
   m_fullBuffers.push(buf);
-  m_fullBuffersLock.unlock();
+//  m_fullBuffersLock.unlock();
   m_fullBuffersAvailable.notify_all();
 }
 
@@ -220,7 +225,7 @@ template<class Ty>
 size_t
 BufferPool<Ty>::bufferSizeElements() const
 {
-  return ( m_szBytesTotal/m_nBufs )/sizeof(Ty);
+  return ( m_szBytesTotal / m_nBufs ) / sizeof(Ty);
 }
 
 
@@ -229,16 +234,17 @@ template<class Ty>
 bool
 BufferPool<Ty>::hasNext()
 {
-  m_emptyBuffersLock.lock();
-  if (m_emptyBuffers.size()==m_allBuffers.size()) {
+//  m_emptyBuffersLock.lock();
+  std::lock_guard<std::mutex> lck(m_emptyBuffersLock);
+  if (m_emptyBuffers.size() == m_allBuffers.size()) {
     // all of the buffers are in the empty queue,
     // there is no full buffer to return.
-    m_emptyBuffersLock.unlock();
+//    m_emptyBuffersLock.unlock();
     return false;
   }
 
   // at least one buffer was in the full queue
-  m_emptyBuffersLock.unlock();
+//  m_emptyBuffersLock.unlock();
   return true;
 }
 
