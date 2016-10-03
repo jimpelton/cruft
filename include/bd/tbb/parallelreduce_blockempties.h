@@ -25,14 +25,14 @@ class ParallelReduceBlockEmpties
 {
 public:
 
-  ParallelReduceBlockEmpties(Buffer<Ty> *b, Volume const *v, Function isRelevant)
+  ParallelReduceBlockEmpties(Buffer<Ty> const *b, Volume const *v, Function isRelevant)
     : m_data{ b->getPtr() }
     , m_volume{ v }
     , m_voxelStart{ b->getIndexOffset() }
     , m_empties{ nullptr }
     , isRelevant{ isRelevant }
   {
-    m_empties = new uint64_t[m_volume->lower().total_block_count()]();
+    m_empties = new uint64_t[m_volume->total_block_count()]();
   }
 
   ParallelReduceBlockEmpties(ParallelReduceBlockEmpties &o, tbb::split)
@@ -42,7 +42,7 @@ public:
       , m_empties{ nullptr }
       , isRelevant{ o.isRelevant }
   {
-    m_empties = new uint64_t[o.m_volume->lower().total_block_count()]();
+    m_empties = new uint64_t[o.m_volume->total_block_count()]();
   }
 
   ~ParallelReduceBlockEmpties()
@@ -59,12 +59,12 @@ public:
 
     uint64_t const vdX{ m_volume->dims().x };
     uint64_t const vdY{ m_volume->dims().y };
-    uint64_t const bdX{ m_volume->lower().block_dims().x };
-    uint64_t const bdY{ m_volume->lower().block_dims().y };
-    uint64_t const bdZ{ m_volume->lower().block_dims().z };
-    uint64_t const bcX{ m_volume->lower().block_count().x };
-    uint64_t const bcY{ m_volume->lower().block_count().y };
-    uint64_t const bcZ{ m_volume->lower().block_count().z };
+    uint64_t const bdX{ m_volume->block_dims().x };
+    uint64_t const bdY{ m_volume->block_dims().y };
+    uint64_t const bdZ{ m_volume->block_dims().z };
+    uint64_t const bcX{ m_volume->block_count().x };
+    uint64_t const bcY{ m_volume->block_count().y };
+    uint64_t const bcZ{ m_volume->block_count().z };
     uint64_t const voxelStart{ m_voxelStart };
 
     uint64_t vIdx, // voxel 1D index
@@ -98,7 +98,7 @@ public:
   void
   join(ParallelReduceBlockEmpties const &rhs)
   {
-    for(uint64_t i{ 0 }; i < m_volume->lower().total_block_count(); ++i) {
+    for(uint64_t i{ 0 }; i < m_volume->total_block_count(); ++i) {
       m_empties[i] += rhs.m_empties[i];
     }
   }

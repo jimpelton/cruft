@@ -8,21 +8,66 @@ namespace bd
 {
 
 ///////////////////////////////////////////////////////////////////////////////
-/// R e g i o n   C l a s s
-///////////////////////////////////////////////////////////////////////////////
+Volume::Volume()
+    : Volume({ }, { 1, 1, 1 })
+{
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
-const glm::u64vec3&
-Region::block_dims() const
+Volume::Volume(glm::u64vec3 const &volDims, glm::u64vec3 const &numBlocks)
+    : m_blockDims{ }
+    , m_blockCount{ }
+    , m_volDims{ volDims }
+    , m_volEmptyVoxels{ 0 }
+    , m_volMax{ std::numeric_limits<double>::lowest() }
+    , m_volMin{ std::numeric_limits<double>::max() }
+    , m_volAvg{ 0.0 }
+    , m_volTot{ 0.0 }
+{
+
+  glm::u64vec3 nb{ numBlocks };
+  if (numBlocks.x == 0 || numBlocks.y == 0 || numBlocks.z == 0) {
+    nb.x = nb.y = nb.z = 1;
+  }
+
+  m_blockDims = volDims / nb;
+  m_blockCount = nb;
+
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+Volume::Volume(Volume const &other)
+    : m_blockDims{ other.m_blockDims }
+    , m_blockCount{ other.m_blockCount }
+    , m_volDims{ other.m_volDims }
+    , m_volEmptyVoxels{ other.m_volEmptyVoxels }
+    , m_volMax{ other.m_volMax }
+    , m_volMin{ other.m_volMin }
+    , m_volAvg{ other.m_volAvg }
+    , m_volTot{ other.m_volTot }
+{
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+Volume::~Volume()
+{
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+const glm::u64vec3 &
+Volume::block_dims() const
 {
   return m_blockDims;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-glm::u64vec3&
-Region::block_dims()
+glm::u64vec3 &
+Volume::block_dims()
 {
   return m_blockDims;
 }
@@ -30,15 +75,15 @@ Region::block_dims()
 
 ///////////////////////////////////////////////////////////////////////////////
 void
-Region::block_dims(const glm::u64vec3& dims)
+Volume::block_dims(const glm::u64vec3 &dims)
 {
   m_blockDims = dims;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-const glm::u64vec3&
-Region::block_count() const
+const glm::u64vec3 &
+Volume::block_count() const
 {
   return m_blockCount;
 }
@@ -46,149 +91,121 @@ Region::block_count() const
 
 ///////////////////////////////////////////////////////////////////////////////
 void
-Region::block_count(const glm::u64vec3& nb)
+Volume::block_count(const glm::u64vec3 &nb)
 {
   m_blockCount = nb;
 }
 
+
 uint64_t
-Region::total_block_count() const
+Volume::total_block_count() const
 {
   return m_blockCount.x * m_blockCount.y * m_blockCount.z;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-const glm::u64vec3&
-Region::vox_start() const
-{
-  return m_voxStart;
-}
-
 
 ///////////////////////////////////////////////////////////////////////////////
-void
-Region::vox_start(const glm::u64vec3& m)
-{
-  m_voxStart = m;
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-glm::u64vec3 Region::extent() const
-{
-  return m_blockCount * m_blockDims;  // component-wise multiply
-}
-
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-/// V o l u m e   C l a s s
-///////////////////////////////////////////////////////////////////////////////
-
-
-
-///////////////////////////////////////////////////////////////////////////////
-const glm::u64vec3& Volume::dims() const
+const glm::u64vec3 &
+Volume::dims() const
 {
   return m_volDims;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void Volume::dims(const glm::u64vec3& voldims)
+void
+Volume::dims(const glm::u64vec3 &voldims)
 {
   m_volDims = voldims;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-double Volume::min() const
+double
+Volume::min() const
 {
   return m_volMin;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void Volume::min(double min)
+void
+Volume::min(double min)
 {
   m_volMin = min;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-double Volume::max() const
+double
+Volume::max() const
 {
   return m_volMax;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void Volume::max(double max)
+void
+Volume::max(double max)
 {
   m_volMax = max;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-double Volume::avg() const
+double
+Volume::avg() const
 {
   return m_volAvg;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void Volume::avg(double avg)
+void
+Volume::avg(double avg)
 {
   m_volAvg = avg;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-double Volume::total() const
+double
+Volume::total() const
 {
   return m_volTot;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void Volume::total(double t)
+void
+Volume::total(double t)
 {
   m_volTot = t;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-//void Volume::emptyVoxels(uint64_t empty)
-//{
-//  m_volEmptyVoxels = empty;
-//}
-
 
 ///////////////////////////////////////////////////////////////////////////////
-//uint64_t Volume::emptyVoxels() const
-//{
-//  return m_volEmptyVoxels;
-//}
-
-
-///////////////////////////////////////////////////////////////////////////////
-const Region& Volume::lower() const
+void
+Volume::numEmptyVoxels(uint64_t empty)
 {
-  return m_lowerRegion;
+  m_volEmptyVoxels = empty;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-Region& Volume::lower()
+uint64_t
+Volume::numEmptyVoxels() const
 {
-  return m_lowerRegion;
+  return m_volEmptyVoxels;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void Volume::lower(const Region& lower)
+glm::u64vec3
+Volume::extent() const
 {
-  m_lowerRegion = lower;
+  return m_blockCount * m_blockDims;  // component-wise multiply
 }
+
 
 } // namespace bd

@@ -42,7 +42,7 @@ public:
     : m_volume{ v }
     , m_data{ b->getPtr() }
     , m_voxelStart{ b->getIndexOffset() }
-    , m_pairs{ new MinMaxPairDouble[ v->lower().total_block_count() ] }
+    , m_pairs{ new MinMaxPairDouble[ v->total_block_count() ] }
   {
   }
 
@@ -60,7 +60,7 @@ public:
     : m_volume{ o.m_volume }
     , m_data{ o.m_data }
     , m_voxelStart{ o.m_voxelStart }
-    , m_pairs{ new MinMaxPairDouble[ o.m_volume->lower().total_block_count() ] }
+    , m_pairs{ new MinMaxPairDouble[ o.m_volume->total_block_count() ] }
   {
   }
 
@@ -69,7 +69,7 @@ public:
   void
   join(ParallelReduceBlockMinMax &rhs)
   {
-    for(uint64_t i{ 0 }; i < m_volume->lower().total_block_count(); ++i) {
+    for(uint64_t i{ 0 }; i < m_volume->total_block_count(); ++i) {
       if (m_pairs[i].min > rhs.m_pairs[i].min)
         m_pairs[i].min = rhs.m_pairs[i].min;
 
@@ -88,12 +88,12 @@ public:
     const uint64_t
     vdX = m_volume->dims().x,
     vdY = m_volume->dims().y,
-    bdX = m_volume->lower().block_dims().x,
-    bdY = m_volume->lower().block_dims().y,
-    bdZ = m_volume->lower().block_dims().z,
-    bcX = m_volume->lower().block_count().x,
-    bcY = m_volume->lower().block_count().y,
-    bcZ = m_volume->lower().block_count().z;
+    bdX = m_volume->block_dims().x,
+    bdY = m_volume->block_dims().y,
+    bdZ = m_volume->block_dims().z,
+    bcX = m_volume->block_count().x,
+    bcY = m_volume->block_count().y,
+    bcZ = m_volume->block_count().z;
 
     Ty const * const a{ m_data };
 

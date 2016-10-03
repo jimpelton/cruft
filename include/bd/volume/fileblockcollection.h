@@ -202,7 +202,6 @@ FileBlockCollection<Ty>::FileBlockCollection(glm::u64vec3 volDims, glm::u64vec3 
     , m_blocks{ }
     , m_nonEmptyBlocks{ }
 {
-  assert(numBlocks.x != 0 && numBlocks.y != 0 && numBlocks.z != 0);
   initBlocks();
 }
 
@@ -269,9 +268,9 @@ FileBlockCollection<Ty>::initBlocks()
   // bc: number of blocks
   // vd: volume voxel dimensions
   // bd: block dimensions
-  glm::u64vec3 bc{ m_volume.lower().block_count() };
+  glm::u64vec3 bc{ m_volume.block_count() };
   glm::u64vec3 vd{ m_volume.dims() };
-  glm::u64vec3 bd{ m_volume.lower().block_dims() };
+  glm::u64vec3 bd{ m_volume.block_dims() };
 
   // block world dims
   glm::vec3 wld_dims{ 1.0f / glm::vec3(bc) };
@@ -296,7 +295,7 @@ FileBlockCollection<Ty>::initBlocks()
         // origin (centroid) in world coordiates
         const glm::vec3 blkOrigin{ ( worldLoc + ( worldLoc + wld_dims )) * 0.5f };
         // voxel start of block within volume
-        const glm::u64vec3 startVoxel{ blkId * m_volume.lower().block_dims() };
+        const glm::u64vec3 startVoxel{ blkId * m_volume.block_dims() };
 
         FileBlock blk; // = new FileBlock();
         blk.block_index = bd::to1D(bxi, byj, bzk, bc.x, bc.y);
@@ -382,7 +381,7 @@ FileBlockCollection<Ty>::initBlocks()
 //
 //  // update the blocks with this buffers min max data.
 //  MinMaxPairDouble const *pairs{ blockMinMax.pairs() };
-//  for (uint64_t i{ 0 }; i < m_volume.lower().total_block_count(); ++i) {
+//  for (uint64_t i{ 0 }; i < m_volume.total_block_count(); ++i) {
 //    FileBlock b{ m_blocks[i] };
 //    if (b.min_val > pairs[i].min) {
 //      b.min_val = pairs[i].min;
@@ -405,7 +404,7 @@ FileBlockCollection<Ty>::initBlocks()
 //  tbb::blocked_range<size_t> range{ 0, buf->getNumElements() };
 //  tbb::parallel_reduce(range, stats);
 //  uint64_t const *empties{ stats.empties() };
-//  for (uint64_t i{ 0 }; i < m_volume.lower().total_block_count(); ++i) {
+//  for (uint64_t i{ 0 }; i < m_volume.total_block_count(); ++i) {
 //    FileBlock *b{ m_blocks[i] };
 //    b->empty_voxels += empties[i];
 //  }
@@ -519,8 +518,8 @@ FileBlockCollection<Ty>::createFromRawFile(std::string const &file,
 //    Ty* blockBuffer
 //) const
 //{
-//  const glm::u64vec3 &nb{ m_volume.lower().block_count() };
-//  const glm::u64vec3 &bd{ m_volume.lower().block_dims() };
+//  const glm::u64vec3 &nb{ m_volume.block_count() };
+//  const glm::u64vec3 &bd{ m_volume.block_dims() };
 //  const glm::u64vec3 &vd{ m_volume.dims() };
 //  // Convert 1D block index to 3D i,j,k indices.
 //  glm::u64vec3 index{

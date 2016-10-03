@@ -3,8 +3,8 @@
 
 #include <bd/io/fileblock.h>
 #include <bd/volume/fileblockcollection.h>
-#include <bd/io/datatypes.h>
-
+//#include <bd/io/datatypes.h>
+#include <bd/io/indexfileheader.h>
 #include <iostream>
 #include <cstdint>
 #include <fstream>
@@ -12,62 +12,18 @@
 namespace bd
 {
 
-///////////////////////////////////////////////////////////////////////////////
-///   \brief The header for the index file.
-struct IndexFileHeader
-{
-public:
-  // IndexFileHeader Data
-  uint16_t magic_number;
-  uint16_t version;
-  uint32_t header_length;
-
-  // Block metadata
-
-  uint64_t numblocks[3];        ///< Num blocks along each coordinate axis.
-
-  uint32_t
-      dataType;            ///< Int representing the data type of elements (char, short, etc).
-  uint64_t volume_extent[3];    ///< Dimensions of volume in voxels.
-  uint64_t blocks_extent[3
-  ];    ///< The voxel extent of the blocks (may not equal the volume voxel extent).
-  ///  Equates to the extent of voxels processed.
-  // Volume statistics
-//  uint64_t vol_empty_voxels;    ///< Num voxels determined empty (ie, irrelevent voxels).
-  double vol_avg;
-  double vol_min;
-  double vol_max;
-
-public:
-  /// \brief Generate an IndexFileHeader from an input stream of binary data.
-  static IndexFileHeader
-  fromStream(std::istream &);
-
-
-  /// \brief Write an existing IndexFileHeader to a binary ostream.
-  static void
-  writeToStream(std::ostream &, const IndexFileHeader &);
-
-
-  /// \brief Convert the dataType value to a bd::DataType.
-  static DataType
-  getType(const IndexFileHeader &);
-
-
-  /// \brief Convert the given bd::DataType to the integer rep used in IFH's.
-  static uint32_t
-  getTypeInt(DataType);
-
-
-}; // struct IndexFileHeader
 
 
 namespace
 {
-const uint16_t MAGIC{ 7376 }; ///< Magic number for the file (ascii 'SV')
-const uint16_t VERSION{ 2 };
-const uint32_t HEAD_LEN{ sizeof(IndexFileHeader) };
+///< Magic number for the file (ascii 'SV')
+uint16_t const MAGIC{ 7376 };
+/// \brief The version of the IndexFile
+uint16_t const VERSION{ 3 };
+/// \brief Length of the IndexFileHeader in bytes.
+uint32_t const HEAD_LEN{ sizeof(IndexFileHeader) };
 }  // namespace
+
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -98,6 +54,10 @@ public:
   getVolume() = 0;
 
 };
+
+/*****************************************************************************
+ * FileBlockCollectionWrapper                                              *
+*****************************************************************************/
 
 /// \sa FileBlockCollectionWrapper_Base
 template<class Ty>
@@ -131,6 +91,55 @@ private:
   FileBlockCollection<Ty> c;
 
 };
+
+/*****************************************************************************
+ * FileBlockCollectionWrapper  Impl                                        *
+*****************************************************************************/
+
+template<class Ty>
+FileBlockCollectionWrapper<Ty>::FileBlockCollectionWrapper(glm::u64vec3 volDims,
+                                                           glm::u64vec3 numBlocks)
+    : c{ volDims, numBlocks }
+{
+}
+
+template<class Ty>
+FileBlockCollectionWrapper<Ty>::FileBlockCollectionWrapper(
+    FileBlockCollection<Ty> const &col)
+    : c{ col }
+{
+}
+
+template<class Ty>
+void
+FileBlockCollectionWrapper<Ty>::addBlock(FileBlock const &b)
+{
+  c.addBlock(b);
+}
+
+
+template<class Ty>
+Volume const &
+FileBlockCollectionWrapper<Ty>::getVolume()
+{
+  return c.volume();
+}
+
+
+template<class Ty>
+std::vector<FileBlock> const &
+FileBlockCollectionWrapper<Ty>::getBlocks()
+{
+  return c.blocks();
+}
+
+
+template<class Ty>
+std::vector<FileBlock *> const &
+FileBlockCollectionWrapper<Ty>::getNonEmptyBlocks()
+{
+  return c.nonEmptyBlocks();
+}
 
 /// \brief Generate an index file from the provided FileBlockCollection. The
 ///        IndexFile can be written to disk in either ASCII or binary format.
@@ -203,59 +212,12 @@ private:
   FileBlockCollectionWrapper_Base* m_col;
 };  // class IndexFile
 
-/*****************************************************************************
- * FileBlockCollectionWrapper                                              *
-*****************************************************************************/
 
-template<class Ty>
-FileBlockCollectionWrapper<Ty>::FileBlockCollectionWrapper(glm::u64vec3 volDims,
-                                                           glm::u64vec3 numBlocks)
-    : c{ volDims, numBlocks }
-{
-}
-
-template<class Ty>
-FileBlockCollectionWrapper<Ty>::FileBlockCollectionWrapper(
-    FileBlockCollection<Ty> const &col)
-  : c{ col }
-{
-}
-
-template<class Ty>
-void
-FileBlockCollectionWrapper<Ty>::addBlock(FileBlock const &b)
-{
-  c.addBlock(b);
-}
-
-
-template<class Ty>
-Volume const &
-FileBlockCollectionWrapper<Ty>::getVolume()
-{
-  return c.volume();
-}
-
-
-template<class Ty>
-std::vector<FileBlock> const &
-FileBlockCollectionWrapper<Ty>::getBlocks()
-{
-  return c.blocks();
-}
-
-
-template<class Ty>
-std::vector<FileBlock *> const &
-FileBlockCollectionWrapper<Ty>::getNonEmptyBlocks()
-{
-  return c.nonEmptyBlocks();
-}
-
-
+/*
 /// \brief IndexFileHeader output stream operator.
 std::ostream &
 operator<<(std::ostream &os, IndexFileHeader const &h);
+*/
 
 
 //static
@@ -276,14 +238,11 @@ IndexFile::fromBlockCollection(std::string const &path,
 
   //TODO: add upper and lower volume boundaries.
   idxfile->m_header.numblocks[0] =
-      idxfile->m_col->getVolume().lower().block_count()
-             .x; // + idxfile->m_col->volume().upper().block_count().x;
+      idxfile->m_col->getVolume().block_count().x;
   idxfile->m_header.numblocks[1] =
-      idxfile->m_col->getVolume().lower().block_count()
-             .y; // + idxfile->m_col->getVolume().upper().block_count().y;
+      idxfile->m_col->getVolume().block_count().y;
   idxfile->m_header.numblocks[2] =
-      idxfile->m_col->getVolume().lower().block_count()
-             .z; // + idxfile->m_col->getVolume().upper().block_count().z;
+      idxfile->m_col->getVolume().block_count().z; // + idxfile->m_col->getVolume().upper().block_count().z;
 
 
   idxfile->m_header.dataType = IndexFileHeader::getTypeInt(dt);
@@ -292,11 +251,12 @@ IndexFile::fromBlockCollection(std::string const &path,
   idxfile->m_header.volume_extent[1] = idxfile->m_col->getVolume().dims().y;
   idxfile->m_header.volume_extent[2] = idxfile->m_col->getVolume().dims().z;
 
-  glm::u64vec3 blkExt = idxfile->m_col->getVolume().lower().extent();
+  glm::u64vec3 blkExt = idxfile->m_col->getVolume().extent();
   idxfile->m_header.blocks_extent[0] = blkExt.x;
   idxfile->m_header.blocks_extent[1] = blkExt.y;
   idxfile->m_header.blocks_extent[2] = blkExt.z;
 
+  idxfile->m_header.vol_empty_voxels = idxfile->m_col->getVolume().numEmptyVoxels();
   idxfile->m_header.vol_avg = idxfile->m_col->getVolume().avg();
   idxfile->m_header.vol_max = idxfile->m_col->getVolume().max();
   idxfile->m_header.vol_min = idxfile->m_col->getVolume().min();

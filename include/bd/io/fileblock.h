@@ -9,6 +9,8 @@
 #include <ostream>
 #include <sstream>
 #include <limits>
+#include <string>
+
 //#include <atomic>
 
 
@@ -29,11 +31,12 @@ struct FileBlock
       , data_offset{ 0 }
       , voxel_dims{ 0 }
       , world_oigin{ 0 }
-      , empty_voxels{ 0 }
       , min_val{ std::numeric_limits< decltype(min_val) >::max() }
       , max_val{ std::numeric_limits< decltype(max_val) >::lowest() }
       , avg_val{ 0.0 }
       , total_val{ 0.0 }
+      , rov{ 0 }
+      , empty_voxels{ 0 }
       , is_empty{ 0 }
   { }
 
@@ -46,11 +49,12 @@ struct FileBlock
   uint64_t data_offset;    ///< Offset into the raw file that the block data starts.
   uint64_t voxel_dims[3];  ///< Dimensions of this block in voxels.
   double world_oigin[3];   ///< Center coordinates within canonical cube.
-  uint64_t empty_voxels;   ///< Number of empty (ie, irrelevent) voxels in this block.
   double min_val;          ///< The min value found in this block.
   double max_val;          ///< The largest value found in this block.
   double avg_val;          ///< Average value within this block.
   double total_val;        ///< The total value of the block voxels.
+  double rov;              ///< Block ratio-of-visibility
+  uint64_t empty_voxels;   ///< Number of empty (ie, irrelevent) voxels in this block.
   uint32_t is_empty;       ///< If this block is empty or not.
 
 }; // struct FileBlock
