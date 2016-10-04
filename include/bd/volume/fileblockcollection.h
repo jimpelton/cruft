@@ -439,8 +439,8 @@ FileBlockCollection<Ty>::computeVolumeStatistics(BufferedReader<Ty> &r,
 
   size_t total_bytes_processed{ 0 };
 
-  while (r.hasNext()) {
-    Buffer<Ty> *buf = r.waitNext();
+  while (r.hasNextBuffer()) {
+    Buffer<Ty> *buf = r.waitNextFull();
 
     // Sum values in this buffer
 //    doBufferSum(buf);
@@ -449,7 +449,7 @@ FileBlockCollection<Ty>::computeVolumeStatistics(BufferedReader<Ty> &r,
     // Compute block minimum and maximum.
 //    doBlockMinMax(buf);
 
-    r.waitReturn(buf);
+    r.waitReturnEmpty(buf);
 
     total_bytes_processed += buf->getNumElements() * sizeof(Ty);
     Info() << "Processed (kB): " << total_bytes_processed * 1e-3;
@@ -563,8 +563,8 @@ FileBlockCollection<Ty>::createFromRawFile(std::string const &file,
 //{
 //  Info() << "Computing block statistics for " << m_blocks.size() << " blocks.";
 //
-//  while(r.hasNext()) {
-//    Buffer<Ty> *buf = r.waitNext();
+//  while(r.hasNextBuffer()) {
+//    Buffer<Ty> *buf = r.waitNextFull();
 //    Info() << "CO: Got buffer of " << buf->elements() << " elements.";
 //    Ty *p = buf->ptr();
 //
@@ -615,7 +615,7 @@ FileBlockCollection<Ty>::createFromRawFile(std::string const &file,
 //
 //    vol_idx += vox;
 //
-//  } // while(r.hasNext...
+//  } // while(r.hasNextBuffer...
 
 
 // Determine which block this voxel falls into:         //

@@ -58,13 +58,13 @@ public:
   /// \brief Return true if the buffer pool has full buffers and/or the reader
   ///        is still reading from the file.
   bool
-  hasNext() const;
+  hasNextBuffer() const;
 
 
   /// \brief Grab the next buffer data from the pool as soon as it is ready.
   /// \note Blocks until a full buffer is ready.
   Buffer<Ty> *
-  waitNext()
+  waitNextFull()
   {
     return m_pool->nextFull();
   }
@@ -72,7 +72,7 @@ public:
 
   /// \brief Return a buffer to the empty pool to be filled again.
   void
-  waitReturn(Buffer<Ty> *buf)
+  waitReturnEmpty(Buffer<Ty> *buf)
   {
     return m_pool->returnEmpty(buf);
   }
@@ -194,7 +194,7 @@ BufferedReader<Ty>::isReading() const
 ///////////////////////////////////////////////////////////////////////////////
 template<class Ty>
 bool
-BufferedReader<Ty>::hasNext() const
+BufferedReader<Ty>::hasNextBuffer() const
 {
   // if no buffers in pool, check if the reader thread is done.
   // If it is still reading, then we should return true because there will

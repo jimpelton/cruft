@@ -235,17 +235,11 @@ bool
 BufferPool<Ty>::hasNext()
 {
 //  m_emptyBuffersLock.lock();
-  std::lock_guard<std::mutex> lck(m_emptyBuffersLock);
-  if (m_emptyBuffers.size() == m_allBuffers.size()) {
-    // all of the buffers are in the empty queue,
-    // there is no full buffer to return.
-//    m_emptyBuffersLock.unlock();
-    return false;
-  }
-
+  std::lock_guard<std::mutex> lck(m_fullBuffersLock);
+//  return m_emptyBuffers.size() != m_allBuffers.size();
+  return m_fullBuffers.size() > 0;
   // at least one buffer was in the full queue
 //  m_emptyBuffersLock.unlock();
-  return true;
 }
 
 
