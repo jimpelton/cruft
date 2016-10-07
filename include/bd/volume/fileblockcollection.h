@@ -273,7 +273,7 @@ FileBlockCollection<Ty>::initBlocks()
   // block world dims
   glm::vec3 wld_dims{ 1.0f / glm::vec3(bc) };
 
-  Info() << "Starting block init: "
+  Dbg() << "Starting FileBlock creation: "
       " # blocks: "
          << bc.x << ", " << bc.y << ", " << bc.z <<
          " Vol dim: "
@@ -313,7 +313,7 @@ FileBlockCollection<Ty>::initBlocks()
     }
   }
 
-  Info() << "Finished block init: total blocks is " << m_blocks.size();
+  Dbg() << "Total blocks is " << m_blocks.size();
 }
 
 

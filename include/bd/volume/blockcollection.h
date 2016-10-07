@@ -68,6 +68,7 @@ template< typename Ty >
 bool
 BlockCollection::do_initBlockTextures(std::string const &file)
 {
+  Dbg() << "Initializing block textures";
   std::ifstream is(file, std::ios::binary);
   if (!is.is_open()) {
     Err() << "Could not open rawfile: " << file << ".";
