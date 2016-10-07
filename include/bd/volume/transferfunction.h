@@ -5,55 +5,118 @@
 #ifndef bd_transferfunction_h
 #define bd_transferfunction_h
 
+#include <bd/util/color.h>
+
 #include <string>
 #include <memory>
 #include <vector>
+#include <sstream>
 
 namespace bd
 {
+class OpacityTransferFunction;
+class ColorTransferFunction;
+struct ColorKnot;
+struct OpacityKnot;
+
+std::ostream& 
+operator<<(std::ostream &os, bd::OpacityTransferFunction const &otf);
+
+std::ostream& 
+operator<<(std::ostream &os, bd::ColorTransferFunction const &otf);
+
+std::ostream& 
+operator<<(std::ostream &os, bd::Color const &c);
+
+std::ostream& 
+operator<<(std::ostream &os, bd::ColorKnot const &knot);
+
+std::ostream& 
+operator<<(std::ostream &os, bd::OpacityKnot const &knot);
 
 /// \brief A knot in an opacity transfer function
 struct OpacityKnot
 {
-  double scalar;
+  double s;
   double alpha;
 
 
   bool
   operator==(OpacityKnot const &rhs) const
   {
-    return scalar == rhs.scalar &&
-        alpha == rhs.alpha;
+    return s == rhs.s;
   }
 
 
   bool
   operator!=(OpacityKnot const &rhs) const
   {
-    return !( rhs == *this );
+    return !(*this == rhs);
   }
+
+
+  bool operator<(OpacityKnot const &rhs) const
+  {
+    return s < rhs.s;
+  }
+
+
+  bool operator>(OpacityKnot const &rhs) const
+  {
+    return rhs < *this;
+  }
+
+
+  bool operator<=(OpacityKnot const &rhs) const
+  {
+    return !(*this > rhs);
+  }
+
+
+  bool operator>=(OpacityKnot const &rhs) const
+  {
+    return !(*this < rhs);
+  }
+
+
+  std::string
+  to_string() const
+  {
+    std::stringstream ss;
+    ss << "{S: " << s << ", A: " << alpha << '}';
+    return ss.str();
+  }
+
 
 }; // struct OpacityKnot
 
-struct Color
-{
-  double r, g, b;
-
-  bool
-  operator==(Color const &rhs) const
-  {
-    return r == rhs.r &&
-        g == rhs.g &&
-        b == rhs.b;
-  }
-
-  bool
-  operator!=(Color const &rhs) const
-  {
-    return !( rhs == *this );
-  }
-
-}; // struct Color
+//struct Color
+//{
+//  double r, g, b;
+//
+//  bool
+//  operator==(Color const &rhs) const
+//  {
+//    return r == rhs.r &&
+//        g == rhs.g &&
+//        b == rhs.b;
+//  }
+//
+//  bool
+//  operator!=(Color const &rhs) const
+//  {
+//    return !( rhs == *this );
+//  }
+//
+//  std::string
+//  to_string() const
+//  {
+//    std::stringstream ss;
+//    ss << "{R: " << r << ", G: " << g << ", B: " << b << '}';
+//    return ss.str();
+//  }
+//
+//}; // struct Color
 
 
 struct ColorKnot
@@ -65,15 +128,47 @@ struct ColorKnot
   bool
   operator==(ColorKnot const &rhs) const
   {
-    return s == rhs.s
-        && c == rhs.c;
+    return s == rhs.s;
   }
 
 
   bool
   operator!=(ColorKnot const &rhs) const
   {
-    return !( rhs == *this );
+    return !(*this == rhs);
+  }
+
+
+  bool operator<(ColorKnot const &rhs) const
+  {
+    return s < rhs.s;
+  }
+
+
+  bool operator>(ColorKnot const &rhs) const
+  {
+    return rhs < *this;
+  }
+
+
+  bool operator<=(ColorKnot const &rhs) const
+  {
+    return !(*this > rhs);
+  }
+
+
+  bool operator>=(ColorKnot const &rhs) const
+  {
+    return !(*this < rhs);
+  }
+
+
+  std::string
+  to_string() const
+  {
+    std::stringstream ss;
+    ss << "{S: " << s << ", C: " << c << '}';
+    return ss.str();
   }
 
 }; // struct ColorKnot
@@ -94,7 +189,6 @@ public:
   /// \note The file can use double precision floating pt values.
   ///
   /// \param filename The path to the text file that has the scalar transfer function.
-  /// \return A vector with the knots from the function
   /// \throws std::runtime_error If the file could not be parsed.
   /// \throws std::ifstream::failure If there was a problem reading the file.
   virtual void
@@ -109,6 +203,21 @@ public:
 
   std::vector<Knot> const &
   getKnotsVector() const { return _knots; }
+
+
+  std::string
+  to_string() const
+  {
+    std::stringstream ss;
+    ss << '{';
+    for (auto &k : _knots) { 
+      ss << k << ", "; 
+    }
+    ss << '}';
+
+    return ss.str();
+  }
+
 
 protected:
   std::vector<Knot> _knots;
@@ -128,8 +237,6 @@ class OpacityTransferFunction
 public:
 
   OpacityTransferFunction();
-//  OpacityTransferFunction(OpacityTransferFunction const &o) = default;
-//  OpacityTransferFunction(OpacityTransferFunction &&o) = default;
 
   void
   load(std::string const &filename) override;
@@ -164,7 +271,7 @@ public:
   interpolate(double scalar) const override;
 
 
-}; // class ColorTransferFunction
+};  // class ColorTransferFunction
 
 } // namespace bd
 

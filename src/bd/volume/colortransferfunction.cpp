@@ -14,8 +14,10 @@ namespace bd
 {
 
 
+
+
 ColorTransferFunction::ColorTransferFunction()
-    : TransferFunction{ }
+  : TransferFunction{ }
 {
 }
 
@@ -108,5 +110,16 @@ ColorTransferFunction::interpolate(double v) const
 
 }
 
+std::ostream&
+operator<<(std::ostream &os, bd::ColorTransferFunction const &ctf)
+{
+  return os << ctf.to_string();
+}
+
+std::ostream&
+operator<<(std::ostream &os, bd::ColorKnot const &ctf)
+{
+  return os << ctf.to_string();
+}
 
 } // namespace bd

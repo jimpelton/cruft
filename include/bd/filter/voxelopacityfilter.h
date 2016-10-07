@@ -2,8 +2,8 @@
 // Created by Jim Pelton on 8/31/16.
 //
 
-#ifndef bd_voxelopacityfilter_h__
-#define bd_voxelopacityfilter_h__
+#ifndef bd_voxelopacityfilter_h
+#define bd_voxelopacityfilter_h
 
 #include <bd/volume/transferfunction.h>
 
@@ -20,11 +20,11 @@ class VoxelOpacityFilter
 public:
   /// \brief Create a filter based on the given opacity function.
   /// \note Scalars in OpacityKnots should be normalized data values.
-  VoxelOpacityFilter(const std::vector<OpacityKnot>& function,
+  VoxelOpacityFilter(std::vector<OpacityKnot> const & function,
       double knotMin,
       double knotMax,
-      const Ty& dataMin,
-      const Ty& dataMax)
+      Ty const & dataMin,
+      Ty const & dataMax)
       : m_func{ function }
       , m_min{ knotMin }
       , m_max{ knotMax }
@@ -59,9 +59,9 @@ public:
       b = m_func[i];
 
       //TODO: fix unsafe comparison 
-      if (v==b.scalar) {
+      if (v==b.s) {
         return b.alpha;
-      } else if (v<b.scalar) {
+      } else if (v<b.s) {
         // v is between a.scalar and b.scalar, so lerp the alpha value.
         return a.alpha*( 1.0-v )+b.alpha*v;
       }
@@ -75,15 +75,15 @@ public:
 
 
 private:
-  const std::vector<OpacityKnot> m_func;
-  const double m_min;
-  const double m_max;
-  const Ty m_dataMin;
-  const Ty m_diff;
+  std::vector<OpacityKnot> const m_func;
+  double const m_min;
+  double const m_max;
+  Ty const m_dataMin;
+  Ty const m_diff;
 
 
 }; // class VoxelOpacityFilter
 
 } // namespace bd
 
-#endif // ! voxelopacityfilter_h__
+#endif // ! voxelopacityfilter_h

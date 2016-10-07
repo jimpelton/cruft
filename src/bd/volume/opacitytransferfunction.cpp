@@ -14,14 +14,10 @@ namespace bd
 {
 
 OpacityTransferFunction::OpacityTransferFunction()
-    : TransferFunction{ }
+  : TransferFunction{ }
 {
 }
 
-//OpacityTransferFunction::OpacityTransferFunction(std::string const &filePath)
-//{
-//  load(filePath);
-//}
 
 void
 OpacityTransferFunction::load(std::string const &filename)
@@ -67,8 +63,7 @@ OpacityTransferFunction::load(std::string const &filename)
 
     file.close();
 
-  }
-  catch (std::exception e) {
+  } catch (std::exception e) {
     bd::Err() << "Problem reading 1D transfer function file: " << e.what();
   }
 
@@ -81,14 +76,14 @@ OpacityTransferFunction::interpolate(double v) const
 //  assert(v <= 1.0);
   OpacityKnot prev{ _knots[0] };
 
-  if (v == prev.scalar) {
+  if (v == prev.s) {
     return prev.alpha;
   }
 
   OpacityKnot next{ _knots[1] };
-  int i = 1;
+  size_t i = 1;
   while (i < _knots.size() - 1) {
-    if (v > next.scalar) {
+    if (v > next.s) {
       prev = next;
       i += 1;
       next = _knots[i];
@@ -97,7 +92,7 @@ OpacityTransferFunction::interpolate(double v) const
     }
   }
 
-  if (v == next.scalar) {
+  if (v == next.s) {
     return next.alpha;
   }
 
@@ -105,5 +100,16 @@ OpacityTransferFunction::interpolate(double v) const
 
 }
 
+std::ostream&
+operator<<(std::ostream &os, bd::OpacityTransferFunction const &otf)
+{
+  return os << otf.to_string();
+}
+
+std::ostream&
+operator<<(std::ostream &os, bd::OpacityKnot const &otf)
+{
+  return os << otf.to_string();
+}
 
 } // namespace bd
