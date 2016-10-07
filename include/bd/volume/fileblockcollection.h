@@ -209,8 +209,9 @@ FileBlockCollection<Ty>::FileBlockCollection(glm::u64vec3 volDims, glm::u64vec3 
 ///////////////////////////////////////////////////////////////////////////////
 template<class Ty>
 FileBlockCollection<Ty>::FileBlockCollection(FileBlockCollection const &other)
-  : m_blocks{ other.m_blocks }
-  , m_volume{ other.m_volume }
+    : m_volume{ other.m_volume }
+    , m_blocks{ other.m_blocks }
+    , m_nonEmptyBlocks{ /* populated in cc'tor body */ }
 {
   for (auto &b : m_blocks){
     if (! b.is_empty) {
@@ -224,10 +225,7 @@ FileBlockCollection<Ty>::FileBlockCollection(FileBlockCollection const &other)
 template<class Ty>
 FileBlockCollection<Ty>::~FileBlockCollection()
 {
-  std::cout << "FileBlockCollection destructor\n";
-//  for (auto b : *m_blocks) {
-//    delete b;
-//  }
+//  std::cout << "FileBlockCollection destructor\n";
 }
 
 
