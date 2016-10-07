@@ -14,14 +14,14 @@ namespace bd
 {
 
 OpacityTransferFunction::OpacityTransferFunction()
-  : TransferFunction{ }
+    : TransferFunction{ }
 {
 }
 
-OpacityTransferFunction::OpacityTransferFunction(std::string const &filePath)
-{
-  load(filePath);
-}
+//OpacityTransferFunction::OpacityTransferFunction(std::string const &filePath)
+//{
+//  load(filePath);
+//}
 
 void
 OpacityTransferFunction::load(std::string const &filename)
@@ -60,16 +60,16 @@ OpacityTransferFunction::load(std::string const &filename)
 
     if (lineNum < numKnots) {
       Err() << "Malformed 1D transfer function file (not enough lines?).";
-      throw std::runtime_error("Malformed 1D transfer function file (not enough lines?).");
+//      throw std::runtime_error("Malformed 1D transfer function file (not enough lines?).");
     } else {
       bd::Info() << "Read " << numKnots << " scalar-opacity knots.";
     }
 
     file.close();
 
-  } catch (std::ifstream::failure e) {
+  }
+  catch (std::exception e) {
     bd::Err() << "Problem reading 1D transfer function file: " << e.what();
-//    throw e;
   }
 
 }
@@ -81,40 +81,28 @@ OpacityTransferFunction::interpolate(double v) const
 //  assert(v <= 1.0);
   OpacityKnot prev{ _knots[0] };
 
-  if (v == prev.scalar)
+  if (v == prev.scalar) {
     return prev.alpha;
+  }
 
   OpacityKnot next{ _knots[1] };
   int i = 1;
-  while(i < _knots.size() - 1){
+  while (i < _knots.size() - 1) {
     if (v > next.scalar) {
       prev = next;
       i += 1;
       next = _knots[i];
-    } else break;
+    } else {
+      break;
+    }
   }
 
   if (v == next.scalar) {
     return next.alpha;
   }
 
-  return prev.alpha * (1.0 - v) + next.alpha * v;
+  return prev.alpha * ( 1.0 - v ) + next.alpha * v;
 
-
-//  for (size_t i = 1; i<_knots.size(); ++i) {
-//    b = _knots[i];
-//
-//    if (v==b.scalar) {
-//      return b.alpha;
-//    } else if (v<b.scalar) {
-//       v is between a.scalar and b.scalar, so lerp the alpha value.
-//      return a.alpha*( 1.0-v )+b.alpha*v;
-//    }
-//
-//    a = _knots[i];
-//  }
-
-//  return 0;
 }
 
 

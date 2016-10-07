@@ -18,7 +18,8 @@ namespace {
 TEST_CASE("OTF can parse a correct file", "[otf][parse]")
 {
   const char* tf_path = RES_DIR "/scalar_opacity_tf.1dt";
-  bd::OpacityTransferFunction otf{ tf_path };
+  bd::OpacityTransferFunction otf{ };
+  otf.load(tf_path);
 
   std::vector<bd::OpacityKnot> const
       knots_actual { { 0.00, 0.00 },
@@ -36,7 +37,8 @@ TEST_CASE("OTF can parse a correct file", "[otf][parse]")
 TEST_CASE("OTF returns alpha value on exact match", "[otf][interpolate]")
 {
   const char* tf_path = RES_DIR "/scalar_opacity_tf.1dt";
-  bd::OpacityTransferFunction otf{ tf_path };
+  bd::OpacityTransferFunction otf{ };
+  otf.load(tf_path);
 
   double val{ 0.0 };
 
@@ -63,7 +65,8 @@ TEST_CASE("OTF returns alpha value on exact match", "[otf][interpolate]")
 TEST_CASE("interpolate returns interpolated values", "[otf][interpolate]")
 {
   const char* tf_path = RES_DIR "/scalar_opacity_tf.1dt";
-  bd::OpacityTransferFunction otf{ tf_path };
+  bd::OpacityTransferFunction otf{ };
+  otf.load(tf_path);
 
   double val{ 0.0 };
 

@@ -85,8 +85,8 @@ class TransferFunction
 public:
   TransferFunction(){ }
   ~TransferFunction() { }
-  TransferFunction(TransferFunction const &) = default;
-  TransferFunction(TransferFunction &&) = default;
+//  TransferFunction(TransferFunction const &) = default;
+//  TransferFunction(TransferFunction &&) = default;
 
   /// \brief Parses a 1d scalar transfer function in a text file
   /// into a vector of OpacityKnot.
@@ -128,12 +128,8 @@ class OpacityTransferFunction
 public:
 
   OpacityTransferFunction();
-  OpacityTransferFunction(OpacityTransferFunction const &o) = default;
-  OpacityTransferFunction(OpacityTransferFunction &&o) = default;
-
-  /// \brief Load a transfer function from the file at \c tfFilePath.
-  /// \param tfFilePath  The text file containing the transfer function values.
-  OpacityTransferFunction(std::string const &filePath);
+//  OpacityTransferFunction(OpacityTransferFunction const &o) = default;
+//  OpacityTransferFunction(OpacityTransferFunction &&o) = default;
 
   void
   load(std::string const &filename) override;
@@ -157,8 +153,15 @@ class ColorTransferFunction
     : public TransferFunction<ColorKnot, Color>
 {
 public:
-  void load(std::string const & filename) override { }
-  Color interpolate(double scalar) const override { return {0,0,0}; }
+  ColorTransferFunction();
+//  ColorTransferFunction(ColorTransferFunction const &o) = default;
+//  ColorTransferFunction(ColorTransferFunction &&o) = default;
+
+  void
+  load(std::string const & filename) override;
+
+  Color
+  interpolate(double scalar) const override;
 
 
 }; // class ColorTransferFunction
