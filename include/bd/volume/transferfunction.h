@@ -90,34 +90,6 @@ struct OpacityKnot
 
 }; // struct OpacityKnot
 
-//struct Color
-//{
-//  double r, g, b;
-//
-//  bool
-//  operator==(Color const &rhs) const
-//  {
-//    return r == rhs.r &&
-//        g == rhs.g &&
-//        b == rhs.b;
-//  }
-//
-//  bool
-//  operator!=(Color const &rhs) const
-//  {
-//    return !( rhs == *this );
-//  }
-//
-//  std::string
-//  to_string() const
-//  {
-//    std::stringstream ss;
-//    ss << "{R: " << r << ", G: " << g << ", B: " << b << '}';
-//    return ss.str();
-//  }
-//
-//}; // struct Color
-
 
 struct ColorKnot
 {
@@ -205,7 +177,7 @@ public:
   getKnotsVector() const { return _knots; }
 
 
-  std::string
+  virtual std::string
   to_string() const
   {
     std::stringstream ss;
