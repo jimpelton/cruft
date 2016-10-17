@@ -32,6 +32,8 @@ public:
   enum class Format: unsigned int
   {
     RED,
+    R8,
+    R32F,
     RG,
     RGB,
     RGBA

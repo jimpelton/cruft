@@ -14,8 +14,8 @@ namespace bd
 
 namespace
 {
-static const std::array<GLenum, 4> gl_format{
-  GL_RED, GL_RG, GL_RGB, GL_RGBA
+static const std::array<GLenum, 6> gl_format{
+  GL_RED, GL_R8, GL_R32F, GL_RG, GL_RGB, GL_RGBA
 };
 
 static const std::array<GLenum, 3> gl_target{

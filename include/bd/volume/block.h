@@ -47,7 +47,7 @@ public:
 
 
   /// \brief Set if this block is marked empty.
-  void empty(bool);
+//  void empty(bool);
   /// \brief Get if this block is marked empty.
   bool empty() const;
 

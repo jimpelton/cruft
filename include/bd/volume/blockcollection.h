@@ -85,7 +85,7 @@ BlockCollection::do_initBlockTextures(std::string const &file)
 
   Ty *buf{ new Ty[buf_size] };
   float *tex{ new float[buf_size] };
-
+  double diff{ m_indexFile->getHeader().vol_max - m_indexFile->getHeader().vol_min };
   std::cout << std::endl;
   int i{ 0 };
   for (auto *b : m_nonEmptyBlocks) {
@@ -96,7 +96,7 @@ BlockCollection::do_initBlockTextures(std::string const &file)
 
     // Normalize the data prior to generating the texture.
     for (size_t idx{ 0 }; idx < buf_size; ++idx) {
-      tex[idx] = buf[idx] / static_cast<float>(m_indexFile->getHeader().vol_max);
+      tex[idx] = buf[idx] / diff;
     }
 
     b->texture().genGLTex3d(bd::Texture::Format::RED,
