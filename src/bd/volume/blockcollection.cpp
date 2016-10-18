@@ -47,7 +47,7 @@ BlockCollection::initBlocksFromFileBlocks(std::vector<FileBlock> const &fileBloc
                                 fileBlocks[idx] }};
 
         m_blocks.push_back(block);
-        if (fileBlocks[idx].is_empty == 1) {
+        if (fileBlocks[idx].is_empty == 0) {
           m_nonEmptyBlocks.push_back(block);
         }
 

@@ -51,7 +51,8 @@ public:
 
 
   /// \brief Create a FileBlockCollection for a volume with \c volDims voxel dimensions
-  ///        and \c numBlocks block dimensions.
+  ///        and \c numBlocks block dimensions. The list of blocks remains empty until
+  ///        initBlocks() is called, or addBlock() is called.
   /// \param volDims The dimensions in voxels of this volume.
   /// \param numBlocks The dimensions in blocks of this volume.
   FileBlockCollection(glm::u64vec3 volDims, glm::u64vec3 numBlocks);
@@ -123,13 +124,15 @@ public:
   }
 
 
-private:
-
-  /// \brief Initializes \c nb blocks so that they fit within the extent of \c vd.
-  ///
-  /// Creates blocks of uniform size and spacing.
+  /// \brief Initializes \c blocks so that they fit within the extent of \c vd. Blocks
+  /// are uniformly sized with equal width,  height, and depth. Blocks have uninitialized
+  /// values for everything except position and dimension, voxel dimensions, data offset
+  /// and block index.
   void
   initBlocks();
+
+private:
+
 
 
   /// \brief Determine if blocks fit evenly within volume, else add blocks in
@@ -202,7 +205,7 @@ FileBlockCollection<Ty>::FileBlockCollection(glm::u64vec3 volDims, glm::u64vec3 
     , m_blocks{ }
     , m_nonEmptyBlocks{ }
 {
-  initBlocks();
+//  initBlocks();
 }
 
 
@@ -476,7 +479,7 @@ FileBlockCollection<Ty>::addBlock(FileBlock const &b)
   m_blocks.push_back(b);
 
   if (!b.is_empty) {
-    FileBlock *ptr{ &(*m_blocks.end()) };
+    FileBlock *ptr{ &m_blocks.back() };
     m_nonEmptyBlocks.push_back(ptr);
   }
 

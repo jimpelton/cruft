@@ -41,7 +41,21 @@ struct FileBlock
   { }
 
 
-  FileBlock(const FileBlock& other) = default;
+  FileBlock(const FileBlock& other)
+      : block_index{ other.block_index }
+      , data_offset{ other.data_offset }
+      , voxel_dims{ other.voxel_dims[0], other.voxel_dims[1], other.voxel_dims[2] }
+      , world_oigin{ other.world_oigin[0], other.world_oigin[1], other.world_oigin[2] }
+      , min_val{ other.min_val }
+      , max_val{  other.max_val }
+      , avg_val{ other.avg_val }
+      , total_val{ other.total_val }
+      , rov{ other.rov }
+      , empty_voxels{ other.empty_voxels }
+      , is_empty{ other.is_empty }
+  {
+  }
+
   std::string to_string() const;
 
 
