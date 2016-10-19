@@ -1,12 +1,17 @@
-#ifndef bd_parallelblockstats_h
-#define bd_parallelblockstats_h
+//
+// Created by jim on 10/18/16.
+//
+
+#ifndef bd_parallelreduce_blockrov_h
+#define bd_parallelreduce_blockrov_h
+
 
 #include <bd/io/fileblock.h>
 #include <bd/io/buffer.h>
 #include <bd/volume/volume.h>
 
-
 #include <tbb/blocked_range.h>
+#include <tbb/parallel_reduce.h>
 
 #include <functional>
 
@@ -19,42 +24,41 @@ namespace bd
 /// takes a Ty as a parameter and returns a bool. The callable type
 /// should return true if the value it recieves is relevant, and
 /// false if the value is not relevant.
-template<class Ty, class Function>
-class ParallelReduceBlockEmpties
+class ParallelReduceBlockRov
 {
 public:
 
-  ParallelReduceBlockEmpties(Buffer<Ty> const *b, Volume const *v, Function isRelevant)
-    : m_data{ b->getPtr() }
-    , m_volume{ v }
-    , m_voxelStart{ b->getIndexOffset() }
-    , m_empties{ nullptr }
-    , isRelevant{ isRelevant }
+  ParallelReduceBlockRov(Buffer<double> const *b, Volume const *v)
+      : m_data{ b->getPtr() }
+      , m_volume{ v }
+      , m_voxelStart{ b->getIndexOffset() }
+      , m_visibilities{ nullptr }
+//      , alpha{ alpha }
   {
-    m_empties = new uint64_t[m_volume->total_block_count()]();
+    m_visibilities = new double[m_volume->total_block_count()]();
   }
 
-  ParallelReduceBlockEmpties(ParallelReduceBlockEmpties &o, tbb::split)
+  ParallelReduceBlockRov(ParallelReduceBlockRov &o, tbb::split)
       : m_data{ o.m_data }
       , m_volume{ o.m_volume }
       , m_voxelStart{ o.m_voxelStart }
-      , m_empties{ nullptr }
-      , isRelevant{ o.isRelevant }
+      , m_visibilities{ nullptr }
+//      , alpha{ o.alpha }
   {
-    m_empties = new uint64_t[o.m_volume->total_block_count()]();
+    m_visibilities = new double[o.m_volume->total_block_count()]();
   }
 
-  ~ParallelReduceBlockEmpties()
+  ~ParallelReduceBlockRov()
   {
-    if (m_empties) {
-      delete [] m_empties;
+    if (m_visibilities) {
+      delete [] m_visibilities;
     }
   }
 
   void
   operator()(tbb::blocked_range<size_t> const &r)
   {
-    Ty const * const a{ m_data };
+    double const * const a{ m_data };
 
     uint64_t const vdX{ m_volume->dims().x };
     uint64_t const vdY{ m_volume->dims().y };
@@ -84,42 +88,41 @@ public:
       bK = ((vIdx / vdX) / vdY) / bdZ;
 
       if (bI < bcX && bJ < bcY && bK < bcZ) {
-        Ty val = a[i];
+        double val = a[i];
         // Convert the 3D block index into a 1D block index and fetch the
         // block from the array of blocks.
         bIdx = bI + bcX * (bJ + bK * bcY);
-        if (! isRelevant(val))
-          m_empties[bIdx] += 1;
+        m_visibilities[bIdx] += val;
       }
     }
   }
 
   void
-  join(ParallelReduceBlockEmpties const &rhs)
+  join(ParallelReduceBlockRov const &rhs)
   {
     for(uint64_t i{ 0 }; i < m_volume->total_block_count(); ++i) {
-      m_empties[i] += rhs.m_empties[i];
+      m_visibilities[i] += rhs.m_visibilities[i];
     }
   }
 
 
-  uint64_t const *
-  empties() const
+  double const *
+  visibilities() const
   {
-    return m_empties;
+    return m_visibilities;
   }
 
 private:
-  Ty const * const m_data;
+  double const * const m_data;
   Volume const * const m_volume;
   size_t const m_voxelStart;
-  uint64_t * m_empties;
+  double * m_visibilities;
 
-  Function isRelevant; ///< Is the element a relevant voxel or not.
+//  Function alpha; ///< Is the element a relevant voxel or not.
 
-}; // class ParallelReduceBlockEmpties
+}; // class ParallelReduceBlockRov
 
 } // namespace preproc
 
-#endif // ! bd_parallelblockstats_h
 
+#endif //! bd_parallelreduce_blockrov_h

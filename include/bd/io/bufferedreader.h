@@ -1,9 +1,9 @@
 #ifndef bd_buffered_reader
 #define bd_buffered_reader
 
-#include "readerworker.h"
 #include "bufferpool.h"
 #include "buffer.h"
+#include "readerworker.h"
 
 #include <fstream>
 #include <thread>
@@ -41,7 +41,8 @@ public:
 
 
   /// \brief Stop reading as soon as possible.
-//  void stop();
+  void
+  stop();
 
 
   /// \brief Stop reading and wait for the read thread to exit.
@@ -55,39 +56,22 @@ public:
   isReading() const;
 
 
-  /// \brief Return true if the buffer pool has full buffers and/or the reader
-  ///        is still reading from the file.
-  bool
-  hasNextBuffer() const;
-
-
   /// \brief Grab the next buffer data from the pool as soon as it is ready.
   /// \note Blocks until a full buffer is ready.
   Buffer<Ty> *
-  waitNextFull()
-  {
-    return m_pool->nextFull();
-  }
+  waitNextFullUntilNone();
 
 
   /// \brief Return a buffer to the empty pool to be filled again.
   void
-  waitReturnEmpty(Buffer<Ty> *buf)
-  {
-    return m_pool->returnEmpty(buf);
-  }
+  waitReturnEmpty(Buffer<Ty> *buf);
 
   /// /brief Get the number of elements in a single buffer in the buffer pool.
   size_t
-  singleBufferElements()
-  {
-    return m_pool->bufferSizeElements();
-  }
+  singleBufferElements();
 
-  size_t totalBufferBytes()
-  {
-    return m_bufSizeBytes;
-  }
+  size_t
+  totalBufferBytes();
 
 private:
   std::string m_path;
@@ -97,7 +81,7 @@ private:
 
   BufferPool<Ty> *m_pool;
   std::future<long long int> m_future;
-  std::atomic_bool m_stopThread;
+  std::atomic_bool m_stopReaderThread;
 
 };
 
@@ -148,25 +132,24 @@ template<class Ty>
 void
 BufferedReader<Ty>::start()
 {
-  m_stopThread = false;
+  m_stopReaderThread = false;
   m_future =
       std::async(std::launch::async,
                  [&]() -> long long int {
-                   ReaderWorker<BufferedReader<Ty>, BufferPool<Ty>, Ty>
-                       worker(this, m_pool);
+                   ReaderWorker<Ty> worker(*m_pool);
                    worker.setPath(m_path);
-                   return worker(std::ref(m_stopThread));
+                   return worker(std::ref(m_stopReaderThread));
                  });
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//template<class Ty>
-//void
-//BufferedReader<Ty>::stop()
-//{
-//  m_stopThread = true;
-//}
+template<class Ty>
+void
+BufferedReader<Ty>::stop()
+{
+  m_stopReaderThread = true;
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -174,7 +157,7 @@ template<class Ty>
 long long int
 BufferedReader<Ty>::reset()
 {
-  m_stopThread = true;
+  m_stopReaderThread = true;
   m_future.wait();
   m_pool->reset();
   return m_future.get();
@@ -182,26 +165,58 @@ BufferedReader<Ty>::reset()
 
 
 ///////////////////////////////////////////////////////////////////////////////
+//template<class Ty>
+//bool
+//BufferedReader<Ty>::isReading() const
+//{
+//  return m_future.wait_for(std::chrono::seconds(0)) !=
+//      std::future_status::ready;
+//}
+
+
 template<class Ty>
-bool
-BufferedReader<Ty>::isReading() const
+Buffer<Ty> *
+BufferedReader<Ty>::waitNextFullUntilNone()
 {
-  return m_future.wait_for(std::chrono::seconds(0)) !=
-      std::future_status::ready;
+  return m_pool->nextFullUntilNone();
+}
+
+
+template<class Ty>
+void
+BufferedReader<Ty>::waitReturnEmpty(Buffer<Ty> *buf)
+{
+  return m_pool->returnEmpty(buf);
+}
+
+
+template<class Ty>
+size_t
+BufferedReader<Ty>::singleBufferElements()
+{
+  return m_pool->bufferSizeElements();
+}
+
+
+template<class Ty>
+size_t
+BufferedReader<Ty>::totalBufferBytes()
+{
+  return m_bufSizeBytes;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
-template<class Ty>
-bool
-BufferedReader<Ty>::hasNextBuffer() const
-{
-  // if no buffers in pool, check if the reader thread is done.
-  // If it is still reading, then we should return true because there will
-  // be a full buffer available soon.
-  return m_pool->hasNext() || isReading();
-}
+//template<class Ty>
+//bool
+//BufferedReader<Ty>::hasNextBuffer() const
+//{
+//   if no buffers in pool, check if the reader thread is done.
+//   If it is still reading, then we should return true because there will
+//   be a full buffer available soon.
+//  return m_pool->hasNext() || isReading();
+//}
 
 
-} // namespace preproc
+} // namespace bd
 #endif // ! buffered_reader__

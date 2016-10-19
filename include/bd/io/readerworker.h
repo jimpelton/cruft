@@ -1,11 +1,11 @@
-#ifndef readerworker_h__
-#define readerworker_h__
+#ifndef bd_readerworker_h
+#define bd_readerworker_h
 
-#include <bd/log/logger.h>
+//#include <bd/io/bufferedreader.h>
 #include <bd/io/bufferpool.h>
-#include <bd/io/bufferedreader.h>
 #include <bd/io/buffer.h>
 
+#include <bd/log/logger.h>
 
 #include <fstream>
 #include <atomic>
@@ -15,13 +15,14 @@ namespace bd
 {
 
 
-template<class Reader, class Pool, class Ty>
+template<class Ty>
 class ReaderWorker
 {
 public:
-  ReaderWorker(Reader *r, Pool *p)
-    : m_reader{ r }
-    , m_pool{ p }
+
+  ReaderWorker(BufferPool<Ty> &p)
+    //: m_reader{ &r }
+    : m_pool{ &p }
     , m_is{ nullptr }
   { }
 
@@ -42,26 +43,34 @@ public:
     }
 
     // bytes to attempt to read from file.
-    size_t const buffer_size_bytes{ m_pool->bufferSizeElements() * sizeof(Ty) };
+    long long const buffer_size_bytes{ (long long) m_pool->bufferSizeElements() * sizeof(Ty) };
     size_t total_read_bytes{ 0 };
 
-    Info() << "Starting reader loop.";
+    Dbg() << "Starting reader loop.";
+    std::cout << std::endl;
     while(!m_is->eof() && !quit) {
 //      Dbg() << "Reader waiting for empty buffer.";
 
       // wait for the next empty buffer in the pool.
       Buffer<Ty> *buf = m_pool->nextEmpty();
+      if (buf == nullptr) {
+        break;
+      }
+
+
       // set the element index this buffer starts at.
       buf->setIndexOffset(total_read_bytes/sizeof(Ty));
       Ty *data = buf->getPtr();
-        
+
+
 //      Dbg() << "Reader filling buffer.";
       m_is->read(reinterpret_cast<char*>(data), buffer_size_bytes);
       std::streampos amount{ m_is->gcount() };
 //      Dbg() << "Reader filled buffer with " << amount << " bytes.";
+
       
       // the last buffer filled may not be a full buffer, so resize!
-      if ( amount < static_cast<long long>(buffer_size_bytes) ) {
+      if (amount < buffer_size_bytes) {
 
         buf->setNumElements(amount/sizeof(Ty));
         if (amount == 0) {
@@ -70,19 +79,25 @@ public:
 //          Dbg() << "Reader done returning empty buffer.";
           break;
         }
+
       } // if (amount...)
-        
+
+
 //      Dbg() << "Reader returning full buffer.";
       m_pool->returnFull(buf);
 //      Dbg() << "Reader done returning full buffer.";
 
       total_read_bytes += amount;
-      Info() << "Read " << total_read_bytes << " bytes.";
+      std::cout << "\rRead " << total_read_bytes << " bytes." << std::flush;
     } // while
 
+    std::cout << std::endl;
+
+    m_pool->requestStop();
+
     m_is->close();
-    Info() << "Reader done after reading " << total_read_bytes << " bytes";
-    m_pool->kickThreads();
+    Dbg() << "Reader done after reading " << total_read_bytes << " bytes";
+//    m_pool->kickThreads();
     return total_read_bytes;
   }
 
@@ -103,8 +118,7 @@ private:
     return m_is->is_open();
   }
 
-  Reader *m_reader;
-  Pool *m_pool;
+  BufferPool<Ty> *m_pool;
   std::ifstream *m_is;
   std::string m_path;
 

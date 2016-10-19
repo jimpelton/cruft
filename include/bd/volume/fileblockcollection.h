@@ -440,8 +440,8 @@ FileBlockCollection<Ty>::computeVolumeStatistics(BufferedReader<Ty> &r,
 
   size_t total_bytes_processed{ 0 };
 
-  while (r.hasNextBuffer()) {
-    Buffer<Ty> *buf = r.waitNextFull();
+  Buffer<Ty> *buf{ nullptr };
+  while ((buf = r.waitNextFullUntilNone()) != nullptr) {
 
     // Sum values in this buffer
 //    doBufferSum(buf);
@@ -565,7 +565,7 @@ FileBlockCollection<Ty>::createFromRawFile(std::string const &file,
 //  Info() << "Computing block statistics for " << m_blocks.size() << " blocks.";
 //
 //  while(r.hasNextBuffer()) {
-//    Buffer<Ty> *buf = r.waitNextFull();
+//    Buffer<Ty> *buf = r.waitNextFullUntilNone();
 //    Info() << "CO: Got buffer of " << buf->elements() << " elements.";
 //    Ty *p = buf->ptr();
 //
