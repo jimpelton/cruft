@@ -43,7 +43,7 @@ public:
     }
 
     // bytes to attempt to read from file.
-    long long const buffer_size_bytes{ (long long) m_pool->bufferSizeElements() * sizeof(Ty) };
+    long long const buffer_size_bytes{ static_cast<long long>(m_pool->bufferSizeElements() * sizeof(Ty)) };
     size_t total_read_bytes{ 0 };
 
     Dbg() << "Starting reader loop.";
