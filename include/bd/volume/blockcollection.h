@@ -154,7 +154,7 @@ BlockCollection::do_initBlockTextures(std::string const &file)
                             b->voxel_extent().y,
                             b->voxel_extent().z,
                             DataType::Float,
-                            buf);
+                            tex);
   } //for
   std::cout << " ...done." << std::endl;
 

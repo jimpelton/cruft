@@ -45,6 +45,7 @@ GLenum pixelType(DataType dt)
       rval = GL_UNSIGNED_SHORT;
       break;
     case DataType::Float:
+    case DataType::Unknown:
     default:
       rval = GL_FLOAT;
       break;
