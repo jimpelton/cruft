@@ -45,6 +45,7 @@ public:
   /// \brief Callable type used for the relevance function
   using RFunc = std::function<bool(Ty)>;
 
+
   /// \brief Default construct a FileBlockCollection.
   /// The default collection has 1x1x1 blocks and volume dimensions of 0x0x0.
   FileBlockCollection();
@@ -68,8 +69,8 @@ public:
   /// \param rawFile[in] Volume data set
   /// \param tmin[in] min average block value to filter against.
   /// \param tmax[in] max average block value to filter against.
-  void
-  createFromRawFile(const std::string &file, size_t bufSize, RFunc const &f);
+//  void
+//  createFromRawFile(const std::string &file, size_t bufSize, RFunc const &f);
 
 
   /// \brief Read a single block into buffer \c out.
@@ -95,6 +96,7 @@ public:
     return m_volume;
   }
 
+
   /// Get the volume for this FBC.
   /// \return reference-to-non-const for the volume.
   Volume &
@@ -103,6 +105,7 @@ public:
     return m_volume;
   }
 
+
   //////////////////////////////////////////////////////////////////////////////
   std::vector<FileBlock> const &
   blocks() const
@@ -110,14 +113,16 @@ public:
     return m_blocks;
   }
 
+
   std::vector<FileBlock> &
   blocks()
   {
     return m_blocks;
   }
 
+
   //////////////////////////////////////////////////////////////////////////////
-  std::vector<FileBlock*> const &
+  std::vector<FileBlock *> const &
   nonEmptyBlocks() const
   {
     return m_nonEmptyBlocks;
@@ -130,6 +135,7 @@ public:
   /// and block index.
   void
   initBlocks();
+
 
 private:
 
@@ -166,13 +172,13 @@ private:
 //  void doCreateVoxelRelevanceMap(Buffer<Ty>*, RMapType &, RFType const&);
 
   /// \brief Compute the averages for each block after min/max and sum is found.
-  void
-  finishBlockAverages();
+//  void
+//  finishBlockAverages();
 
 
   /// \brief Compute and save a few stats from provided raw file.
-  void
-  computeVolumeStatistics(BufferedReader<Ty> &r, RFunc const &);
+//  void
+//  computeVolumeStatistics(BufferedReader<Ty> &r, RFunc const &);
 
 
   /// \brief Compute and save a few stats for each block.
@@ -185,7 +191,7 @@ private:
 
   std::vector<FileBlock> m_blocks;
 
-  std::vector<FileBlock*> m_nonEmptyBlocks;
+  std::vector<FileBlock *> m_nonEmptyBlocks;
 
 }; // class FileBlockCollection
 
@@ -216,8 +222,8 @@ FileBlockCollection<Ty>::FileBlockCollection(FileBlockCollection const &other)
     , m_blocks{ other.m_blocks }
     , m_nonEmptyBlocks{ /* populated in cc'tor body */ }
 {
-  for (auto &b : m_blocks){
-    if (! b.is_empty) {
+  for (auto &b : m_blocks) {
+    if (!b.is_empty) {
       m_nonEmptyBlocks.push_back(&b);
     }
   }
@@ -278,11 +284,11 @@ FileBlockCollection<Ty>::initBlocks()
 
   Dbg() << "Starting FileBlock creation: "
       " # blocks: "
-         << bc.x << ", " << bc.y << ", " << bc.z <<
-         " Vol dim: "
-         << vd.x << ", " << vd.y << ", " << vd.z <<
-         " Block dim: "
-         << ", " << wld_dims.x << ", " << wld_dims.y << ", " << wld_dims.z;
+        << bc.x << ", " << bc.y << ", " << bc.z <<
+        " Vol dim: "
+        << vd.x << ", " << vd.y << ", " << vd.z <<
+        " Block dim: "
+        << ", " << wld_dims.x << ", " << wld_dims.y << ", " << wld_dims.z;
 
 
   // Loop through all our blocks (identified by <bxi,byj,bzk>) and populate block fields.
@@ -319,6 +325,20 @@ FileBlockCollection<Ty>::initBlocks()
   Dbg() << "Total blocks is " << m_blocks.size();
 }
 
+
+//////////////////////////////////////////////////////////////////////////////
+template<class Ty>
+void
+FileBlockCollection<Ty>::addBlock(FileBlock const &b)
+{
+  m_blocks.push_back(b);
+
+  if (!b.is_empty) {
+    FileBlock *ptr{ &m_blocks.back() };
+    m_nonEmptyBlocks.push_back(ptr);
+  }
+
+}
 
 //////////////////////////////////////////////////////////////////////////////
 //template<class Ty>
@@ -415,96 +435,82 @@ FileBlockCollection<Ty>::initBlocks()
 
 
 //////////////////////////////////////////////////////////////////////////////
-template<class Ty>
-void
-FileBlockCollection<Ty>::finishBlockAverages()
-{
-//  uint64_t volume_empty_voxels{ 0 };
-  for (auto &b : m_blocks) {
-    uint64_t total_vox{ b.voxel_dims[0] * b.voxel_dims[1] * b.voxel_dims[2] };
-    b.avg_val = b.total_val / total_vox;
-//    volume_empty_voxels += b->empty_voxels;
-  }
-
-//  m_volume.emptyVoxels(volume_empty_voxels);
-}
-
-
-//////////////////////////////////////////////////////////////////////////////
-template<class Ty>
-void
-FileBlockCollection<Ty>::computeVolumeStatistics(BufferedReader<Ty> &r,
-                                                 RFunc const &f)
-{
-  Info() << "Computing volume statistics...";
-
-  size_t total_bytes_processed{ 0 };
-
-  Buffer<Ty> *buf{ nullptr };
-  while ((buf = r.waitNextFullUntilNone()) != nullptr) {
-
-    // Sum values in this buffer
-//    doBufferSum(buf);
-    // Compute the min/max values of the buffer (used for volume min max).
-//    doBufferMinMax(buf);
-    // Compute block minimum and maximum.
-//    doBlockMinMax(buf);
-
-    r.waitReturnEmpty(buf);
-
-    total_bytes_processed += buf->getNumElements() * sizeof(Ty);
-    Info() << "Processed (kB): " << total_bytes_processed * 1e-3;
-
-  } // while(...
-
-  // Save final volume min/max/avg.
-  m_volume.avg(m_volume.total() /
-                   ( m_volume.dims().x * m_volume.dims().y * m_volume.dims().z ));
-
-  // Average the blocks!
-  finishBlockAverages();
-
-  Info() << "Done computing volume statistics "
-         << m_volume.min() << ", " << m_volume.max() << ", " << m_volume.avg()
-         << "\n Total bytes processed: " << total_bytes_processed;
-
-}
+//template<class Ty>
+//void
+//FileBlockCollection<Ty>::finishBlockAverages()
+//{
+////  uint64_t volume_empty_voxels{ 0 };
+//  for (auto &b : m_blocks) {
+//    uint64_t total_vox{ b.voxel_dims[0] * b.voxel_dims[1] * b.voxel_dims[2] };
+//    b.avg_val = b.total_val / total_vox;
+////    volume_empty_voxels += b->empty_voxels;
+//  }
+//
+////  m_volume.emptyVoxels(volume_empty_voxels);
+//}
 
 
 //////////////////////////////////////////////////////////////////////////////
-template<class Ty>
-void
-FileBlockCollection<Ty>::addBlock(FileBlock const &b)
-{
-  m_blocks.push_back(b);
+//template<class Ty>
+//void
+//FileBlockCollection<Ty>::computeVolumeStatistics(BufferedReader<Ty> &r,
+//                                                 RFunc const &f)
+//{
+//  Info() << "Computing volume statistics...";
+//
+//  size_t total_bytes_processed{ 0 };
+//
+//  Buffer<Ty> *buf{ nullptr };
+//  while ((buf = r.waitNextFullUntilNone()) != nullptr) {
+//
+//    // Sum values in this buffer
+////    doBufferSum(buf);
+//    // Compute the min/max values of the buffer (used for volume min max).
+////    doBufferMinMax(buf);
+//    // Compute block minimum and maximum.
+////    doBlockMinMax(buf);
+//
+//    r.waitReturnEmpty(buf);
+//
+//    total_bytes_processed += buf->getNumElements() * sizeof(Ty);
+//    Info() << "Processed (kB): " << total_bytes_processed * 1e-3;
+//
+//  } // while(...
+//
+//  // Save final volume min/max/avg.
+//  m_volume.avg(m_volume.total() /
+//                   ( m_volume.dims().x * m_volume.dims().y * m_volume.dims().z ));
+//
+//  // Average the blocks!
+//  finishBlockAverages();
+//
+//  Info() << "Done computing volume statistics "
+//         << m_volume.min() << ", " << m_volume.max() << ", " << m_volume.avg()
+//         << "\n Total bytes processed: " << total_bytes_processed;
+//
+//}
 
-  if (!b.is_empty) {
-    FileBlock *ptr{ &m_blocks.back() };
-    m_nonEmptyBlocks.push_back(ptr);
-  }
-
-}
 
 
 ///////////////////////////////////////////////////////////////////////////////
-template<class Ty>
-void
-FileBlockCollection<Ty>::createFromRawFile(std::string const &file,
-                                           size_t bufSize,
-                                           std::function<bool(Ty)> const &relevance)
-{
-  BufferedReader<Ty> r{ bufSize };
-  if (!r.open(file)) {
-    throw std::runtime_error("Could not open file " + file);
-  }
-
-  r.start();
-
-  computeVolumeStatistics(r, relevance);
-
-  Info() << m_blocks.size() - m_nonEmptyBlocks.size() << "/" << m_blocks.size() <<
-         " blocks marked empty.";
-}
+//template<class Ty>
+//void
+//FileBlockCollection<Ty>::createFromRawFile(std::string const &file,
+//                                           size_t bufSize,
+//                                           std::function<bool(Ty)> const &relevance)
+//{
+//  BufferedReader<Ty> r{ bufSize };
+//  if (!r.open(file)) {
+//    throw std::runtime_error("Could not open file " + file);
+//  }
+//
+//  r.start();
+//
+//  computeVolumeStatistics(r, relevance);
+//
+//  Info() << m_blocks.size() - m_nonEmptyBlocks.size() << "/" << m_blocks.size() <<
+//         " blocks marked empty.";
+//}
 
 
 

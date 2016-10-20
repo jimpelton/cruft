@@ -47,9 +47,9 @@ BlockCollection::initBlocksFromFileBlocks(std::vector<FileBlock> const &fileBloc
                                 fileBlocks[idx] }};
 
         m_blocks.push_back(block);
-        if (fileBlocks[idx].is_empty == 0) {
-          m_nonEmptyBlocks.push_back(block);
-        }
+//        if (fileBlocks[idx].is_empty == 0) {
+//          m_nonEmptyBlocks.push_back(block);
+//        }
 
         idx++;
       }
@@ -57,10 +57,10 @@ BlockCollection::initBlocksFromFileBlocks(std::vector<FileBlock> const &fileBloc
 
 
 void
-BlockCollection::filterBlocks(std::function<bool(Block const *)> isEmpty)
+BlockCollection::filterBlocks(std::function<bool(Block const &)> notEmpty)
 {
   for (Block *b : m_blocks) {
-    if (!isEmpty(b)) {
+    if (notEmpty(*b)) {
       m_nonEmptyBlocks.push_back(b);
     }
   }
@@ -120,6 +120,40 @@ BlockCollection::nonEmptyBlocks()
 }
 
 
+size_t
+BlockCollection::largestNonEmptyBlock(){
+  auto largest =
+      std::max_element(
+          m_nonEmptyBlocks.begin(),
+          m_nonEmptyBlocks.end(),
+
+          [](Block *lhs, Block *rhs) -> bool {
+
+            // compare number of voxels
+
+            size_t lhs_vox =
+                lhs->voxel_extent().x *
+                    lhs->voxel_extent().y *
+                    lhs->voxel_extent().z;
+
+            size_t rhs_vox =
+                rhs->voxel_extent().x *
+                    rhs->voxel_extent().y *
+                    rhs->voxel_extent().z;
+
+            return lhs_vox < rhs_vox;
+          });
+
+  Block *blk{ *largest };
+  return  blk->voxel_extent().x * blk->voxel_extent().y * blk->voxel_extent().z ;
+}
+
+
+IndexFile const &
+BlockCollection::indexFile() const
+{
+  return *m_indexFile;
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////

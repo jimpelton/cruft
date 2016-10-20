@@ -14,8 +14,8 @@ namespace bd
 
 namespace
 {
-static const std::array<GLenum, 6> gl_format{
-  GL_RED, GL_R8, GL_R32F, GL_RG, GL_RGB, GL_RGBA
+static const std::array<GLenum, 8> gl_format{
+  GL_RED, GL_R8, GL_R8UI, GL_R16, GL_R32F, GL_RG, GL_RGB, GL_RGBA
 };
 
 static const std::array<GLenum, 3> gl_target{
@@ -155,14 +155,14 @@ Texture::genGLTex3d(Format ity, Format ety, size_t w, size_t h, size_t d,
   gl_check(glBindTexture(GL_TEXTURE_3D, texId));
 
   gl_check(glTexImage3D(
-    GL_TEXTURE_3D,
-    mipMapLevel,                         // mip-map detail level
-    gl_format[ordinal<Format>(ity)],     // internal format (how texture is to be stored by GL)
-    w, h, d,                             // dimensions
-    border,                              // border
-    gl_format[ordinal<Format>(ety)],     // pixel data format (R, RG, etc.)
-    pixelType(ty),                       // pixel data type
-    pixelData));                         // ptr to data
+      GL_TEXTURE_3D,
+      mipMapLevel,                         // mip-map detail level
+      gl_format[ordinal<Format>(ity)],     // internal format (how texture is to be stored by GL)
+      w, h, d,                             // dimensions
+      border,                              // border
+      gl_format[ordinal<Format>(ety)],     // pixel data format (R, RG, etc.)
+      pixelType(ty),                       // pixel data type
+      pixelData));                         // ptr to data
 
   gl_check(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
   gl_check(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));

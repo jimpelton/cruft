@@ -33,6 +33,8 @@ public:
   {
     RED,
     R8,
+    R8UI,
+    R16,
     R32F,
     RG,
     RGB,
