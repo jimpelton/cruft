@@ -8,24 +8,25 @@
 #include <array>
 #include <sstream>
 
-
 namespace bd
 {
 
 namespace
 {
 static const std::array<GLenum, 8> gl_format{
-  GL_RED, GL_R8, GL_R8UI, GL_R16, GL_R32F, GL_RG, GL_RGB, GL_RGBA
+    GL_RED, GL_R8, GL_R8UI, GL_R16, GL_R32F, GL_RG, GL_RGB, GL_RGBA
 };
 
 static const std::array<GLenum, 3> gl_target{
-  GL_TEXTURE_1D, GL_TEXTURE_2D, GL_TEXTURE_3D
+    GL_TEXTURE_1D, GL_TEXTURE_2D, GL_TEXTURE_3D
 };
 
-GLenum pixelType(DataType dt)
+
+GLenum
+pixelType(DataType dt)
 {
   GLenum rval;
-  switch(dt) {
+  switch (dt) {
     case DataType::Integer:
       rval = GL_INT;
       break;
@@ -58,10 +59,11 @@ GLenum pixelType(DataType dt)
 } // namespace
 
 Texture::Texture(Target textureType)
-  : m_id{ 0 }
-  , m_type{ textureType }
+    : m_id{ 0 }
+    , m_type{ textureType }
 {
 }
+
 
 Texture::~Texture()
 {
@@ -85,7 +87,7 @@ Texture::bind(unsigned int unit) const
 
 
 unsigned int
-Texture::genGLTex1d(float const * img, Format ity, Format ety, size_t w)
+Texture::genGLTex1d(float const *img, Format ity, Format ety, size_t w)
 {
   GLuint texId{ 0 };
   gl_check(glGenTextures(1, &texId));
@@ -95,12 +97,12 @@ Texture::genGLTex1d(float const * img, Format ity, Format ety, size_t w)
       GL_TEXTURE_1D,
       0,
       gl_format[ordinal<Format>(ity)],
-    w,
-    0,
-    gl_format[ordinal<Format>(ety)],
-    GL_FLOAT,
-    static_cast<void const *>(img)
-    ));
+      w,
+      0,
+      gl_format[ordinal<Format>(ety)],
+      GL_FLOAT,
+      static_cast<void const *>(img)
+  ));
 
   gl_check(glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
   gl_check(glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
@@ -114,7 +116,7 @@ Texture::genGLTex1d(float const * img, Format ity, Format ety, size_t w)
 
 
 unsigned int
-Texture::genGLTex2d(float* img, Format ity, Format ety, size_t w, size_t h)
+Texture::genGLTex2d(float *img, Format ity, Format ety, size_t w, size_t h)
 {
   GLuint texId{ 0 };
   gl_check(glGenTextures(1, &texId));
@@ -124,11 +126,11 @@ Texture::genGLTex2d(float* img, Format ity, Format ety, size_t w, size_t h)
       GL_TEXTURE_2D,
       0,
       gl_format[ordinal<Format>(ity)],
-    w, h,
-    0,
-    gl_format[ordinal<Format>(ety)],
-    GL_FLOAT,
-    img));
+      w, h,
+      0,
+      gl_format[ordinal<Format>(ety)],
+      GL_FLOAT,
+      img));
 
   gl_check(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
   gl_check(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
@@ -146,7 +148,7 @@ Texture::genGLTex2d(float* img, Format ity, Format ety, size_t w, size_t h)
 
 unsigned int
 Texture::genGLTex3d(Format ity, Format ety, size_t w, size_t h, size_t d,
-    DataType ty, void* pixelData)
+                    DataType ty, void *pixelData)
 {
   const GLint border{ 0 };
   const GLint mipMapLevel{ 0 };
@@ -193,31 +195,35 @@ Texture::to_string() const
     GLint val{ 0 };
     gl_check(glGetTextureLevelParameteriv(m_id, 0, GL_TEXTURE_WIDTH, &val));
     ss << "\n\t" << bd::gl_to_string(GL_TEXTURE_WIDTH) << ": " << val;
-    gl_check(glGetTextureLevelParameteriv(m_id, 0, GL_TEXTURE_HEIGHT,&val));
+    gl_check(glGetTextureLevelParameteriv(m_id, 0, GL_TEXTURE_HEIGHT, &val));
     ss << "\n\t" << bd::gl_to_string(GL_TEXTURE_HEIGHT) << ": " << val;
-    gl_check(glGetTextureLevelParameteriv(m_id, 0, GL_TEXTURE_DEPTH,&val));
+    gl_check(glGetTextureLevelParameteriv(m_id, 0, GL_TEXTURE_DEPTH, &val));
     ss << "\n\t" << bd::gl_to_string(GL_TEXTURE_DEPTH) << ": " << val;
-    gl_check(glGetTextureLevelParameteriv(m_id, 0, GL_TEXTURE_INTERNAL_FORMAT,&val));
-    ss << "\n\t" << bd::gl_to_string(GL_TEXTURE_INTERNAL_FORMAT) << ": " << bd::gl_to_string(val);
-    gl_check(glGetTextureLevelParameteriv(m_id, 0, GL_TEXTURE_RED_TYPE,&val));
+    gl_check(glGetTextureLevelParameteriv(m_id, 0, GL_TEXTURE_INTERNAL_FORMAT, &val));
+    ss << "\n\t" << bd::gl_to_string(GL_TEXTURE_INTERNAL_FORMAT) << ": "
+       << bd::gl_to_string(val);
+    gl_check(glGetTextureLevelParameteriv(m_id, 0, GL_TEXTURE_RED_TYPE, &val));
     ss << "\n\t" << bd::gl_to_string(GL_TEXTURE_RED_TYPE) << ": " << val;
-    gl_check(glGetTextureLevelParameteriv(m_id, 0, GL_TEXTURE_BLUE_TYPE,&val));
+    gl_check(glGetTextureLevelParameteriv(m_id, 0, GL_TEXTURE_BLUE_TYPE, &val));
     ss << "\n\t" << bd::gl_to_string(GL_TEXTURE_BLUE_TYPE) << ": " << val;
-    gl_check(glGetTextureLevelParameteriv(m_id, 0, GL_TEXTURE_GREEN_TYPE,&val));
+    gl_check(glGetTextureLevelParameteriv(m_id, 0, GL_TEXTURE_GREEN_TYPE, &val));
     ss << "\n\t" << bd::gl_to_string(GL_TEXTURE_GREEN_TYPE) << ": " << val;
-    gl_check(glGetTextureLevelParameteriv(m_id, 0, GL_TEXTURE_ALPHA_TYPE,&val));
+    gl_check(glGetTextureLevelParameteriv(m_id, 0, GL_TEXTURE_ALPHA_TYPE, &val));
     ss << "\n\t" << bd::gl_to_string(GL_TEXTURE_ALPHA_TYPE) << ": " << val;
-    gl_check(glGetTextureLevelParameteriv(m_id, 0, GL_TEXTURE_RED_SIZE,&val));
+    gl_check(glGetTextureLevelParameteriv(m_id, 0, GL_TEXTURE_RED_SIZE, &val));
     ss << "\n\t" << bd::gl_to_string(GL_TEXTURE_RED_SIZE) << ": " << val;
-    gl_check(glGetTextureLevelParameteriv(m_id, 0, GL_TEXTURE_BLUE_SIZE,&val));
+    gl_check(glGetTextureLevelParameteriv(m_id, 0, GL_TEXTURE_BLUE_SIZE, &val));
     ss << "\n\t" << bd::gl_to_string(GL_TEXTURE_BLUE_SIZE) << ": " << val;
-    gl_check(glGetTextureLevelParameteriv(m_id, 0, GL_TEXTURE_GREEN_SIZE,&val));
+    gl_check(glGetTextureLevelParameteriv(m_id, 0, GL_TEXTURE_GREEN_SIZE, &val));
     ss << "\n\t" << bd::gl_to_string(GL_TEXTURE_GREEN_SIZE) << ": " << val;
-    gl_check(glGetTextureLevelParameteriv(m_id, 0, GL_TEXTURE_ALPHA_SIZE,&val));
+    gl_check(glGetTextureLevelParameteriv(m_id, 0, GL_TEXTURE_ALPHA_SIZE, &val));
     ss << "\n\t" << bd::gl_to_string(GL_TEXTURE_ALPHA_SIZE) << ": " << val;
-    gl_check(glGetTextureLevelParameteriv(m_id, 0, GL_TEXTURE_COMPRESSED,&val));
+    gl_check(glGetTextureLevelParameteriv(m_id, 0, GL_TEXTURE_COMPRESSED, &val));
     ss << "\n\t" << bd::gl_to_string(GL_TEXTURE_COMPRESSED) << ": " << val;
-    gl_check(glGetTextureLevelParameteriv(m_id, 0, GL_TEXTURE_COMPRESSED_IMAGE_SIZE, &val));
+    gl_check(glGetTextureLevelParameteriv(m_id,
+                                          0,
+                                          GL_TEXTURE_COMPRESSED_IMAGE_SIZE,
+                                          &val));
     ss << "\n\t" << bd::gl_to_string(GL_TEXTURE_COMPRESSED_IMAGE_SIZE) << ": " << val;
 
   }
@@ -225,13 +231,12 @@ Texture::to_string() const
   return ss.str();
 }
 
-std::ostream&
-operator<<(std::ostream& os, const bd::Texture& t)
+
+std::ostream &
+operator<<(std::ostream &os, const bd::Texture &t)
 {
   return os << t.to_string();
 }
-
-
 
 
 } // namespace bd

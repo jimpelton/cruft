@@ -1,5 +1,5 @@
-#ifndef texture_h__
-#define texture_h__
+#ifndef bd_texture_h
+#define bd_texture_h
 
 #include <bd/graphics/shader.h>
 #include <bd/io/datatypes.h>
@@ -21,15 +21,16 @@ class Texture
 {
 public:
 
-  enum class Target: unsigned int
+  enum class Target
+      : unsigned int
   {
     Tex1D,
     Tex2D,
     Tex3D
   };
 
-
-  enum class Format: unsigned int
+  enum class Format
+      : unsigned int
   {
     RED,
     R8,
@@ -43,25 +44,32 @@ public:
 
 
   Texture(Target textureType);
+
+
   virtual ~Texture();
 
 
   /// \brief Binds this texture to the current active texture.
-  void bind() const;
+  void
+  bind() const;
 
 
   /// \brief Activates texture unit \c unit and binds this texture.
-  void bind(unsigned int unit) const;
+  void
+  bind(unsigned int unit) const;
 
 
-  unsigned int genGLTex1d(float const* img, Format ity, Format ety, size_t w);
+  unsigned int
+  genGLTex1d(float const *img, Format ity, Format ety, size_t w);
 
 
-  unsigned int genGLTex2d(float* img, Format ity, Format ety, size_t w, size_t h);
+  unsigned int
+  genGLTex2d(float *img, Format ity, Format ety, size_t w, size_t h);
 
 
-  unsigned int genGLTex3d(Format internal, Format external, size_t w, size_t h, size_t d,
-      DataType ty, void* pixelData);
+  unsigned int
+  genGLTex3d(Format internal, Format external, size_t w, size_t h, size_t d,
+             DataType ty, void *pixelData);
 
 
   unsigned int
@@ -77,7 +85,10 @@ public:
     return m_type;
   }
 
-  std::string to_string() const;
+
+  std::string
+  to_string() const;
+
 
 private:
   ///////////////////////////////////////////////////////////////////////////////
@@ -92,7 +103,8 @@ private:
 };
 
 
-std::ostream& operator<<(std::ostream& os, const bd::Texture& t);
+std::ostream &
+operator<<(std::ostream &os, const bd::Texture &t);
 } // namespace bd
 
 
