@@ -122,11 +122,11 @@ public:
 
 
   //////////////////////////////////////////////////////////////////////////////
-  std::vector<FileBlock *> const &
-  nonEmptyBlocks() const
-  {
-    return m_nonEmptyBlocks;
-  }
+//  std::vector<FileBlock *> const &
+//  nonEmptyBlocks() const
+//  {
+//    return m_nonEmptyBlocks;
+//  }
 
 
   /// \brief Initializes \c blocks so that they fit within the extent of \c vd. Blocks
@@ -191,7 +191,7 @@ private:
 
   std::vector<FileBlock> m_blocks;
 
-  std::vector<FileBlock *> m_nonEmptyBlocks;
+//  std::vector<FileBlock *> m_nonEmptyBlocks;
 
 }; // class FileBlockCollection
 
@@ -209,7 +209,7 @@ template<class Ty>
 FileBlockCollection<Ty>::FileBlockCollection(glm::u64vec3 volDims, glm::u64vec3 numBlocks)
     : m_volume{ volDims, numBlocks }
     , m_blocks{ }
-    , m_nonEmptyBlocks{ }
+//    , m_nonEmptyBlocks{ }
 {
 //  initBlocks();
 }
@@ -220,13 +220,13 @@ template<class Ty>
 FileBlockCollection<Ty>::FileBlockCollection(FileBlockCollection const &other)
     : m_volume{ other.m_volume }
     , m_blocks{ other.m_blocks }
-    , m_nonEmptyBlocks{ /* populated in cc'tor body */ }
+//    , m_nonEmptyBlocks{ /* populated in cc'tor body */ }
 {
-  for (auto &b : m_blocks) {
-    if (!b.is_empty) {
-      m_nonEmptyBlocks.push_back(&b);
-    }
-  }
+//  for (auto &b : m_blocks) {
+//    if (!b.is_empty) {
+//      m_nonEmptyBlocks.push_back(&b);
+//    }
+//  }
 }
 
 
@@ -333,10 +333,10 @@ FileBlockCollection<Ty>::addBlock(FileBlock const &b)
 {
   m_blocks.push_back(b);
 
-  if (!b.is_empty) {
-    FileBlock *ptr{ &m_blocks.back() };
-    m_nonEmptyBlocks.push_back(ptr);
-  }
+//  if (!b.is_empty) {
+//    FileBlock *ptr{ &m_blocks.back() };
+//    m_nonEmptyBlocks.push_back(ptr);
+//  }
 
 }
 

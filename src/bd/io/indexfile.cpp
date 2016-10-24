@@ -178,7 +178,7 @@ IndexFile::writeAsciiIndexFile(std::string const &outpath) const
 
 ///////////////////////////////////////////////////////////////////////////////
 std::vector<FileBlock> const &
-IndexFile::getBlocks() const
+IndexFile::getFileBlocks() const
 {
   return m_col->getBlocks();
 }

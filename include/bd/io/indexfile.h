@@ -134,12 +134,12 @@ FileBlockCollectionWrapper<Ty>::getBlocks()
 }
 
 
-template<class Ty>
-std::vector<FileBlock *> const &
-FileBlockCollectionWrapper<Ty>::getNonEmptyBlocks()
-{
-  return c.nonEmptyBlocks();
-}
+//template<class Ty>
+//std::vector<FileBlock *> const &
+//FileBlockCollectionWrapper<Ty>::getNonEmptyBlocks()
+//{
+//  return c.nonEmptyBlocks();
+//}
 
 /// \brief Generate an index file from the provided FileBlockCollection. The
 ///        IndexFile can be written to disk in either ASCII or binary format.
@@ -191,7 +191,7 @@ public:
 
 
   std::vector<FileBlock> const &
-  getBlocks() const;
+  getFileBlocks() const;
 
 
 private:
