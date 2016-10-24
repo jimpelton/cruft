@@ -46,8 +46,8 @@ public:
   getBlocks() = 0;
 
 
-  virtual std::vector<FileBlock*> const &
-  getNonEmptyBlocks() = 0;
+//  virtual std::vector<FileBlock*> const &
+//  getNonEmptyBlocks() = 0;
 
 
   virtual const Volume &
@@ -83,8 +83,8 @@ public:
   getBlocks() override;
 
 
-  std::vector<FileBlock*> const &
-  getNonEmptyBlocks() override;
+//  std::vector<FileBlock*> const &
+//  getNonEmptyBlocks() override;
 
 
 private:
