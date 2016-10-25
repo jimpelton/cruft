@@ -28,6 +28,12 @@ IndexFile::fromBinaryIndexFile(std::string const &path)
     return nullptr;
   }
 
+  if (idxfile->getHeader().version != VERSION){
+    Err() << "The index file provided is the wrong version! You should regenerate the"
+        "index file.";
+    return nullptr;
+  }
+
   return idxfile;
 }
 

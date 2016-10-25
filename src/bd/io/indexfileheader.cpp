@@ -80,6 +80,7 @@ IndexFileHeader::getTypeInt(DataType ty)
 }
 
 
+
 // IndexFileHeader operator<<
 std::ostream &
 operator<<(std::ostream &os, bd::IndexFileHeader const &h)

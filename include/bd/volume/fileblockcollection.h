@@ -280,7 +280,7 @@ FileBlockCollection<Ty>::initBlocks()
   glm::u64vec3 bd{ m_volume.block_dims() };
 
   // block world dims
-  glm::vec3 wld_dims{ 1.0f / glm::vec3(bc) };
+  glm::vec3 wld_dims{ 2.0f / glm::vec3(bc) };
 
   Dbg() << "Starting FileBlock creation: "
       " # blocks: "
