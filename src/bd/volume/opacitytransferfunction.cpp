@@ -19,11 +19,11 @@ OpacityTransferFunction::OpacityTransferFunction()
 }
 
 
-void
+bool
 OpacityTransferFunction::load(std::string const &filename)
 {
   bd::Dbg() << "Reading OTF: " << filename;
-
+  bool success{ false };
   _knots.clear();
 
   size_t lineNum{ 0 };
@@ -62,17 +62,22 @@ OpacityTransferFunction::load(std::string const &filename)
     }
 
     file.close();
+    success = true;
 
-  } catch (std::exception e) {
+  } catch (std::ios_base::failure &e) {
     bd::Err() << "Problem reading 1D transfer function file: " << e.what();
   }
 
+  return success;
 }
 
 
 double
 OpacityTransferFunction::interpolate(double v) const
 {
+  if(_knots.size() == 0) {
+    return 0;
+  }
 //  assert(v <= 1.0);
   OpacityKnot prev{ _knots[0] };
 

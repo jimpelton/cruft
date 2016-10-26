@@ -163,7 +163,7 @@ public:
   /// \param filename The path to the text file that has the scalar transfer function.
   /// \throws std::runtime_error If the file could not be parsed.
   /// \throws std::ifstream::failure If there was a problem reading the file.
-  virtual void
+  virtual bool
   load(std::string const &filename) = 0;
 
   virtual Value
@@ -210,7 +210,7 @@ public:
 
   OpacityTransferFunction();
 
-  void
+  bool
   load(std::string const &filename) override;
 
   double
@@ -236,7 +236,7 @@ public:
 //  ColorTransferFunction(ColorTransferFunction const &o) = default;
 //  ColorTransferFunction(ColorTransferFunction &&o) = default;
 
-  void
+  bool
   load(std::string const & filename) override;
 
   Color
