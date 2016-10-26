@@ -260,6 +260,11 @@ Dbg()
   return logger::get("DEBUG");
 }
 
+inline logger &
+Warn()
+{
+  return logger::get("WARNING");
+}
 
 inline logger &
 Err()
