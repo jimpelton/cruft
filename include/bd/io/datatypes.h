@@ -19,6 +19,7 @@ enum class DataType
   UnsignedShort,
 
   Float,
+  Double,
 
   Unknown
 };
