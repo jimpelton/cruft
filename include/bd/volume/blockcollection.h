@@ -115,7 +115,7 @@ BlockCollection::do_initBlockTextures(std::string const &file)
 
 
   if (m_nonEmptyBlocks.size() == 0) {
-    Err() << "There are no non-empty blocks to initialize texture for.";
+    Warn() << "There are no non-empty blocks to initialize textures for.";
     return false;
   }
 
@@ -127,8 +127,8 @@ BlockCollection::do_initBlockTextures(std::string const &file)
 
 
   int i{ 0 };
-  double diff{ m_indexFile->getHeader().vol_max -
-                   m_indexFile->getHeader().vol_min };
+  double vol_min = m_indexFile->getHeader().vol_min;
+  double diff{ m_indexFile->getHeader().vol_max - vol_min };
 
   // Generate textures for each non-empty block
   std::cout << std::endl;
@@ -144,7 +144,7 @@ BlockCollection::do_initBlockTextures(std::string const &file)
 
     // Normalize the data prior to generating the texture.
     for (size_t idx{ 0 }; idx < buf_size; ++idx) {
-      tex[idx] = buf[idx] / diff;
+      tex[idx] = (buf[idx] - vol_min) / diff;
     }
 
     //TODO: try not normalizing the texture data and see what happens... :)
