@@ -76,6 +76,9 @@ ColorTransferFunction::load(std::string const &filename)
   catch (std::runtime_error &e) {
     Err() << "Malformed CTF file: " << e.what();
   }
+  catch(std::exception &e) {
+    Err() << "Exception caught in " << __func__ << ": " << e.what();
+  }
   return success;
 }
 
