@@ -42,6 +42,7 @@ BlockCollection::initBlocksFromFileBlocks(std::vector<FileBlock> const &fileBloc
   m_indexesToDraw.reserve(fileBlocks.size());
   m_nonEmptyBlocks.reserve(fileBlocks.size());
 
+  double const vol_side{ 1.0 };
   auto idx = 0ull;
   for (auto k = 0ull; k < nb.z; ++k) {
     for (auto j = 0ull; j < nb.y; ++j) {
@@ -49,7 +50,7 @@ BlockCollection::initBlocksFromFileBlocks(std::vector<FileBlock> const &fileBloc
         std::cout << "\rCreating block " << idx;
 
         Block *block{ new Block{{ i, j, k },
-                                { 2.0f / nb.x, 2.0f / nb.y, 2.0f / nb.z },
+                                { vol_side / nb.x, vol_side / nb.y, vol_side / nb.z },
                                 fileBlocks[idx] }};
 
         m_blocks.push_back(block);
@@ -65,15 +66,17 @@ BlockCollection::initBlocksFromFileBlocks(std::vector<FileBlock> const &fileBloc
 void
 BlockCollection::filterBlocks(std::function<bool(Block const &)> notEmpty)
 {
-
   m_indexesToDraw.clear();
   m_nonEmptyBlocks.clear();
+
   for (Block *b : m_blocks) {
     uint64_t idx{ b->fileBlock().block_index };
+
     if (notEmpty(*b)) {
       m_nonEmptyBlocks.push_back(b);
       m_indexesToDraw.push_back(idx);
     }
+
 //    else {
 //      // if it is empty, remove from m_nonEmptyBlocks
 //      //m_nonEmptyBlocks[idx] = nullptr;

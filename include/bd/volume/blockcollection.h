@@ -174,23 +174,25 @@ void
 BlockCollection::fillBlockData(Block const &b, std::istream &infile,
                                Ty *blockBuffer) const
 {
-//  const glm::u64vec3 &nb{ m_volume.lower().block_count() };
-//  const glm::u64vec3 &bd{ m_volume.lower().block_dims() };
-//  const glm::u64vec3 &vd{ m_volume.dims() };
 
-  glm::u64vec3 const &bd{ b.voxel_extent() };
-  glm::u64vec2 const &vd{ m_indexFile->getHeader().volume_extent[0],
+  // block's dimensions in voxels
+  glm::u64vec3 const &be{ b.voxel_extent() };
+
+  // volume's dimensions in voxels.
+  glm::u64vec2 const &ve{ m_indexFile->getHeader().volume_extent[0],
                           m_indexFile->getHeader().volume_extent[1] };
 
   // start element = block index w/in volume * block size
-  const glm::u64vec3 start{ b.ijk() * bd };
+  const glm::u64vec3 start{ b.ijk() * be };
+
   // block end element = block voxel start dims + block size
-  const glm::u64vec3 end{ start + bd };
+  const glm::u64vec3 end{ start + be };
+
   // byte offset into file to read from
   size_t offset{ b.fileBlock().data_offset };
 
   // Loop through rows and slabs of volume reading rows of voxels into memory.
-  const size_t blockRowLength{ bd.x };
+  const size_t blockRowLength{ be.x };
   for (auto slab = start.z; slab < end.z; ++slab) {
     for (auto row = start.y; row < end.y; ++row) {
 
@@ -202,7 +204,7 @@ BlockCollection::fillBlockData(Block const &b, std::istream &infile,
       blockBuffer += blockRowLength;
 
       // offset of next row
-      offset = bd::to1D(start.x, row + 1, slab, vd.x, vd.y);
+      offset = bd::to1D(start.x, row + 1, slab, ve.x, ve.y);
       offset *= sizeof(Ty);
     }
   }
