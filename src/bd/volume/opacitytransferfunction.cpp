@@ -35,6 +35,7 @@ OpacityTransferFunction::load(std::string const &filename)
     file.open(filename.c_str(), std::ifstream::in);
     if (!file.is_open()) {
       bd::Err() << "Couldn't open OTF file: " << filename;
+      return false;
     }
 
     // number of entries/lines in the scalar opacity file.
@@ -43,8 +44,7 @@ OpacityTransferFunction::load(std::string const &filename)
     lineNum++;
 
     if (numKnots > 8192) {
-      bd::Err() << "OTF has > 8192 lines.";
-//    throw std::runtime_error("1D transfer function has > 8192 lines.");
+      bd::Warn() << "OTF has > 8192 lines.";
     }
 
     // read rest of file consisting of scalar-opacity pairs
@@ -55,8 +55,7 @@ OpacityTransferFunction::load(std::string const &filename)
     }
 
     if (lineNum < numKnots) {
-      Err() << "Malformed OTF file (not enough knots?).";
-//      throw std::runtime_error("Malformed 1D transfer function file (not enough lines?).");
+      throw std::runtime_error("Not enough knots");
     } else {
       bd::Info() << "Read " << numKnots << " scalar-opacity knots.";
     }
@@ -65,7 +64,10 @@ OpacityTransferFunction::load(std::string const &filename)
     success = true;
 
   } catch (std::ios_base::failure &e) {
-    bd::Err() << "Problem reading 1D transfer function file: " << e.what();
+    bd::Err() << "Problem reading OTF file: " << e.what();
+  }
+  catch(std::runtime_error &e) {
+    Err() << "Malformed OTF file: " << e.what();
   }
 
   return success;

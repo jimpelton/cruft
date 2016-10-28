@@ -24,6 +24,7 @@ namespace
     { "unsigned short", DataType::UnsignedShort },
 
     { "float", DataType::Float },
+    { "double", DataType::Double },
 
     { "unknown", DataType::Unknown }
   };

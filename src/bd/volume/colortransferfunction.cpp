@@ -42,6 +42,7 @@ ColorTransferFunction::load(std::string const &filename)
     file.open(filename.c_str(), std::ifstream::in);
     if (!file.is_open()) {
       bd::Err() << "Couldn't open CTF file: " << filename;
+      return false;
     }
 
     // number of entries/lines in the scalar opacity file.
@@ -50,8 +51,7 @@ ColorTransferFunction::load(std::string const &filename)
     lineNum++;
 
     if (numKnots > 8192) {
-      bd::Err() << "CTF has > 8192 lines.";
-//    throw std::runtime_error("1D transfer function has > 8192 lines.");
+      bd::Warn() << "CTF has > 8192 lines.";
     }
 
     // read rest of file consisting of scalar-opacity pairs
@@ -62,8 +62,7 @@ ColorTransferFunction::load(std::string const &filename)
     }
 
     if (lineNum < numKnots) {
-      Err() << "Malformed CTF file (not enough knots?).";
-//      throw std::runtime_error("Malformed 1D transfer function file (not enough lines?).");
+      throw std::runtime_error("Not enough knots");
     } else {
       bd::Info() << "Read " << numKnots << " scalar-color knots.";
     }
@@ -72,7 +71,10 @@ ColorTransferFunction::load(std::string const &filename)
     success = true;
   }
   catch (std::ios_base::failure &e) {
-    bd::Err() << "Problem reading 1D transfer function file: " << e.what();
+    bd::Err() << "Problem reading CTF file: " << e.what();
+  }
+  catch (std::runtime_error &e) {
+    Err() << "Malformed CTF file: " << e.what();
   }
   return success;
 }

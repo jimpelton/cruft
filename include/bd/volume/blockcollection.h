@@ -41,6 +41,8 @@ public:
   void
   filterBlocks(std::function<bool(Block const &)> filter);
 
+  void
+  filterBlocksByROVRange(double rov_min, double rov_max);
 
   bool
   initBlockTextures(std::string const &rawFile);
@@ -68,8 +70,8 @@ public:
 
   /// Find the largest non-empty block and return the number of voxels.
   /// \return size_t that is the number of voxels in the largest block.
-  size_t
-  largestNonEmptyBlock();
+  uint64_t
+  findLargestBlock(std::vector<Block *> &blocks);
 
 
 private:
@@ -92,6 +94,8 @@ private:
   std::vector<Block *> m_blocks;
 
   std::vector<Block *> m_nonEmptyBlocks;
+
+  std::vector<int> m_indexesToDraw;
 
   std::shared_ptr<IndexFile const> m_indexFile;
 
@@ -121,7 +125,7 @@ BlockCollection::do_initBlockTextures(std::string const &file)
 
   // init buffers for the raw values and a
   // texture buffer that contains normalized values.
-  size_t buf_size{ largestNonEmptyBlock() };
+  size_t buf_size{ findLargestBlock(m_nonEmptyBlocks) };
   Ty *buf{ new Ty[buf_size] };
   float *tex{ new float[buf_size] };
 

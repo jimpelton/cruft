@@ -9,6 +9,9 @@ namespace bd
 {
 
 BlockCollection::BlockCollection()
+    : m_blocks()
+    , m_nonEmptyBlocks()
+    , m_indexFile{ nullptr }
 {
 }
 
@@ -25,71 +28,115 @@ BlockCollection::initBlocksFromIndexFile(std::shared_ptr<IndexFile const> index)
   bd::IndexFileHeader const &header = m_indexFile->getHeader();
 
   Dbg() << "Initializing blocks from index file."; //<< fileName;
-  initBlocksFromFileBlocks(m_indexFile->getFileBlocks(),
-                           { header.numblocks[0],
-                             header.numblocks[1],
-                             header.numblocks[2] });
 
+  glm::u64vec3 nb{ header.numblocks[0], header.numblocks[1], header.numblocks[2] };
+  initBlocksFromFileBlocks(m_indexFile->getFileBlocks(), nb);
 }
+
 
 void
 BlockCollection::initBlocksFromFileBlocks(std::vector<FileBlock> const &fileBlocks,
                                           glm::u64vec3 const &nb)
 {
+  m_blocks.reserve(fileBlocks.size());
+  m_indexesToDraw.reserve(fileBlocks.size());
+  m_nonEmptyBlocks.reserve(fileBlocks.size());
+
   auto idx = 0ull;
-  for (auto k = 0ull; k < nb.z; ++k)
-    for (auto j = 0ull; j < nb.y; ++j)
+  for (auto k = 0ull; k < nb.z; ++k) {
+    for (auto j = 0ull; j < nb.y; ++j) {
       for (auto i = 0ull; i < nb.x; ++i) {
         std::cout << "\rCreating block " << idx;
-//        FileBlock *file_block{ fileBlocks[idx] };
+
         Block *block{ new Block{{ i, j, k },
-                                { 1.0f / nb.x, 1.0f / nb.y, 1.0f / nb.z },
+                                { 2.0f / nb.x, 2.0f / nb.y, 2.0f / nb.z },
                                 fileBlocks[idx] }};
 
         m_blocks.push_back(block);
-//        if (fileBlocks[idx].is_empty == 0) {
-//          m_nonEmptyBlocks.push_back(block);
-//        }
 
         idx++;
       }
+    }
+  }
+
 }
 
 
 void
 BlockCollection::filterBlocks(std::function<bool(Block const &)> notEmpty)
 {
+
+  m_indexesToDraw.clear();
+  m_nonEmptyBlocks.clear();
   for (Block *b : m_blocks) {
+    uint64_t idx{ b->fileBlock().block_index };
     if (notEmpty(*b)) {
       m_nonEmptyBlocks.push_back(b);
+      m_indexesToDraw.push_back(idx);
     }
+//    else {
+//      // if it is empty, remove from m_nonEmptyBlocks
+//      //m_nonEmptyBlocks[idx] = nullptr;
+//    }
   }
+
+}
+
+
+void
+BlockCollection::filterBlocksByROVRange(double rov_min, double rov_max)
+{
+  //m_nonEmptyBlocks.clear();
+  m_indexesToDraw.clear();
+
+  auto shouldDraw =
+      [&rov_min, &rov_max](double rov) -> bool {
+        return ( rov >= rov_min && rov <= rov_max );
+      };
+
+  m_indexesToDraw.clear();
+  m_nonEmptyBlocks.clear();
+
+  for (Block *b : m_blocks) {
+    uint64_t idx{ b->fileBlock().block_index };
+    if (shouldDraw(b->fileBlock().rov)) {
+      m_nonEmptyBlocks.push_back(b);
+      m_indexesToDraw.push_back(idx);
+    }
+//    else {
+//      // if it is empty, remove from m_nonEmptyBlocks
+//      m_nonEmptyBlocks[idx] = nullptr;
+//    }
+  }
+
 }
 
 
 bool
-BlockCollection::initBlockTextures(std::string const & file)
+BlockCollection::initBlockTextures(std::string const &file)
 {
   bool rval = false;
   DataType type{ IndexFileHeader::getType(m_indexFile->getHeader()) };
+
   switch (type) {
-  case DataType::UnsignedCharacter:
-    rval = do_initBlockTextures< unsigned char >(file);
-    break;
-  case DataType::UnsignedShort:
-    rval = do_initBlockTextures< unsigned short >(file);
-    break;
-  case DataType::Float:
-  default:
-    rval = do_initBlockTextures< float >(file);
-    break;
+    case DataType::UnsignedCharacter:
+      rval = do_initBlockTextures<unsigned char>(file);
+      break;
+    case DataType::UnsignedShort:
+      rval = do_initBlockTextures<unsigned short>(file);
+      break;
+    case DataType::Double:
+      rval = do_initBlockTextures<double>(file);
+      break;
+    case DataType::Float:
+    default:
+      rval = do_initBlockTextures<float>(file);
+      break;
   }
 
   return rval;
 
 }
-
-
 
 
 std::vector<Block *> const &
@@ -99,7 +146,7 @@ BlockCollection::blocks() const
 }
 
 
-std::vector<Block *>  &
+std::vector<Block *> &
 BlockCollection::blocks()
 {
   return m_blocks;
@@ -120,12 +167,14 @@ BlockCollection::nonEmptyBlocks()
 }
 
 
-size_t
-BlockCollection::largestNonEmptyBlock(){
+uint64_t
+BlockCollection::findLargestBlock(std::vector<Block *> &blocks)
+{
+  // find the largest element by comparing voxel counts for each nonEmptyBlock.
   auto largest =
       std::max_element(
-          m_nonEmptyBlocks.begin(),
-          m_nonEmptyBlocks.end(),
+          blocks.begin(),
+          blocks.end(),
 
           [](Block *lhs, Block *rhs) -> bool {
 
@@ -145,7 +194,7 @@ BlockCollection::largestNonEmptyBlock(){
           });
 
   Block *blk{ *largest };
-  return  blk->voxel_extent().x * blk->voxel_extent().y * blk->voxel_extent().z ;
+  return blk->voxel_extent().x * blk->voxel_extent().y * blk->voxel_extent().z;
 }
 
 

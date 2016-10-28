@@ -29,9 +29,8 @@ public:
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Create block (i,j,k) with specified dims and world origin.
   /// \param[in] ijk The block ID (and position with in the grid of blocks).
-  /// \param[in] dims The dimensions in data points of this block.
-  /// \param[in] origin Center of this block in world coords
-  ///            (or whatever coords you want...maybe...sigh...whatevs).
+  /// \param[in] dims The world dimensions in of this block.
+  /// \param[in] fb This block's FileBlock.
   Block(glm::u64vec3 const &ijk, glm::vec3 const &dims, FileBlock const &fb);
 
   virtual ~Block();

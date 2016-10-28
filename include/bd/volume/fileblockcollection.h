@@ -279,7 +279,7 @@ FileBlockCollection<Ty>::initBlocks()
   glm::u64vec3 vd{ m_volume.dims() };
   glm::u64vec3 bd{ m_volume.block_dims() };
 
-  // block world dims
+  // block world dims 2.0 = volume world dimensions on each side.
   glm::vec3 wld_dims{ 2.0f / glm::vec3(bc) };
 
   Dbg() << "Starting FileBlock creation: "
@@ -298,7 +298,7 @@ FileBlockCollection<Ty>::initBlocks()
         // i,j,k block identifier
         const glm::u64vec3 blkId{ bxi, byj, bzk };
         // lower left corner in world coordinates
-        const glm::vec3 worldLoc{ wld_dims * glm::vec3(blkId) - 0.5f }; // - 0.5f;
+        const glm::vec3 worldLoc{ wld_dims * glm::vec3(blkId) - 1.0f }; // - 0.5f;
         // origin (centroid) in world coordiates
         const glm::vec3 blkOrigin{ ( worldLoc + ( worldLoc + wld_dims )) * 0.5f };
         // voxel start of block within volume

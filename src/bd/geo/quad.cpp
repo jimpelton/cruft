@@ -8,26 +8,26 @@ namespace bd
 {
 const std::array<glm::vec4, 4> Quad::verts_xy
 {
-  glm::vec4(-0.5f, -0.5f, 0.0f, 1.0f), // 0 ll
-  glm::vec4(0.5f, -0.5f, 0.0f, 1.0f), // 1 lr
-  glm::vec4(-0.5f, 0.5f, 0.0f, 1.0f), // 2 ul
-  glm::vec4(0.5f, 0.5f, 0.0f, 1.0f) // 3 ur
+  glm::vec4(-1.0f, -1.0f, 0.0f, 1.0f), // 0 ll
+  glm::vec4(1.0f, -1.0f, 0.0f, 1.0f), // 1 lr
+  glm::vec4(-1.0f, 1.0f, 0.0f, 1.0f), // 2 ul
+  glm::vec4(1.0f, 1.0f, 0.0f, 1.0f) // 3 ur
 };
 
 const std::array<glm::vec4, 4> Quad::verts_yz
 {
-  glm::vec4(0.0f, -0.5f, -0.5f, 1.0f), // 0 ll
-  glm::vec4(0.0f, 0.5f, -0.5f, 1.0f), // 1 lr
-  glm::vec4(0.0f, -0.5f, 0.5f, 1.0f), // 2 ul
-  glm::vec4(0.0f, 0.5f, 0.5f, 1.0f) // 3 ur
+  glm::vec4(0.0f, -1.0f, -1.0f, 1.0f), // 0 ll
+  glm::vec4(0.0f, 1.0f, -1.0f, 1.0f), // 1 lr
+  glm::vec4(0.0f, -1.0f, 1.0f, 1.0f), // 2 ul
+  glm::vec4(0.0f, 1.0f, 1.0f, 1.0f) // 3 ur
 };
 
 const std::array<glm::vec4, 4> Quad::verts_xz
 {
-  glm::vec4(-0.5f, 0.0f, -0.5f, 1.0f), // 0 ll
-  glm::vec4(0.5f, 0.0f, -0.5f, 1.0f), // 1 lr
-  glm::vec4(-0.5f, 0.0f, 0.5f, 1.0f), // 2 ul
-  glm::vec4(0.5f, 0.0f, 0.5f, 1.0f) // 3 ur
+  glm::vec4(-1.0f, 0.0f, -1.0f, 1.0f), // 0 ll
+  glm::vec4(1.0f, 0.0f, -1.0f, 1.0f), // 1 lr
+  glm::vec4(-1.0f, 0.0f, 1.0f, 1.0f), // 2 ul
+  glm::vec4(1.0f, 0.0f, 1.0f, 1.0f) // 3 ur
 };
 
 const std::array<glm::vec3, 4> Quad::texcoords_xy{
