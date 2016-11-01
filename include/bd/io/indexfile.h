@@ -2,7 +2,7 @@
 #define indexfile_h__
 
 #include <bd/io/fileblock.h>
-#include <bd/volume/fileblockcollection.h>
+#include <bd/io/fileblockcollection.h>
 //#include <bd/io/datatypes.h>
 #include <bd/io/indexfileheader.h>
 #include <iostream>
@@ -19,7 +19,7 @@ namespace
 ///< Magic number for the file (ascii 'SV')
 uint16_t const MAGIC{ 7376 };
 /// \brief The version of the IndexFile
-uint16_t const VERSION{ 4 };
+uint16_t const VERSION{ 5 };
 /// \brief Length of the IndexFileHeader in bytes.
 uint32_t const HEAD_LEN{ sizeof(IndexFileHeader) };
 }  // namespace
