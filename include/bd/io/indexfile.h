@@ -3,7 +3,6 @@
 
 #include <bd/io/fileblock.h>
 #include <bd/io/fileblockcollection.h>
-//#include <bd/io/datatypes.h>
 #include <bd/io/indexfileheader.h>
 #include <iostream>
 #include <cstdint>
@@ -19,7 +18,7 @@ namespace
 ///< Magic number for the file (ascii 'SV')
 uint16_t const MAGIC{ 7376 };
 /// \brief The version of the IndexFile
-uint16_t const VERSION{ 5 };
+uint16_t const VERSION{ 7 };
 /// \brief Length of the IndexFileHeader in bytes.
 uint32_t const HEAD_LEN{ sizeof(IndexFileHeader) };
 }  // namespace
@@ -247,9 +246,13 @@ IndexFile::fromBlockCollection(std::string const &path,
 
   idxfile->m_header.dataType = IndexFileHeader::getTypeInt(dt);
 
-  idxfile->m_header.volume_extent[0] = idxfile->m_col->getVolume().dims().x;
-  idxfile->m_header.volume_extent[1] = idxfile->m_col->getVolume().dims().y;
-  idxfile->m_header.volume_extent[2] = idxfile->m_col->getVolume().dims().z;
+  idxfile->m_header.volume_extent[0] = idxfile->m_col->getVolume().voxelDims().x;
+  idxfile->m_header.volume_extent[1] = idxfile->m_col->getVolume().voxelDims().y;
+  idxfile->m_header.volume_extent[2] = idxfile->m_col->getVolume().voxelDims().z;
+
+  idxfile->m_header.volume_world_dims[0] = idxfile->m_col->getVolume().worldDims().x;
+  idxfile->m_header.volume_world_dims[1] = idxfile->m_col->getVolume().worldDims().y;
+  idxfile->m_header.volume_world_dims[2] = idxfile->m_col->getVolume().worldDims().z;
 
   glm::u64vec3 blkExt = idxfile->m_col->getVolume().extent();
   idxfile->m_header.blocks_extent[0] = blkExt.x;

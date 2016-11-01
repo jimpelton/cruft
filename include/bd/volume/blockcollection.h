@@ -185,7 +185,7 @@ BlockCollection::fillBlockData(Block const &b, std::istream &infile,
   // start element = block index w/in volume * block size
   const glm::u64vec3 start{ b.ijk() * be };
 
-  // block end element = block voxel start dims + block size
+  // block end element = block voxel start voxelDims + block size
   const glm::u64vec3 end{ start + be };
 
   // byte offset into file to read from

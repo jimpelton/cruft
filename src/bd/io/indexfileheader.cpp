@@ -10,6 +10,7 @@ namespace bd
  * I n d e x F i l e H e a d e r                                             *
 *****************************************************************************/
 
+
 ///////////////////////////////////////////////////////////////////////////////
 IndexFileHeader
 IndexFileHeader::fromStream(std::istream &is)
@@ -98,6 +99,8 @@ operator<<(std::ostream &os, bd::IndexFileHeader const &h)
          "  \"blocks_extent\": [" << h.blocks_extent[0] << ", " << h.blocks_extent[1]
      << ", " << h.blocks_extent[2] << "],\n"
          "  \"vol_empty_voxels\": " << h.vol_empty_voxels << ",\n"
+         "  \"volume_world_dims\": [" << h.volume_world_dims[0] << ", "
+     << h.volume_world_dims[1] << ", " << h.volume_world_dims[2] << "],\n"
          "  \"vol_min\": " << h.vol_min << ",\n"
          "  \"vol_max\": " << h.vol_max << ",\n"
          "  \"vol_avg\": " << h.vol_avg << "\n"

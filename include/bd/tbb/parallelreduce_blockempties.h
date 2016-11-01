@@ -56,8 +56,8 @@ public:
   {
     Ty const * const a{ m_data };
 
-    uint64_t const vdX{ m_volume->dims().x };
-    uint64_t const vdY{ m_volume->dims().y };
+    uint64_t const vdX{ m_volume->voxelDims().x };
+    uint64_t const vdY{ m_volume->voxelDims().y };
     uint64_t const bdX{ m_volume->block_dims().x };
     uint64_t const bdY{ m_volume->block_dims().y };
     uint64_t const bdZ{ m_volume->block_dims().z };

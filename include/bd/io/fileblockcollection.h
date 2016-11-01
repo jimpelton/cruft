@@ -90,7 +90,7 @@ public:
 
   /// Get the volume for this FBC.
   /// \return reference-to-const for the volume.
-  const Volume &
+  Volume const &
   volume() const
   {
     return m_volume;
@@ -234,7 +234,7 @@ FileBlockCollection<Ty>::FileBlockCollection(FileBlockCollection const &other)
 template<class Ty>
 FileBlockCollection<Ty>::~FileBlockCollection()
 {
-//  std::cout << "FileBlockCollection destructor\n";
+  std::cout << "FileBlockCollection destructor\n" << std::endl;
 }
 
 
@@ -244,7 +244,7 @@ FileBlockCollection<Ty>::~FileBlockCollection()
 //FileBlockCollection<Ty>::updateBlockCount()
 //{
 //  glm::u64vec3 bc{ volume().lower().block_count() };
-//  glm::u64vec3 vd{ volume().dims() };
+//  glm::u64vec3 vd{ volume().voxelDims() };
 //
 //  const glm::u64vec3 rem{ vd%bc };
 //  if (rem.x>0) {
@@ -276,11 +276,11 @@ FileBlockCollection<Ty>::initBlocks()
   // vd: volume voxel dimensions
   // bd: block dimensions
   glm::u64vec3 bc{ m_volume.block_count() };
-  glm::u64vec3 vd{ m_volume.dims() };
+  glm::u64vec3 vd{ m_volume.voxelDims() };
   glm::u64vec3 bd{ m_volume.block_dims() };
 
-  // block world dims 1.0 = volume world dimensions on each side.
-  glm::vec3 wld_dims{ 1.0f / glm::vec3(bc) };
+  // block world voxelDims 1.0 = volume world dimensions on each side.
+  glm::vec3 wld_dims{ m_volume.worldDims() / glm::vec3(bc) };
 
   Dbg() << "Starting FileBlock creation: "
       " # blocks: "
@@ -304,7 +304,7 @@ FileBlockCollection<Ty>::initBlocks()
         // voxel start of block within volume
         const glm::u64vec3 startVoxel{ blkId * m_volume.block_dims() };
 
-        FileBlock blk; // = new FileBlock();
+        FileBlock blk;
         blk.block_index = bd::to1D(bxi, byj, bzk, bc.x, bc.y);
         blk.data_offset =
             sizeof(Ty) * bd::to1D(startVoxel.x, startVoxel.y, startVoxel.z, vd.x, vd.y);
@@ -316,6 +316,10 @@ FileBlockCollection<Ty>::initBlocks()
         blk.world_oigin[0] = blkOrigin.x;
         blk.world_oigin[1] = blkOrigin.y;
         blk.world_oigin[2] = blkOrigin.z;
+
+        blk.world_dims[0] = wld_dims.x;
+        blk.world_dims[1] = wld_dims.y;
+        blk.world_dims[2] = wld_dims.z;
 
         m_blocks.push_back(blk);
       }
@@ -479,7 +483,7 @@ FileBlockCollection<Ty>::addBlock(FileBlock const &b)
 //
 //  // Save final volume min/max/avg.
 //  m_volume.avg(m_volume.total() /
-//                   ( m_volume.dims().x * m_volume.dims().y * m_volume.dims().z ));
+//                   ( m_volume.dims().x * m_volume.voxelDims().y * m_volume.voxelDims().z ));
 //
 //  // Average the blocks!
 //  finishBlockAverages();
@@ -527,7 +531,7 @@ FileBlockCollection<Ty>::addBlock(FileBlock const &b)
 //{
 //  const glm::u64vec3 &nb{ m_volume.block_count() };
 //  const glm::u64vec3 &bd{ m_volume.block_dims() };
-//  const glm::u64vec3 &vd{ m_volume.dims() };
+//  const glm::u64vec3 &vd{ m_volume.voxelDims() };
 //  // Convert 1D block index to 3D i,j,k indices.
 //  glm::u64vec3 index{
 //      b.block_index%nb.x,
@@ -537,7 +541,7 @@ FileBlockCollection<Ty>::addBlock(FileBlock const &b)
 //
 //  // start element = block index w/in volume * block size
 //  const glm::u64vec3 start{ index*bd};
-//  // block end element = block voxel start dims + block size
+//  // block end element = block voxel start voxelDims + block size
 //  const glm::u64vec3 end{ start+bd};
 //
 //  size_t offset{ b.data_offset };
@@ -628,9 +632,9 @@ FileBlockCollection<Ty>::addBlock(FileBlock const &b)
 // Determine which block this voxel falls into:         //
 // 1st compute 3D block index from 1D voxel index,      //
 // then compute 1D block index from 3D block index      //
-//    auto vX = (vol_idx%m_volDims.x);
-//    auto vY = ((vol_idx/m_volDims.x)%m_volDims.y);
-//    auto vZ = ((vol_idx/m_volDims.x)/m_volDims.y);
+//    auto vX = (vol_idx%m_voxelDims.x);
+//    auto vY = ((vol_idx/m_voxelDims.x)%m_voxelDims.y);
+//    auto vZ = ((vol_idx/m_voxelDims.x)/m_voxelDims.y);
 //    size_t blockIdx{
 //        bd::to1D(
 //            vX/m_blockDims.x,

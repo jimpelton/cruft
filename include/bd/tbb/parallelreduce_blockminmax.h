@@ -86,8 +86,8 @@ public:
   operator()(tbb::blocked_range<size_t> const & r)
   {
     const uint64_t
-    vdX = m_volume->dims().x,
-    vdY = m_volume->dims().y,
+    vdX = m_volume->voxelDims().x,
+    vdY = m_volume->voxelDims().y,
     bdX = m_volume->block_dims().x,
     bdY = m_volume->block_dims().y,
     bdZ = m_volume->block_dims().z,

@@ -15,10 +15,11 @@ Volume::Volume()
 
 
 ///////////////////////////////////////////////////////////////////////////////
-Volume::Volume(glm::u64vec3 const &volDims, glm::u64vec3 const &numBlocks)
+Volume::Volume(glm::u64vec3 const &voxelDims, glm::u64vec3 const &numBlocks)
     : m_blockDims{ }
     , m_blockCount{ }
-    , m_volDims{ volDims }
+    , m_voxelDims{ voxelDims }
+    , m_worldDims{ 0, 0, 0 }
     , m_volEmptyVoxels{ 0 }
     , m_volMax{ std::numeric_limits<double>::lowest() }
     , m_volMin{ std::numeric_limits<double>::max() }
@@ -31,8 +32,20 @@ Volume::Volume(glm::u64vec3 const &volDims, glm::u64vec3 const &numBlocks)
     nb.x = nb.y = nb.z = 1;
   }
 
-  m_blockDims = volDims / nb;
+  m_blockDims = voxelDims / nb;
   m_blockCount = nb;
+
+  glm::u64 longest{ voxelDims.x };
+  if (longest < voxelDims.y) {
+    longest = voxelDims.y;
+  }
+  if (longest < voxelDims.z) {
+    longest = voxelDims.z;
+  }
+
+  m_worldDims.x = voxelDims.x / glm::f32(longest);
+  m_worldDims.y = voxelDims.y / glm::f32(longest);
+  m_worldDims.z = voxelDims.z / glm::f32(longest);
 
 }
 
@@ -41,7 +54,8 @@ Volume::Volume(glm::u64vec3 const &volDims, glm::u64vec3 const &numBlocks)
 Volume::Volume(Volume const &other)
     : m_blockDims{ other.m_blockDims }
     , m_blockCount{ other.m_blockCount }
-    , m_volDims{ other.m_volDims }
+    , m_voxelDims{ other.m_voxelDims }
+    , m_worldDims{ other.m_worldDims }
     , m_volEmptyVoxels{ other.m_volEmptyVoxels }
     , m_volMax{ other.m_volMax }
     , m_volMin{ other.m_volMin }
@@ -106,17 +120,39 @@ Volume::total_block_count() const
 
 ///////////////////////////////////////////////////////////////////////////////
 const glm::u64vec3 &
-Volume::dims() const
+Volume::voxelDims() const
 {
-  return m_volDims;
+  return m_voxelDims;
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
 void
-Volume::dims(const glm::u64vec3 &voldims)
+Volume::voxelDims(const glm::u64vec3 &voxdims)
 {
-  m_volDims = voldims;
+  m_voxelDims = voxdims;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+glm::u64vec3 const &
+Volume::voxelDims()
+{
+  return m_voxelDims;
+}
+
+
+void
+Volume::worldDims(glm::f32vec3 const &wd)
+{
+  m_worldDims = wd;
+}
+
+
+glm::f32vec3 const &
+Volume::worldDims() const
+{
+  return m_worldDims;
 }
 
 

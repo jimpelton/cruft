@@ -218,9 +218,9 @@ BlockCollection::indexFile() const
 //
 /////////////////////////////////////////////////////////////////////////////////
 //void
-//BlockCollection::blockDims(const glm::u64vec3& dims)
+//BlockCollection::blockDims(const glm::u64vec3& voxelDims)
 //{
-//  m_blockDims = dims;
+//  m_blockDims = voxelDims;
 //}
 //
 //
@@ -228,7 +228,7 @@ BlockCollection::indexFile() const
 //glm::u64vec3
 //BlockCollection::volDims()
 //{
-//  return m_volDims;
+//  return m_voxelDims;
 //}
 //
 //
@@ -236,7 +236,7 @@ BlockCollection::indexFile() const
 //void
 //BlockCollection::volDims(const glm::u64vec3& voldims)
 //{
-//  m_volDims = voldims;
+//  m_voxelDims = voldims;
 //}
 
 
@@ -248,10 +248,10 @@ BlockCollection::indexFile() const
 //BlockCollection::initBlocks(glm::u64vec3 nb, glm::u64vec3 vd)
 //{
 //  m_blockDims = vd / nb;
-//  m_volDims = vd;
+//  m_voxelDims = vd;
 //  m_numBlocks = nb;
 //
-//  // block world dims
+//  // block world voxelDims
 //  glm::vec3 wld_dims{ 1.0f / glm::vec3(nb) };
 //
 //

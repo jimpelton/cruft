@@ -2,8 +2,8 @@
 // Created by Jim Pelton on 3/5/16.
 //
 
-#ifndef crufterly_fileblock_h
-#define crufterly_fileblock_h
+#ifndef bd_fileblock_h
+#define bd_fileblock_h
 
 #include <cstdint>
 #include <ostream>
@@ -25,10 +25,12 @@ namespace bd
 struct FileBlock
 {
 
+
   FileBlock()
       : block_index{ 0 }
       , data_offset{ 0 }
       , voxel_dims{ 0 }
+      , world_dims{ 0 }
       , world_oigin{ 0 }
       , min_val{ std::numeric_limits< decltype(min_val) >::max() }
       , max_val{ std::numeric_limits< decltype(max_val) >::lowest() }
@@ -44,6 +46,7 @@ struct FileBlock
       : block_index{ other.block_index }
       , data_offset{ other.data_offset }
       , voxel_dims{ other.voxel_dims[0], other.voxel_dims[1], other.voxel_dims[2] }
+      , world_dims{ other.world_dims[0], other.world_dims[1], other.world_dims[2] }
       , world_oigin{ other.world_oigin[0], other.world_oigin[1], other.world_oigin[2] }
       , min_val{ other.min_val }
       , max_val{  other.max_val }
@@ -61,6 +64,7 @@ struct FileBlock
   uint64_t block_index;    ///< The 1D idx of this block (derived from the i,j,k block-grid coordinates).
   uint64_t data_offset;    ///< Offset into the raw file that the block data starts.
   uint64_t voxel_dims[3];  ///< Dimensions of this block in voxels.
+  double world_dims[3];    ///< Dims of this block in world coordinates
   double world_oigin[3];   ///< Center coordinates within canonical cube.
   double min_val;          ///< The min value found in this block.
   double max_val;          ///< The largest value found in this block.
@@ -76,4 +80,4 @@ std::ostream& operator<<(std::ostream&, const FileBlock&);
 
 } // namespace bd
 
-#endif //! crufterly_fileblock_h
+#endif //! bd_fileblock_h

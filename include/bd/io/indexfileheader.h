@@ -54,6 +54,8 @@ struct IndexFileHeader
   uint64_t blocks_extent[3];
   /// \brief Num voxels determined irrelevent.
   uint64_t vol_empty_voxels;
+  /// \brief Volume dimensions in world coordinates.
+  double volume_world_dims[3];
 
   double vol_avg;
   double vol_min;
