@@ -70,7 +70,7 @@ OpacityTransferFunction::load(std::string const &filename)
     Err() << "Malformed OTF file: " << e.what();
   }
   catch(std::runtime_error &e) {
-    Err() << "Exception caught in " << __PRETTY_FUNCTION__ << ": " << e.what();
+    Err() << "Exception caught in " << __func__ << ": " << e.what();
   }
 
   return success;

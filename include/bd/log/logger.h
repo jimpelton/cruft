@@ -3,6 +3,7 @@
 
 #ifndef FILE_LOG_LEVEL
 #define FILE_LOG_LEVEL DEBUG
+#include <iomanip>
 #endif  // !FILE_LOG_LEVEL
 
 #include <ostream>
@@ -11,7 +12,7 @@
 #include <mutex>
 #include <sstream>
 
-#include <sys/time.h>
+//#include <sys/time.h>
 #include <ctime>
 
 namespace bd
@@ -35,7 +36,7 @@ public:
         : log(l)
     {
       log.lock();
-//      std::cout << "sentry ctor after lock.\n";
+      std::cout << "sentry ctor after lock.\n";
       log.start_line();
     }
 
@@ -44,7 +45,7 @@ public:
     sentry(sentry const &o)
         : log{ o.log }
     {
-//      std::cout << "sentry copy ctor.\n";
+      std::cout << "sentry copy ctor.\n";
     }
 
 
@@ -52,7 +53,7 @@ public:
     sentry(sentry &&o)
         : log{ o.log }
     {
-//      std::cout << "sentry move ctor.\n";
+      std::cout << "sentry move ctor.\n";
     }
 
 
@@ -61,7 +62,7 @@ public:
     {
       log.end_line();
       log.unlock();
-//      std::cout << "sentry dtor after unlock.\n";
+      std::cout << "sentry dtor after unlock.\n";
     }
 
 
@@ -114,8 +115,8 @@ public:
   /////////////////////////////////////////////////////////////////////////////
   logger()
       : m_out{ &std::cout }
-//    , m_level{ LogLevel::INFO }
       , m_levelString{ "INFO" }
+      , m_mutex{ }
   {
   }
 
@@ -138,7 +139,8 @@ public:
   {
     if (s_instance==nullptr) {
       s_instance = new logger();
-      s_instance->do_log("Logger initialized.\n");
+      
+      //s_instance->do_log("Logger initialized.\n");
     }
 
     s_instance->m_levelString = level;
@@ -216,27 +218,36 @@ private:
   std::string
   now()
   {
-    timeval tv;
-    time_t curtime;
-    gettimeofday(&tv, nullptr);
-    curtime = tv.tv_sec;
-    char datetimebuf[20]; // "%F %T\0" = 20 chars
-    std::strftime(datetimebuf, 20, "%F %T", std::localtime(&curtime));
-    char buf2[20+8]; // "%s.%ld\0" = 28 chars
+//    timeval tv;
+//    time_t curtime;
+//    gettimeofday(&tv, nullptr);
+//    curtime = tv.tv_sec;
+//    char datetimebuf[20]; // "%F %T\0" = 20 chars
+//      std::time_t tt{ std::time(nullptr) };
+      std::stringstream ss;
+      
+      auto diff =
+        std::chrono::high_resolution_clock::now() - programStartTime;
+//      ss << 
+      ss << std::chrono::duration_cast<std::chrono::seconds>(diff).count();
 
-#ifdef __APPLE__
-    sprintf(buf2, "%s.%d", datetimebuf, tv.tv_usec);
-#else
-    sprintf(buf2, "%s.%ld", datetimebuf, tv.tv_usec);
-#endif
+//    std::strftime(datetimebuf, 20, "%F %T", std::localtime(&curtime));
+//    char buf2[20+8]; // "%s.%ld\0" = 28 chars
 
-    return std::string(buf2);
+//#ifdef __APPLE__
+//    sprintf(buf2, "%s.%d", datetimebuf, tv.tv_usec);
+//#else
+//    sprintf(buf2, "%s.%ld", datetimebuf, tv.tv_usec);
+//#endif
+      return ss.str();
   }
 
 
 private:   // members
 
   static logger *s_instance;
+  static std::chrono::time_point<
+    std::chrono::high_resolution_clock> programStartTime;
 
   std::ostream *m_out;
 //  LogLevel m_level;
