@@ -30,19 +30,22 @@ BlockCollection::initBlocksFromIndexFile(std::shared_ptr<IndexFile const> index)
   Dbg() << "Initializing blocks from index file."; //<< fileName;
 
   glm::u64vec3 nb{ header.numblocks[0], header.numblocks[1], header.numblocks[2] };
-  initBlocksFromFileBlocks(m_indexFile->getFileBlocks(), nb);
+  glm::f64vec3 vol_dims{ header.volume_world_dims[0],
+                         header.volume_world_dims[1],
+                         header.volume_world_dims[2]};
+  initBlocksFromFileBlocks(m_indexFile->getFileBlocks(), vol_dims, nb);
 }
 
 
 void
 BlockCollection::initBlocksFromFileBlocks(std::vector<FileBlock> const &fileBlocks,
+                                          glm::f64vec3 const &vd,
                                           glm::u64vec3 const &nb)
 {
   m_blocks.reserve(fileBlocks.size());
   m_indexesToDraw.reserve(fileBlocks.size());
   m_nonEmptyBlocks.reserve(fileBlocks.size());
 
-  double const vol_side{ 1.0 };
   auto idx = 0ull;
   for (auto k = 0ull; k < nb.z; ++k) {
     for (auto j = 0ull; j < nb.y; ++j) {
@@ -50,7 +53,7 @@ BlockCollection::initBlocksFromFileBlocks(std::vector<FileBlock> const &fileBloc
         std::cout << "\rCreating block " << idx;
 
         Block *block{ new Block{{ i, j, k },
-                                { vol_side / nb.x, vol_side / nb.y, vol_side / nb.z },
+                                { vd.x / nb.x, vd.y / nb.y, vd.z / nb.z },
                                 fileBlocks[idx] }};
 
         m_blocks.push_back(block);
