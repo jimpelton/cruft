@@ -2,11 +2,13 @@
 #define indexfile_h__
 
 #include <bd/io/fileblock.h>
-#include <bd/io/fileblockcollection.h>
 #include <bd/io/indexfileheader.h>
 #include <iostream>
 #include <cstdint>
 #include <fstream>
+#include <memory>
+#include <vector>
+#include "bd/volume/volume.h"
 
 namespace bd
 {
@@ -29,22 +31,22 @@ uint32_t const HEAD_LEN{ sizeof(IndexFileHeader) };
 /// \brief Allows using the FileBlockCollection template without
 ///        exposing the templated-ness of FileBlockCollection, since we don't
 ///        know what type of BC2 we need until runtime.
-class FileBlockCollectionWrapper_Base
-{
-public:
-  virtual ~FileBlockCollectionWrapper_Base()
-  {
-  }
-
-
-  virtual void
-  addBlock(FileBlock const &) = 0;
-
-
-  virtual std::vector<FileBlock> const &
-  getBlocks() = 0;
-
-};
+//class FileBlockCollectionWrapper_Base
+//{
+//public:
+//  virtual ~FileBlockCollectionWrapper_Base()
+//  {
+//  }
+//
+//
+//  virtual void
+//  addBlock(FileBlock const &) = 0;
+//
+//
+//  virtual std::vector<FileBlock> const &
+//  getBlocks() = 0;
+//
+//};
 
 /*****************************************************************************
  * FileBlockCollectionWrapper                                              *
