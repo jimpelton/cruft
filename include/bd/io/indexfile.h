@@ -44,94 +44,77 @@ public:
   virtual std::vector<FileBlock> const &
   getBlocks() = 0;
 
-
-//  virtual std::vector<FileBlock*> const &
-//  getNonEmptyBlocks() = 0;
-
-
-  virtual const Volume &
-  getVolume() = 0;
-
 };
 
 /*****************************************************************************
  * FileBlockCollectionWrapper                                              *
 *****************************************************************************/
 
-/// \sa FileBlockCollectionWrapper_Base
-template<class Ty>
-class FileBlockCollectionWrapper : public FileBlockCollectionWrapper_Base
-{
-public:
-
-  /// \brief Create a wrapper around a FileBlockCollection<Ty>
-  FileBlockCollectionWrapper(glm::u64vec3 volDims, glm::u64vec3 numBlocks);
-
-  /// \brief Create a wrapper around the provided FileBlockCollection<Ty>.
-  FileBlockCollectionWrapper(FileBlockCollection<Ty> const &col);
-
-  void
-  addBlock(FileBlock const &b) override;
-
-
-  Volume const &
-  getVolume() override;
-
-
-  std::vector<FileBlock> const &
-  getBlocks() override;
-
-
-//  std::vector<FileBlock*> const &
-//  getNonEmptyBlocks() override;
-
-
-private:
-  FileBlockCollection<Ty> c;
-
-};
+///// \sa FileBlockCollectionWrapper_Base
+//template<class Ty>
+//class FileBlockCollectionWrapper : public FileBlockCollectionWrapper_Base
+//{
+//public:
+//
+//  /// \brief Create a wrapper around a FileBlockCollection<Ty>
+//  FileBlockCollectionWrapper(std::shared_ptr<bd::Volume const> volume);
+//
+//  /// \brief Create a wrapper around the provided FileBlockCollection<Ty>.
+//  FileBlockCollectionWrapper(FileBlockCollection<Ty> const &col);
+//
+//  void
+//  addBlock(FileBlock const &b) override;
+//
+//
+//  std::vector<FileBlock> const &
+//  getBlocks() override;
+//
+//private:
+//  FileBlockCollection<Ty> c;
+//
+//};
 
 /*****************************************************************************
  * FileBlockCollectionWrapper  Impl                                        *
 *****************************************************************************/
 
-template<class Ty>
-FileBlockCollectionWrapper<Ty>::FileBlockCollectionWrapper(glm::u64vec3 volDims,
-                                                           glm::u64vec3 numBlocks)
-    : c{ volDims, numBlocks }
-{
-}
+//template<class Ty>
+//FileBlockCollectionWrapper<Ty>::
+//FileBlockCollectionWrapper(std::shared_ptr<bd::Volume const> volume)
+//    : c{ std::move(volume) }
+//{
+//}
+//
+//template<class Ty>
+//FileBlockCollectionWrapper<Ty>::
+//FileBlockCollectionWrapper(FileBlockCollection<Ty> const &col)
+//    : c{ col }
+//{
+//}
+//
+//template<class Ty>
+//void
+//FileBlockCollectionWrapper<Ty>::addBlock(FileBlock const &b)
+//{
+//  c.addBlock(b);
+//}
 
-template<class Ty>
-FileBlockCollectionWrapper<Ty>::FileBlockCollectionWrapper(
-    FileBlockCollection<Ty> const &col)
-    : c{ col }
-{
-}
-
-template<class Ty>
-void
-FileBlockCollectionWrapper<Ty>::addBlock(FileBlock const &b)
-{
-  c.addBlock(b);
-}
+//
+//template<class Ty>
+//Volume const &
+//FileBlockCollectionWrapper<Ty>::getVolume() const
+//{
+//  return c.volume();
+//}
 
 
-template<class Ty>
-Volume const &
-FileBlockCollectionWrapper<Ty>::getVolume()
-{
-  return c.volume();
-}
-
-
-template<class Ty>
-std::vector<FileBlock> const &
-FileBlockCollectionWrapper<Ty>::getBlocks()
-{
-  return c.blocks();
-}
-
+//template<class Ty>
+//std::vector<FileBlock> const &
+//FileBlockCollectionWrapper<Ty>::getBlocks()
+//{
+//  return c.blocks();
+//}
+//
 
 //template<class Ty>
 //std::vector<FileBlock *> const &
@@ -146,11 +129,11 @@ class IndexFile
 {
 public:
 
-  template<class Ty>
-  static std::unique_ptr<IndexFile>
-  fromBlockCollection(std::string const &path,
-                      FileBlockCollection<Ty> &col,
-                      bd::DataType dt);
+  //template<class Ty>
+  //static std::unique_ptr<IndexFile>
+  //fromBlockCollection(std::string const &path,
+  //                    FileBlockCollection<Ty> &col,
+  //                    bd::DataType dt);
 
 
   /// \brief Create IndexFile from an existing binary index file.
@@ -161,6 +144,9 @@ public:
 
   /// \brief Create an empty IndexFile with empty header.
   IndexFile();
+
+  
+
   ~IndexFile();
 
 
@@ -192,23 +178,34 @@ public:
   std::vector<FileBlock> const &
   getFileBlocks() const;
 
+  bd::Volume
+  getVolume() const;
 
 private:
 
+
+
   /// \brief Instantiate a FileBlockCollection<Ty> with \c Ty determined by
   ///        the \c type parameter.
-  static FileBlockCollectionWrapper_Base*
-  instantiate_wrapper(DataType type, const uint64_t* num_vox, const uint64_t* numblocks);
+  /*static FileBlockCollectionWrapper_Base*
+  instantiate_wrapper(DataType type, const uint64_t* num_vox, const uint64_t* numblocks);*/
 
 
   /// \brief Read binary index file and populate \c a collection with blocks
   bool
   readBinaryIndexFile();
 
+  void
+    initFileBlocks(DataType t);
+
+  
+
 
   IndexFileHeader m_header;
   std::string m_fileName;
-  FileBlockCollectionWrapper_Base* m_col;
+  std::vector<bd::FileBlock> m_fileBlocks;
+  bd::Volume m_volume;
+
 };  // class IndexFile
 
 
@@ -220,52 +217,52 @@ operator<<(std::ostream &os, IndexFileHeader const &h);
 
 
 //static
-template<class Ty>
-std::unique_ptr<bd::IndexFile>
-IndexFile::fromBlockCollection(std::string const &path,
-                               bd::FileBlockCollection<Ty> &col,
-                               bd::DataType dt)
-{
-  std::unique_ptr<IndexFile> idxfile{ std::unique_ptr<IndexFile>{ new IndexFile{ }}};
-  idxfile->m_fileName = path;
-
-  idxfile->m_col = new FileBlockCollectionWrapper<Ty>(col);
-
-  idxfile->m_header.magic_number = MAGIC;
-  idxfile->m_header.version = VERSION;
-  idxfile->m_header.header_length = HEAD_LEN;
-
-  //TODO: add upper and lower volume boundaries.
-  idxfile->m_header.numblocks[0] =
-      idxfile->m_col->getVolume().block_count().x;
-  idxfile->m_header.numblocks[1] =
-      idxfile->m_col->getVolume().block_count().y;
-  idxfile->m_header.numblocks[2] =
-      idxfile->m_col->getVolume().block_count().z; // + idxfile->m_col->getVolume().upper().block_count().z;
-
-
-  idxfile->m_header.dataType = IndexFileHeader::getTypeInt(dt);
-
-  idxfile->m_header.volume_extent[0] = idxfile->m_col->getVolume().voxelDims().x;
-  idxfile->m_header.volume_extent[1] = idxfile->m_col->getVolume().voxelDims().y;
-  idxfile->m_header.volume_extent[2] = idxfile->m_col->getVolume().voxelDims().z;
-
-  idxfile->m_header.volume_world_dims[0] = idxfile->m_col->getVolume().worldDims().x;
-  idxfile->m_header.volume_world_dims[1] = idxfile->m_col->getVolume().worldDims().y;
-  idxfile->m_header.volume_world_dims[2] = idxfile->m_col->getVolume().worldDims().z;
-
-  glm::u64vec3 blkExt = idxfile->m_col->getVolume().extent();
-  idxfile->m_header.blocks_extent[0] = blkExt.x;
-  idxfile->m_header.blocks_extent[1] = blkExt.y;
-  idxfile->m_header.blocks_extent[2] = blkExt.z;
-
-  idxfile->m_header.vol_empty_voxels = idxfile->m_col->getVolume().numEmptyVoxels();
-  idxfile->m_header.vol_avg = idxfile->m_col->getVolume().avg();
-  idxfile->m_header.vol_max = idxfile->m_col->getVolume().max();
-  idxfile->m_header.vol_min = idxfile->m_col->getVolume().min();
-
-  return idxfile;
-}
+//template<class Ty>
+//std::unique_ptr<bd::IndexFile>
+//IndexFile::fromBlockCollection(std::string const &path,
+//                               bd::FileBlockCollection<Ty> &col,
+//                               bd::DataType dt)
+//{
+//  std::unique_ptr<IndexFile> idxfile{ std::unique_ptr<IndexFile>{ new IndexFile{ }}};
+//  idxfile->m_fileName = path;
+//
+//  idxfile->m_col = new FileBlockCollectionWrapper<Ty>(col);
+//
+//  idxfile->m_header.magic_number = MAGIC;
+//  idxfile->m_header.version = VERSION;
+//  idxfile->m_header.header_length = HEAD_LEN;
+//
+//  //TODO: add upper and lower volume boundaries.
+//  idxfile->m_header.numblocks[0] =
+//      idxfile->m_col->getVolume().block_count().x;
+//  idxfile->m_header.numblocks[1] =
+//      idxfile->m_col->getVolume().block_count().y;
+//  idxfile->m_header.numblocks[2] =
+//      idxfile->m_col->getVolume().block_count().z; // + idxfile->m_col->getVolume().upper().block_count().z;
+//
+//
+//  idxfile->m_header.dataType = IndexFileHeader::getTypeInt(dt);
+//
+//  idxfile->m_header.volume_extent[0] = idxfile->m_col->getVolume().voxelDims().x;
+//  idxfile->m_header.volume_extent[1] = idxfile->m_col->getVolume().voxelDims().y;
+//  idxfile->m_header.volume_extent[2] = idxfile->m_col->getVolume().voxelDims().z;
+//
+//  idxfile->m_header.volume_world_dims[0] = idxfile->m_col->getVolume().worldDims().x;
+//  idxfile->m_header.volume_world_dims[1] = idxfile->m_col->getVolume().worldDims().y;
+//  idxfile->m_header.volume_world_dims[2] = idxfile->m_col->getVolume().worldDims().z;
+//
+//  glm::u64vec3 blkExt = idxfile->m_col->getVolume().extent();
+//  idxfile->m_header.blocks_extent[0] = blkExt.x;
+//  idxfile->m_header.blocks_extent[1] = blkExt.y;
+//  idxfile->m_header.blocks_extent[2] = blkExt.z;
+//
+//  idxfile->m_header.vol_empty_voxels = idxfile->m_col->getVolume().numEmptyVoxels();
+//  idxfile->m_header.vol_avg = idxfile->m_col->getVolume().avg();
+//  idxfile->m_header.vol_max = idxfile->m_col->getVolume().max();
+//  idxfile->m_header.vol_min = idxfile->m_col->getVolume().min();
+//
+//  return idxfile;
+//}
 
 } // namespace bd
 

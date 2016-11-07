@@ -67,6 +67,41 @@ to_string(DataType type)
     return "unknown";
   }
 }
+
+size_t
+to_sizeType(DataType type)
+{
+  switch(type) {
+  case DataType::Integer:
+    return sizeof(int32_t);
+
+  case DataType::UnsignedInteger:
+    return sizeof(uint32_t);
+
+  case DataType::Character:
+    return sizeof(int8_t);
+
+  case DataType::UnsignedCharacter:
+    return sizeof(uint8_t);
+
+  case DataType::Short:
+    return sizeof(int16_t);
+
+  case DataType::UnsignedShort:
+    return sizeof(uint16_t);
+
+  case DataType::Float:
+    return sizeof(float);
+
+  case DataType::Double:
+    return sizeof(double);
+
+  case DataType::Unknown:
+    Err() << "Unknown data type, returning size 0 from to_sizeType";
+    return 0;
+  }
+}
+
 } /* namespace bd */
 
 

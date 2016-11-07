@@ -11,7 +11,8 @@ namespace bd
 BlockCollection::BlockCollection()
     : m_blocks()
     , m_nonEmptyBlocks()
-    , m_indexFile{ nullptr }
+    , m_volume{ }
+//    , m_indexFile{ nullptr }
 {
 }
 
@@ -24,8 +25,9 @@ BlockCollection::~BlockCollection()
 void
 BlockCollection::initBlocksFromIndexFile(std::shared_ptr<IndexFile const> index)
 {
-  m_indexFile = index;
-  bd::IndexFileHeader const &header = m_indexFile->getHeader();
+  m_volume = index->getVolume();
+
+  bd::IndexFileHeader const &header = index->getHeader();
 
   Dbg() << "Initializing blocks from index file."; //<< fileName;
 
@@ -33,7 +35,10 @@ BlockCollection::initBlocksFromIndexFile(std::shared_ptr<IndexFile const> index)
   glm::f64vec3 vol_dims{ header.volume_world_dims[0],
                          header.volume_world_dims[1],
                          header.volume_world_dims[2]};
-  initBlocksFromFileBlocks(m_indexFile->getFileBlocks(), vol_dims, nb);
+  initBlocksFromFileBlocks(index->getFileBlocks(), vol_dims, nb);
+  
+  
+  
 }
 
 
@@ -119,10 +124,10 @@ BlockCollection::filterBlocksByROVRange(double rov_min, double rov_max)
 
 
 bool
-BlockCollection::initBlockTextures(std::string const &file)
+BlockCollection::initBlockTextures(std::string const &file, bd::DataType type)
 {
   bool rval = false;
-  DataType type{ IndexFileHeader::getType(m_indexFile->getHeader()) };
+//  DataType type{ IndexFileHeader::getType(m_indexFile->getHeader()) };
 
   switch (type) {
     case DataType::UnsignedCharacter:
@@ -204,11 +209,11 @@ BlockCollection::findLargestBlock(std::vector<Block *> &blocks)
 }
 
 
-IndexFile const &
-BlockCollection::indexFile() const
-{
-  return *m_indexFile;
-}
+//IndexFile const &
+//BlockCollection::indexFile() const
+//{
+//  return *m_indexFile;
+//}
 
 
 ///////////////////////////////////////////////////////////////////////////////

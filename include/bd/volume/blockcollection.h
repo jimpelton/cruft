@@ -34,19 +34,19 @@ public:
   /// \param fileBlocks[in] The FileBlocks generated from the IndexFile.
   /// \param numBlocks[in]  The number of blocks to generate in each dimension.
   void
-  initBlocksFromFileBlocks(std::vector<FileBlock> const &fileBlocks,
+  initBlocksFromFileBlocks(std::vector<bd::FileBlock> const &fileBlocks,
                              glm::f64vec3 const &vd,
                              glm::u64vec3 const &numblocks);
 
 
   void
-  filterBlocks(std::function<bool(Block const &)> filter);
+  filterBlocks(std::function<bool(bd::Block const &)> filter);
 
   void
   filterBlocksByROVRange(double rov_min, double rov_max);
 
   bool
-  initBlockTextures(std::string const &rawFile);
+  initBlockTextures(std::string const &rawFile, bd::DataType type);
 
 
   std::vector<Block *> const &
@@ -98,8 +98,9 @@ private:
 
   std::vector<int> m_indexesToDraw;
 
-  std::shared_ptr<IndexFile const> m_indexFile;
+//  std::shared_ptr<IndexFile const> m_indexFile;
 
+  bd::Volume m_volume;
   //TODO: volume member in BlockCollection.
 
 };
@@ -132,8 +133,8 @@ BlockCollection::do_initBlockTextures(std::string const &file)
 
 
   int i{ 0 };
-  double vol_min = m_indexFile->getHeader().vol_min;
-  double diff{ m_indexFile->getHeader().vol_max - vol_min };
+  double vol_min = m_volume.min(); //m_indexFile->getHeader().vol_min;
+  double diff{ m_volume.max() - vol_min };
 
   // Generate textures for each non-empty block
   std::cout << std::endl;
@@ -180,8 +181,8 @@ BlockCollection::fillBlockData(Block const &b, std::istream &infile,
   glm::u64vec3 const &be{ b.voxel_extent() };
 
   // volume's dimensions in voxels.
-  glm::u64vec2 const &ve{ m_indexFile->getHeader().volume_extent[0],
-                          m_indexFile->getHeader().volume_extent[1] };
+  glm::u64vec2 const &ve{m_volume.extent().x,
+                          m_volume.extent().y };
 
   // start element = block index w/in volume * block size
   const glm::u64vec3 start{ b.ijk() * be };

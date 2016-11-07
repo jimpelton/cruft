@@ -32,6 +32,9 @@ to_dataType(const std::string &typeStr);
 std::string
 to_string(DataType);
 
+size_t
+to_sizeType(DataType);
+
 } /* namespace bd */
 
 #endif /* ifndef datatypes_h__ */
