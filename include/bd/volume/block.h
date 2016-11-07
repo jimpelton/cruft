@@ -32,7 +32,7 @@ public:
   /// \param[in] ijk The block ID (and position with in the grid of blocks).
   /// \param[in] dims The world dimensions in of this block.
   /// \param[in] fb This block's FileBlock.
-  Block(glm::u64vec3 const &ijk, glm::vec3 const &dims, FileBlock const &fb);
+  Block(glm::u64vec3 const &ijk, FileBlock const &fb);
 
   virtual ~Block();
 

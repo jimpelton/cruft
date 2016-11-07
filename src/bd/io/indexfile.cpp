@@ -218,7 +218,7 @@ IndexFile::readBinaryIndexFile()
   m_volume.block_count({ ifh.numblocks[0], ifh.numblocks[1], ifh.numblocks[2] });
   m_volume.voxelDims({ ifh.volume_extent[0], ifh.volume_extent[1], ifh.volume_extent[2] });
 
-  initFileBlocks(IndexFileHeader::getType(ifh));
+  //initFileBlocks(IndexFileHeader::getType(ifh));
 
   // Read all the things!
   FileBlock fb;

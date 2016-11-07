@@ -7,6 +7,29 @@
 namespace bd
 {
 
+namespace
+{
+  glm::vec3 
+  calculateWorldDims(glm::u64vec3 voxelDims)
+  {
+    glm::vec3 worldDims{ 0 };
+
+    glm::u64 longest{ voxelDims.x };
+    if (longest < voxelDims.y) {
+      longest = voxelDims.y;
+    }
+    if (longest < voxelDims.z) {
+      longest = voxelDims.z;
+    }
+
+    worldDims.x = voxelDims.x / glm::f32(longest);
+    worldDims.y = voxelDims.y / glm::f32(longest);
+    worldDims.z = voxelDims.z / glm::f32(longest);
+    
+    return worldDims;
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 Volume::Volume()
     : Volume({ }, { 1, 1, 1 })
@@ -35,17 +58,7 @@ Volume::Volume(glm::u64vec3 const &voxelDims, glm::u64vec3 const &numBlocks)
   m_blockDims = voxelDims / nb;
   m_blockCount = nb;
 
-  glm::u64 longest{ voxelDims.x };
-  if (longest < voxelDims.y) {
-    longest = voxelDims.y;
-  }
-  if (longest < voxelDims.z) {
-    longest = voxelDims.z;
-  }
-
-  m_worldDims.x = voxelDims.x / glm::f32(longest);
-  m_worldDims.y = voxelDims.y / glm::f32(longest);
-  m_worldDims.z = voxelDims.z / glm::f32(longest);
+  m_worldDims = calculateWorldDims(voxelDims);
 
 }
 
@@ -88,11 +101,11 @@ Volume::block_dims()
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void
-Volume::block_dims(const glm::u64vec3 &dims)
-{
-  m_blockDims = dims;
-}
+//void
+//Volume::block_dims(const glm::u64vec3 &dims)
+//{
+//  m_blockDims = dims;
+//}
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -107,6 +120,7 @@ Volume::block_count() const
 void
 Volume::block_count(const glm::u64vec3 &nb)
 {
+  m_blockDims = m_voxelDims / nb;
   m_blockCount = nb;
 }
 
@@ -130,6 +144,8 @@ Volume::voxelDims() const
 void
 Volume::voxelDims(const glm::u64vec3 &voxdims)
 {
+  m_worldDims = calculateWorldDims(voxdims);
+  m_blockDims = voxdims / m_blockCount;
   m_voxelDims = voxdims;
 }
 

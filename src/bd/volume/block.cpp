@@ -16,17 +16,19 @@ namespace bd
 
 
 ///////////////////////////////////////////////////////////////////////////////
-Block::Block(const glm::u64vec3& ijk, const glm::vec3 &dims, const FileBlock &fb)
+Block::Block(const glm::u64vec3& ijk, const FileBlock &fb)
   : m_fb{ fb }
   , m_ijk{ ijk }
   , m_origin{ fb.world_oigin[0], fb.world_oigin[1], fb.world_oigin[2] }
   , m_transform{ 1.0f }  // identity matrix
   , m_tex{ bd::Texture::Target::Tex3D }
 {
-  glm::vec3 wld_pos{ fb.world_oigin[0], fb.world_oigin[1], fb.world_oigin[2] };
 
-  glm::mat4 s{ glm::scale(glm::mat4{ 1.0f }, dims) };
-  glm::mat4 t{ glm::translate(glm::mat4{ 1.0f }, wld_pos) };
+  glm::vec3 wld_dims{ fb.world_dims[0], fb.world_dims[1], fb.world_dims[2] };
+
+  glm::mat4 s{ glm::scale(glm::mat4{ 1.0f }, wld_dims) };
+
+  glm::mat4 t{ glm::translate(glm::mat4{ 1.0f }, m_origin) };
 
   m_transform = t * s;
 

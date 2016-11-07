@@ -27,24 +27,25 @@ BlockCollection::initBlocksFromIndexFile(std::shared_ptr<IndexFile const> index)
 {
   m_volume = index->getVolume();
 
-  bd::IndexFileHeader const &header = index->getHeader();
+//  bd::IndexFileHeader const &header = index->getHeader();
 
   Dbg() << "Initializing blocks from index file."; //<< fileName;
 
-  glm::u64vec3 nb{ header.numblocks[0], header.numblocks[1], header.numblocks[2] };
-  glm::f64vec3 vol_dims{ header.volume_world_dims[0],
-                         header.volume_world_dims[1],
-                         header.volume_world_dims[2]};
-  initBlocksFromFileBlocks(index->getFileBlocks(), vol_dims, nb);
+  //glm::u64vec3 nb{ header.numblocks[0], header.numblocks[1], header.numblocks[2] };
+  //glm::f64vec3 vol_dims{ header.volume_world_dims[0],
+  //                       header.volume_world_dims[1],
+  //                       header.volume_world_dims[2]};
   
   
-  
+  initBlocksFromFileBlocks(index->getFileBlocks(),
+    m_volume.worldDims(),
+    m_volume.block_count());
 }
 
 
 void
 BlockCollection::initBlocksFromFileBlocks(std::vector<FileBlock> const &fileBlocks,
-                                          glm::f64vec3 const &vd,
+                                          glm::f32vec3 const &vd,
                                           glm::u64vec3 const &nb)
 {
   m_blocks.reserve(fileBlocks.size());
@@ -56,11 +57,11 @@ BlockCollection::initBlocksFromFileBlocks(std::vector<FileBlock> const &fileBloc
     for (auto j = 0ull; j < nb.y; ++j) {
       for (auto i = 0ull; i < nb.x; ++i) {
         std::cout << "\rCreating block " << idx;
-
+//        FileBlock fb{ fileBlocks[idx] };
+    
         Block *block{ new Block{{ i, j, k },
-                                { vd.x / nb.x, vd.y / nb.y, vd.z / nb.z },
+//                                { vd.x / nb.x, vd.y / nb.y, vd.z / nb.z },
                                 fileBlocks[idx] }};
-
         m_blocks.push_back(block);
 
         idx++;

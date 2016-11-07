@@ -27,17 +27,17 @@ public:
   /////////////////////////////////////////////////////////////////////////////
   class sentry
   {
-    logger &log;
+    logger *log;
 
   public:
 
     /////////////////////////////////////////////////////////////////////////////
-    sentry(logger &l)
+    sentry(logger *l)
         : log(l)
     {
-      log.lock();
-      std::cout << "sentry ctor after lock.\n";
-      log.start_line();
+      log->lock();
+//      std::cout << "sentry ctor after lock.\n";
+      log->start_line();
     }
 
 
@@ -45,7 +45,7 @@ public:
     sentry(sentry const &o)
         : log{ o.log }
     {
-      std::cout << "sentry copy ctor.\n";
+//      std::cout << "sentry copy ctor.\n";
     }
 
 
@@ -53,16 +53,19 @@ public:
     sentry(sentry &&o)
         : log{ o.log }
     {
-      std::cout << "sentry move ctor.\n";
+      o.log = nullptr;
+//      std::cout << "sentry move ctor.\n";
     }
 
 
     /////////////////////////////////////////////////////////////////////////////
     ~sentry()
     {
-      log.end_line();
-      log.unlock();
-      std::cout << "sentry dtor after unlock.\n";
+      if (log) {
+        log->end_line();
+        log->unlock();
+      }
+//      std::cout << "sentry dtor after unlock.\n";
     }
 
 
@@ -73,7 +76,7 @@ public:
     sentry &
     operator<<(T const &t)
     {
-      log.do_log(t);
+      log->do_log(t);
       return *this;
     }
 
@@ -85,7 +88,7 @@ public:
     operator<<(std::ostream &(*man)(std::ostream &))
     {
       // Handles manipulators like endl.
-      log.do_log(man);
+      log->do_log(man);
       return *this;
     }
 
@@ -93,7 +96,7 @@ public:
     sentry &
     operator<<(std::ios_base &(*man)(std::ios_base &))
     {
-      log.do_log(man);
+      log->do_log(man);
       // Handles manipulators like hex.
       return *this;
     }
@@ -193,7 +196,7 @@ public:
   sentry
   operator<<(T const &t)
   {
-    sentry s(*this);
+    sentry s(this);
     s << t;
     return s;
   }

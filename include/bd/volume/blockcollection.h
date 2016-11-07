@@ -35,7 +35,7 @@ public:
   /// \param numBlocks[in]  The number of blocks to generate in each dimension.
   void
   initBlocksFromFileBlocks(std::vector<bd::FileBlock> const &fileBlocks,
-                             glm::f64vec3 const &vd,
+                             glm::f32vec3 const &vd,
                              glm::u64vec3 const &numblocks);
 
 
@@ -98,10 +98,7 @@ private:
 
   std::vector<int> m_indexesToDraw;
 
-//  std::shared_ptr<IndexFile const> m_indexFile;
-
   bd::Volume m_volume;
-  //TODO: volume member in BlockCollection.
 
 };
 
