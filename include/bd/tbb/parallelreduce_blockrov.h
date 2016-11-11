@@ -32,26 +32,26 @@ public:
       : m_data{ b->getPtr() }
       , m_volume{ v }
       , m_voxelStart{ b->getIndexOffset() }
-      , m_visibilities{ nullptr }
+      , m_rels{ nullptr }
 //      , alpha{ alpha }
   {
-    m_visibilities = new double[m_volume->total_block_count()]();
+    m_rels = new double[m_volume->total_block_count()]();
   }
 
   ParallelReduceBlockRov(ParallelReduceBlockRov &o, tbb::split)
       : m_data{ o.m_data }
       , m_volume{ o.m_volume }
       , m_voxelStart{ o.m_voxelStart }
-      , m_visibilities{ nullptr }
+      , m_rels{ nullptr }
 //      , alpha{ o.alpha }
   {
-    m_visibilities = new double[o.m_volume->total_block_count()]();
+    m_rels = new double[o.m_volume->total_block_count()]();
   }
 
   ~ParallelReduceBlockRov()
   {
-    if (m_visibilities) {
-      delete [] m_visibilities;
+    if (m_rels) {
+      delete [] m_rels;
     }
   }
 
@@ -92,7 +92,7 @@ public:
         // Convert the 3D block index into a 1D block index and fetch the
         // block from the array of blocks.
         bIdx = bI + bcX * (bJ + bK * bcY);
-        m_visibilities[bIdx] += val;
+        m_rels[bIdx] += val;
       }
     }
   }
@@ -101,22 +101,22 @@ public:
   join(ParallelReduceBlockRov const &rhs)
   {
     for(uint64_t i{ 0 }; i < m_volume->total_block_count(); ++i) {
-      m_visibilities[i] += rhs.m_visibilities[i];
+      m_rels[i] += rhs.m_rels[i];
     }
   }
 
 
   double const *
-  visibilities() const
+  relevances() const
   {
-    return m_visibilities;
+    return m_rels;
   }
 
 private:
   double const * const m_data;
   Volume const * const m_volume;
   size_t const m_voxelStart;
-  double * m_visibilities;
+  double * m_rels;
 
 //  Function alpha; ///< Is the element a relevant voxel or not.
 

@@ -131,13 +131,6 @@ class IndexFile
 {
 public:
 
-  //template<class Ty>
-  //static std::unique_ptr<IndexFile>
-  //fromBlockCollection(std::string const &path,
-  //                    FileBlockCollection<Ty> &col,
-  //                    bd::DataType dt);
-
-
   /// \brief Create IndexFile from an existing binary index file.
   /// \returns A unique_ptr to the IndexFile created or nullptr on failure.
   static std::unique_ptr<IndexFile>
@@ -148,7 +141,6 @@ public:
   IndexFile();
 
   
-
   ~IndexFile();
 
 
@@ -180,12 +172,19 @@ public:
   std::vector<FileBlock> const &
   getFileBlocks() const;
 
-  bd::Volume
+
+  std::vector<FileBlock>  &
+  IndexFile::getFileBlocks();
+
+  
+  bd::Volume const &
   getVolume() const;
 
+  bd::Volume &
+  getVolume();
+
+
 private:
-
-
 
   /// \brief Instantiate a FileBlockCollection<Ty> with \c Ty determined by
   ///        the \c type parameter.
@@ -198,10 +197,7 @@ private:
   readBinaryIndexFile();
 
   void
-    initFileBlocks(DataType t);
-
-  
-
+  initFileBlocks(DataType t);
 
   IndexFileHeader m_header;
   std::string m_fileName;
