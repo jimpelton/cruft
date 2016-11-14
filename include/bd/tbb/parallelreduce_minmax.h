@@ -23,6 +23,7 @@ public:
   ParallelReduceMinMax(const Buffer<Ty>* b /*, const std::function<bool(Ty)> &isRelevant*/)
     : min_value{ std::numeric_limits<Ty>::max() }
     , max_value{ std::numeric_limits<Ty>::lowest() }
+    , tot_value{ 0.0 }
     , data{ b->getPtr() }
   {
   }
@@ -32,6 +33,7 @@ public:
   ParallelReduceMinMax(ParallelReduceMinMax& x, tbb::split)
     : min_value{ std::numeric_limits<Ty>::max() }
     , max_value{ std::numeric_limits<Ty>::lowest() }
+    , tot_value{ x.tot_value }
     , data{ x.data }
   {
   }
@@ -63,11 +65,14 @@ public:
     if (y.max_value>max_value) {
       max_value = y.max_value;
     }
+
+    tot_value += y.tot_value;
   }
 
 
   Ty min_value;
   Ty max_value;
+  double tot_value;
 
 private:
   Ty const * const data;

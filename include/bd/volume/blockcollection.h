@@ -3,6 +3,7 @@
 
 #include <bd/volume/block.h>
 #include <bd/io/indexfile.h>
+#include <bd/util/util.h>
 
 #include <functional>
 
@@ -63,10 +64,6 @@ public:
 
   std::vector<Block *> &
   nonEmptyBlocks();
-
-
-  IndexFile const &
-  indexFile() const;
 
 
   /// Find the largest non-empty block and return the number of voxels.
