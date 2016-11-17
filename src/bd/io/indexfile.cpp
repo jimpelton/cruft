@@ -155,10 +155,12 @@ IndexFile::writeAsciiIndexFile(std::ostream &os) const
   os << "{\n";
   os << m_header << ",\n\"blocks\": { \n";
 
-  for (size_t i{ 0 }; i<m_fileBlocks.size()-1; ++i) {
-    os << m_fileBlocks[i] << ",\n";
+  if (m_fileBlocks.size() > 0) {
+    for (size_t i{ 0 }; i < m_fileBlocks.size() - 1; ++i) {
+      os << m_fileBlocks[i] << ",\n";
+    }
+    os << m_fileBlocks[m_fileBlocks.size() - 1] << "\n";
   }
-  os << m_fileBlocks[m_fileBlocks.size()-1] << "\n";
 
   os << "}}\n";
 }
@@ -247,7 +249,7 @@ IndexFile::readBinaryIndexFile()
   return true;
 }
 
-void IndexFile::initFileBlocks(bd::DataType type)
+void IndexFile::init(bd::DataType type)
 {
   size_t tySize{ bd::to_sizeType(type) };
   
@@ -285,8 +287,8 @@ void IndexFile::initFileBlocks(bd::DataType type)
 
         FileBlock blk;
         blk.block_index = bd::to1D(bxi, byj, bzk, bc.x, bc.y);
-        blk.data_offset =
-          tySize * bd::to1D(startVoxel.x, startVoxel.y, startVoxel.z, vd.x, vd.y);
+        blk.data_offset = tySize *
+            bd::to1D(startVoxel.x, startVoxel.y, startVoxel.z, vd.x, vd.y);
 
         blk.voxel_dims[0] = static_cast<decltype(blk.voxel_dims[0])>(bd.x);
         blk.voxel_dims[1] = static_cast<decltype(blk.voxel_dims[1])>(bd.y);
@@ -305,7 +307,49 @@ void IndexFile::initFileBlocks(bd::DataType type)
     }
   }
 
+  initHeader(type);
+
   Dbg() << "Total blocks is: " << m_fileBlocks.size();
+}
+
+void
+IndexFile::initHeader(DataType dt)
+{
+//  std::unique_ptr<IndexFile> idxfile{ std::unique_ptr<IndexFile>{ new IndexFile{ }}};
+//  m_fileName = path;
+
+//  idxfile->m_col = new FileBlockCollectionWrapper<Ty>(col);
+
+  m_header.magic_number = MAGIC;
+  m_header.version = VERSION;
+  m_header.header_length = HEAD_LEN;
+
+  //TODO: add upper and lower volume boundaries.
+  m_header.numblocks[0] = m_volume.block_count().x;
+  m_header.numblocks[1] = m_volume.block_count().y;
+  m_header.numblocks[2] = m_volume.block_count().z; // + m_col->getVolume().upper().block_count().z;
+
+
+  m_header.dataType = IndexFileHeader::getTypeInt(dt);
+
+  m_header.volume_extent[0] = m_volume.voxelDims().x;
+  m_header.volume_extent[1] = m_volume.voxelDims().y;
+  m_header.volume_extent[2] = m_volume.voxelDims().z;
+
+  m_header.volume_world_dims[0] = m_volume.worldDims().x;
+  m_header.volume_world_dims[1] = m_volume.worldDims().y;
+  m_header.volume_world_dims[2] = m_volume.worldDims().z;
+
+  glm::u64vec3 blkExt = m_volume.extent();
+  m_header.blocks_extent[0] = blkExt.x;
+  m_header.blocks_extent[1] = blkExt.y;
+  m_header.blocks_extent[2] = blkExt.z;
+
+  m_header.vol_empty_voxels = m_volume.numEmptyVoxels();
+  m_header.vol_avg = m_volume.avg();
+  m_header.vol_max = m_volume.max();
+  m_header.vol_min = m_volume.min();
+
 }
 
 
