@@ -254,7 +254,7 @@ Volume::numEmptyVoxels() const
 
 ///////////////////////////////////////////////////////////////////////////////
 glm::u64vec3
-Volume::extent() const
+Volume::blocksExtent() const
 {
   return m_blockCount * m_blockDims;  // component-wise multiply
 }

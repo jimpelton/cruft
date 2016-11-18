@@ -260,7 +260,6 @@ void IndexFile::init(bd::DataType type)
   glm::u64vec3 vd{ m_volume.voxelDims() };
   glm::u64vec3 bd{ m_volume.block_dims() };
 
-  // block world voxelDims 1.0 = volume world dimensions on each side.
   glm::vec3 wld_dims{ m_volume.worldDims() / glm::vec3(bc) };
 
   Dbg() << "Starting FileBlock creation: "
@@ -279,11 +278,13 @@ void IndexFile::init(bd::DataType type)
         // i,j,k block identifier
         glm::u64vec3 const blkId{ bxi, byj, bzk };
 
+        glm::vec3 const worldLoc{ wld_dims * glm::vec3(blkId) - 0.5f };
+
         // block center in world coordinates
-         glm::vec3 const blkOrigin{ wld_dims * glm::vec3(blkId) + wld_dims / 2.0f };
+        glm::vec3 const blkOrigin{ (worldLoc + (worldLoc + wld_dims)) * 0.5f };
         
         // voxel start of block within volume
-         glm::u64vec3 const startVoxel{ blkId * bd };
+        glm::u64vec3 const startVoxel{ blkId * bd };
 
         FileBlock blk;
         blk.block_index = bd::to1D(bxi, byj, bzk, bc.x, bc.y);
@@ -340,7 +341,7 @@ IndexFile::initHeader(DataType dt)
   m_header.volume_world_dims[1] = m_volume.worldDims().y;
   m_header.volume_world_dims[2] = m_volume.worldDims().z;
 
-  glm::u64vec3 blkExt = m_volume.extent();
+  glm::u64vec3 blkExt = m_volume.blocksExtent();
   m_header.blocks_extent[0] = blkExt.x;
   m_header.blocks_extent[1] = blkExt.y;
   m_header.blocks_extent[2] = blkExt.z;

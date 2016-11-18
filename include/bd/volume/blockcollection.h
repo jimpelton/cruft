@@ -175,8 +175,8 @@ BlockCollection::fillBlockData(Block const &b, std::istream &infile,
   glm::u64vec3 const &be{ b.voxel_extent() };
 
   // volume's dimensions in voxels.
-  glm::u64vec2 const &ve{m_volume.extent().x,
-                          m_volume.extent().y };
+  glm::u64vec2 const &ve{ m_volume.voxelDims().x,
+                          m_volume.voxelDims().y };
 
   // start element = block index w/in volume * block size
   const glm::u64vec3 start{ b.ijk() * be };

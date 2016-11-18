@@ -119,8 +119,11 @@ public:
   numEmptyVoxels(uint64_t);
 
 
+  /// \brief Return the voxel extent covered by the blocks (the blocks may not run from edge to
+  /// edge of the volume).
+  /// \return x, y, z dims of the voxel extent.
   glm::u64vec3
-  extent() const;
+  blocksExtent() const;
 
 private:
 
