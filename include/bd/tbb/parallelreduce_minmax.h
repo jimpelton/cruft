@@ -50,6 +50,7 @@ public:
       
       if (val<min_value) { min_value = val; }
       if (val>max_value) { max_value = val; }
+      tot_value += val;
     }
   }
 
