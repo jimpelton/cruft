@@ -20,7 +20,7 @@ namespace
 ///< Magic number for the file (ascii 'SV')
 uint16_t const MAGIC{ 7376 };
 /// \brief The version of the IndexFile
-uint16_t const VERSION{ 8 };
+uint16_t const VERSION{ 9 };
 /// \brief Length of the IndexFileHeader in bytes.
 uint32_t const HEAD_LEN{ sizeof(IndexFileHeader) };
 }  // namespace
