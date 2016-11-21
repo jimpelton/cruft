@@ -101,9 +101,10 @@ operator<<(std::ostream &os, bd::IndexFileHeader const &h)
          "  \"vol_empty_voxels\": " << h.vol_empty_voxels << ",\n"
          "  \"volume_world_dims\": [" << h.volume_world_dims[0] << ", "
      << h.volume_world_dims[1] << ", " << h.volume_world_dims[2] << "],\n"
-         "  \"vol_min\": " << h.vol_min << ",\n"
-         "  \"vol_max\": " << h.vol_max << ",\n"
-         "  \"vol_avg\": " << h.vol_avg << "\n"
+         "  \"vol_min\": " << std::fixed << h.vol_min << ",\n"
+         "  \"vol_max\": " << std::fixed << h.vol_max << ",\n"
+         "  \"vol_avg\": " << std::fixed << h.vol_avg << "\n"
+         "  \"vol_total\": " << std::fixed << h.vol_total << "\n"
          "}";
 
   return os;

@@ -60,6 +60,7 @@ struct IndexFileHeader
   double vol_avg;
   double vol_min;
   double vol_max;
+  double vol_total;
 
 }; // struct IndexFileHeader
 
