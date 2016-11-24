@@ -71,7 +71,7 @@ public:
 
         buf->setNumElements(amount/sizeof(Ty));
         if (amount == 0) {
-          Dbg() << "Reader read 0 bytes.";
+//          Dbg() << "Reader read 0 bytes.";
           m_pool->returnEmpty(buf);
           break;
         }
@@ -92,7 +92,7 @@ public:
     m_is->close();
     Dbg() << "Reader done after reading " << total_read_bytes << " bytes";
 //    m_pool->kickThreads();
-    return total_read_bytes;
+    return static_cast<long long int>(total_read_bytes);
   }
 
     

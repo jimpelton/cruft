@@ -39,8 +39,8 @@ public:
 
 
   /// \brief Get/set the number of voxels in each block.
-  glm::u64vec3 &
-  block_dims();
+//  glm::u64vec3 &
+//  block_dims();
 
 
   /// \brief Get/Set the number of blocks along each axis.
