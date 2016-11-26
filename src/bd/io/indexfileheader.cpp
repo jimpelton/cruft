@@ -91,20 +91,7 @@ operator<<(std::ostream &os, bd::IndexFileHeader const &h)
          "  \"magic\": " << h.magic_number << ",\n"
          "  \"version\": " << h.version << ",\n"
          "  \"header_length\": " << h.header_length << ",\n"
-         "  \"num_blocks\": [" << h.numblocks[0] << ", " << h.numblocks[1] << ", "
-     << h.numblocks[2] << "],\n"
          "  \"data_type\": \"" << bd::to_string(IndexFileHeader::getType(h)) << "\",\n"
-         "  \"volume_extent\": [" << h.volume_extent[0] << ", " << h.volume_extent[1]
-     << ", " << h.volume_extent[2] << "],\n"
-         "  \"blocks_extent\": [" << h.blocks_extent[0] << ", " << h.blocks_extent[1]
-     << ", " << h.blocks_extent[2] << "],\n"
-         "  \"vol_empty_voxels\": " << h.vol_empty_voxels << ",\n"
-         "  \"volume_world_dims\": [" << h.volume_world_dims[0] << ", "
-     << h.volume_world_dims[1] << ", " << h.volume_world_dims[2] << "],\n"
-         "  \"vol_min\": " << std::fixed << h.vol_min << ",\n"
-         "  \"vol_max\": " << std::fixed << h.vol_max << ",\n"
-         "  \"vol_avg\": " << std::fixed << h.vol_avg << ",\n"
-         "  \"vol_total\": " << std::fixed << h.vol_total << "\n"
          "}";
 
   return os;

@@ -29,18 +29,8 @@ public:
 
 
   /// \brief Get/set the number of voxels in each block.
-//  void
-//  block_dims(glm::u64vec3 const &dims);
-
-
-  /// \brief Get/set the number of voxels in each block.
   const glm::u64vec3 &
   block_dims() const;
-
-
-  /// \brief Get/set the number of voxels in each block.
-//  glm::u64vec3 &
-//  block_dims();
 
 
   /// \brief Get/Set the number of blocks along each axis.
@@ -110,6 +100,17 @@ public:
   void
   total(double);
 
+  void
+    rovMin(double);
+
+  double
+    rovMin() const;
+
+  void
+    rovMax(double);
+
+  double 
+  rovMax() const;
 
   uint64_t
   numEmptyVoxels() const;
@@ -136,9 +137,14 @@ private:
   double m_volMin;           ///< Min value found in volume.
   double m_volAvg;           ///< Avg value found in volume.
   double m_volTot;           ///< Total of all values in volume.
+  double m_rovMin;
+  double m_rovMax;
 
 
 };
+
+std::ostream &
+operator<<(std::ostream &os, bd::Volume const &);
 
 } // namespace bd
 

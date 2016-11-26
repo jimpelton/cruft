@@ -44,23 +44,27 @@ struct IndexFileHeader
   uint16_t version;
   /// \brief Length in bytes of the header
   uint32_t header_length;
-  /// \brief Num blocks along each coordinate axis.
-  uint64_t numblocks[3];
   /// \brief Int representing the data type of elements (char, short, etc).
   uint32_t dataType;
-  /// \brief Dimensions of volume in voxels
-  uint64_t volume_extent[3];
-  /// \brief The voxel extent of the blocks (may not equal the volume voxel extent).
-  uint64_t blocks_extent[3];
-  /// \brief Num voxels determined irrelevent.
-  uint64_t vol_empty_voxels;
-  /// \brief Volume dimensions in world coordinates.
-  double volume_world_dims[3];
 
-  double vol_avg;
-  double vol_min;
-  double vol_max;
-  double vol_total;
+//  /// \brief Num blocks along each coordinate axis.
+//  uint64_t numblocks[3];
+//  /// \brief Dimensions of volume in voxels
+//  uint64_t volume_extent[3];
+//  /// \brief The voxel extent of the blocks (may not equal the volume voxel extent).
+//  uint64_t blocks_extent[3];
+//  /// \brief Num voxels determined irrelevent.
+//  uint64_t vol_empty_voxels;
+//  /// \brief Volume dimensions in world coordinates.
+//  double volume_world_dims[3];
+//
+//  double vol_avg;
+//  double vol_min;
+//  double vol_max;
+//  double vol_total;
+//
+//  double rov_min;
+//  double rov_max;
 
 }; // struct IndexFileHeader
 

@@ -1,13 +1,12 @@
 
 #include <bd/io/indexfile.h>
 #include <bd/filter/blockaveragefilter.h>
-
+#include <bd/util/util.h>
 
 #include <glm/glm.hpp>
 
 #include <istream>
 #include <ostream>
-#include "bd/util/util.h"
 
 
 namespace bd
@@ -49,8 +48,6 @@ IndexFile::IndexFile()
 }
 
 
-
-
 ///////////////////////////////////////////////////////////////////////////////
 IndexFile::~IndexFile()
 {
@@ -63,55 +60,6 @@ IndexFile::getHeader() const
 {
   return m_header;
 }
-
-
-///////////////////////////////////////////////////////////////////////////////
-//FileBlockCollectionWrapper_Base *
-//IndexFile::instantiate_wrapper(DataType type,
-//                               uint64_t const *num_vox,
-//                               uint64_t const *numblocks)
-//{
-//  FileBlockCollectionWrapper_Base *col{ nullptr };
-//
-//  switch (type) {
-//
-//    case bd::DataType::UnsignedCharacter:
-//      col = new FileBlockCollectionWrapper<unsigned char>{
-//          { num_vox[0],   num_vox[1],   num_vox[2] },
-//          { numblocks[0], numblocks[1], numblocks[2] }};
-//      break;
-//
-//    case bd::DataType::Character:
-//      col = new FileBlockCollectionWrapper<char>
-//          {{ num_vox[0],   num_vox[1],   num_vox[2] },
-//           { numblocks[0], numblocks[1], numblocks[2] }};
-//      break;
-//
-//    case bd::DataType::UnsignedShort:
-//      col = new FileBlockCollectionWrapper<unsigned short>
-//          {{ num_vox[0],   num_vox[1],   num_vox[2] },
-//           { numblocks[0], numblocks[1], numblocks[2] }};
-//      break;
-//
-//    case bd::DataType::Short:
-//      col = new FileBlockCollectionWrapper<short>
-//          {{ num_vox[0],   num_vox[1],   num_vox[2] },
-//           { numblocks[0], numblocks[1], numblocks[2] }};
-//      break;
-//
-//    case bd::DataType::Float:
-//      col = new FileBlockCollectionWrapper<float>
-//          {{ num_vox[0],   num_vox[1],   num_vox[2] },
-//           { numblocks[0], numblocks[1], numblocks[2] }};
-//      break;
-//
-//    default:
-//      std::cerr << "Unsupported/unknown datatype: " << bd::to_string(type) << ".\n";
-//      break;
-//  }
-//
-//  return col;
-//}
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -191,6 +139,8 @@ IndexFile::getFileBlocks() const
   return m_fileBlocks;
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
 std::vector<FileBlock>  &
 IndexFile::getFileBlocks()
 {
@@ -225,19 +175,17 @@ IndexFile::readBinaryIndexFile()
     return false;
   }
 
+  is.seekg(0, std::ios::beg);
+  
   // read header
   IndexFileHeader ifh;
-  is.seekg(0, std::ios::beg);
   is.read(reinterpret_cast<char *>(&ifh), sizeof(IndexFileHeader));
   m_header = ifh;
 
-  m_volume.min(ifh.vol_min);
-  m_volume.max(ifh.vol_max);
-  m_volume.avg(ifh.vol_avg);
-  m_volume.block_count({ ifh.numblocks[0], ifh.numblocks[1], ifh.numblocks[2] });
-  m_volume.voxelDims({ ifh.volume_extent[0], ifh.volume_extent[1], ifh.volume_extent[2] });
-
-  //initFileBlocks(IndexFileHeader::getType(ifh));
+  // read volume
+  Volume v;
+  is.read(reinterpret_cast<char *>(&v), sizeof(Volume));
+  m_volume = v;
 
   // Read all the things!
   FileBlock fb;
@@ -249,18 +197,22 @@ IndexFile::readBinaryIndexFile()
   return true;
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
 void IndexFile::init(bd::DataType type)
 {
   size_t tySize{ bd::to_sizeType(type) };
   
   // bc: number of blocks
-  // vd: volume voxel dimensions
-  // bd: block dimensions
   glm::u64vec3 bc{ m_volume.block_count() };
+
+  // vd: volume voxel dimensions
   glm::u64vec3 vd{ m_volume.voxelDims() };
+  
+  // bd: block dimensions
   glm::u64vec3 bd{ m_volume.block_dims() };
 
-  glm::vec3 wld_dims{ m_volume.worldDims() / glm::vec3(bc) };
+  glm::vec3 wd{ m_volume.worldDims() / glm::vec3(bc) };
 
   Dbg() << "Starting FileBlock creation: "
     " # blocks: "
@@ -268,7 +220,7 @@ void IndexFile::init(bd::DataType type)
     " Vol dim: "
     << vd.x << ", " << vd.y << ", " << vd.z <<
     " Block dim: "
-    << ", " << wld_dims.x << ", " << wld_dims.y << ", " << wld_dims.z;
+    << ", " << wd.x << ", " << wd.y << ", " << wd.z;
 
 
   // Loop through all our blocks (identified by <bxi,byj,bzk>) and populate block fields.
@@ -278,10 +230,10 @@ void IndexFile::init(bd::DataType type)
         // i,j,k block identifier
         glm::u64vec3 const blkId{ bxi, byj, bzk };
 
-        glm::vec3 const worldLoc{ wld_dims * glm::vec3(blkId) - 0.5f };
+        glm::vec3 const worldLoc{ wd * glm::vec3(blkId) - 0.5f };
 
         // block center in world coordinates
-        glm::vec3 const blkOrigin{ (worldLoc + (worldLoc + wld_dims)) * 0.5f };
+        glm::vec3 const blkOrigin{ (worldLoc + (worldLoc + wd)) * 0.5f };
         
         // voxel start of block within volume
         glm::u64vec3 const startVoxel{ blkId * bd };
@@ -299,9 +251,9 @@ void IndexFile::init(bd::DataType type)
         blk.world_oigin[1] = blkOrigin.y;
         blk.world_oigin[2] = blkOrigin.z;
 
-        blk.world_dims[0] = wld_dims.x;
-        blk.world_dims[1] = wld_dims.y;
-        blk.world_dims[2] = wld_dims.z;
+        blk.world_dims[0] = wd.x;
+        blk.world_dims[1] = wd.y;
+        blk.world_dims[2] = wd.z;
 
         m_fileBlocks.push_back(blk);
       }
@@ -313,47 +265,46 @@ void IndexFile::init(bd::DataType type)
   Dbg() << "Total blocks is: " << m_fileBlocks.size();
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
 void
 IndexFile::initHeader(DataType dt)
 {
-//  std::unique_ptr<IndexFile> idxfile{ std::unique_ptr<IndexFile>{ new IndexFile{ }}};
-//  m_fileName = path;
-
-//  idxfile->m_col = new FileBlockCollectionWrapper<Ty>(col);
 
   m_header.magic_number = MAGIC;
   m_header.version = VERSION;
   m_header.header_length = HEAD_LEN;
-
-  //TODO: add upper and lower volume boundaries.
-  m_header.numblocks[0] = m_volume.block_count().x;
-  m_header.numblocks[1] = m_volume.block_count().y;
-  m_header.numblocks[2] = m_volume.block_count().z; // + m_col->getVolume().upper().block_count().z;
-
-
   m_header.dataType = IndexFileHeader::getTypeInt(dt);
 
-  m_header.volume_extent[0] = m_volume.voxelDims().x;
-  m_header.volume_extent[1] = m_volume.voxelDims().y;
-  m_header.volume_extent[2] = m_volume.voxelDims().z;
-
-  m_header.volume_world_dims[0] = m_volume.worldDims().x;
-  m_header.volume_world_dims[1] = m_volume.worldDims().y;
-  m_header.volume_world_dims[2] = m_volume.worldDims().z;
-
-  glm::u64vec3 blkExt = m_volume.blocksExtent();
-  m_header.blocks_extent[0] = blkExt.x;
-  m_header.blocks_extent[1] = blkExt.y;
-  m_header.blocks_extent[2] = blkExt.z;
-
-  m_header.vol_empty_voxels = m_volume.numEmptyVoxels();
-  m_header.vol_avg = m_volume.avg();
-  m_header.vol_max = m_volume.max();
-  m_header.vol_min = m_volume.min();
+//  m_header.numblocks[0] = m_volume.block_count().x;
+//  m_header.numblocks[1] = m_volume.block_count().y;
+//  m_header.numblocks[2] = m_volume.block_count().z;
+//
+//  m_header.dataType = IndexFileHeader::getTypeInt(dt);
+//
+//  m_header.volume_extent[0] = m_volume.voxelDims().x;
+//  m_header.volume_extent[1] = m_volume.voxelDims().y;
+//  m_header.volume_extent[2] = m_volume.voxelDims().z;
+//
+//  m_header.volume_world_dims[0] = m_volume.worldDims().x;
+//  m_header.volume_world_dims[1] = m_volume.worldDims().y;
+//  m_header.volume_world_dims[2] = m_volume.worldDims().z;
+//
+//  glm::u64vec3 blkExt = m_volume.blocksExtent();
+//  m_header.blocks_extent[0] = blkExt.x;
+//  m_header.blocks_extent[1] = blkExt.y;
+//  m_header.blocks_extent[2] = blkExt.z;
+//
+//  m_header.vol_empty_voxels = m_volume.numEmptyVoxels();
+//  m_header.vol_avg = m_volume.avg();
+//  m_header.vol_max = m_volume.max();
+//  m_header.vol_min = m_volume.min();
+//  m_header.vol_total = m_volume.total();
 
 }
 
 
+///////////////////////////////////////////////////////////////////////////////
 // FileBlock operator<<
 std::ostream &
 operator<<(std::ostream &os, bd::FileBlock const &block)

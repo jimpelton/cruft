@@ -4,6 +4,9 @@
 
 #include <bd/volume/volume.h>
 
+#include <sstream>
+#include "bd/io/indexfileheader.h"
+
 namespace bd
 {
 
@@ -259,5 +262,32 @@ Volume::blocksExtent() const
   return m_blockCount * m_blockDims;  // component-wise multiply
 }
 
+
+
+
+std::ostream &
+operator<<(std::ostream &os, bd::Volume const &v)
+{
+  os <<
+    "\"volume\": {\n"
+    "  \"num_blocks\": [" << v.block_count().x << ", " << v.block_count().y << ", "
+    << v.block_count().z << "],\n"
+
+    "  \"volume_extent\": [" << v.voxelDims().x << ", " << v.voxelDims().y
+    << ", " << v.voxelDims().z << "],\n"
+    "  \"blocks_extent\": [" << v.blocksExtent().x << ", " << v.blocksExtent().y
+    << ", " << v.blocksExtent().z << "],\n"
+    "  \"vol_empty_voxels\": " << v.numEmptyVoxels() << ",\n"
+    "  \"volume_world_dims\": [" << v.worldDims().x << ", "
+    << v.worldDims().y << ", " << v.worldDims().z << "],\n"
+    "  \"vol_min\": " << std::fixed << v.min() << ",\n"
+    "  \"vol_max\": " << std::fixed << v.max() << ",\n"
+    "  \"vol_avg\": " << std::fixed << v.avg() << ",\n"
+    "  \"vol_total\": " << std::fixed << v.total() << ",\n"
+    "  \"rov_min\": " << std::fixed << v.rovMin() << ",\n"
+    "  \"rov_max\": " << std::fixed << v.rovMax() << "\n"
+    "}";
+    
+}
 
 } // namespace bd
