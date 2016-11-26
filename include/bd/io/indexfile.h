@@ -27,104 +27,6 @@ uint32_t const HEAD_LEN{ sizeof(IndexFileHeader) };
 
 
 
-///////////////////////////////////////////////////////////////////////////////
-/// \brief Allows using the FileBlockCollection template without
-///        exposing the templated-ness of FileBlockCollection, since we don't
-///        know what type of BC2 we need until runtime.
-//class FileBlockCollectionWrapper_Base
-//{
-//public:
-//  virtual ~FileBlockCollectionWrapper_Base()
-//  {
-//  }
-//
-//
-//  virtual void
-//  addBlock(FileBlock const &) = 0;
-//
-//
-//  virtual std::vector<FileBlock> const &
-//  getBlocks() = 0;
-//
-//};
-
-/*****************************************************************************
- * FileBlockCollectionWrapper                                              *
-*****************************************************************************/
-
-///// \sa FileBlockCollectionWrapper_Base
-//template<class Ty>
-//class FileBlockCollectionWrapper : public FileBlockCollectionWrapper_Base
-//{
-//public:
-//
-//  /// \brief Create a wrapper around a FileBlockCollection<Ty>
-//  FileBlockCollectionWrapper(std::shared_ptr<bd::Volume const> volume);
-//
-//  /// \brief Create a wrapper around the provided FileBlockCollection<Ty>.
-//  FileBlockCollectionWrapper(FileBlockCollection<Ty> const &col);
-//
-//  void
-//  addBlock(FileBlock const &b) override;
-//
-//
-//  std::vector<FileBlock> const &
-//  getBlocks() override;
-//
-//private:
-//  FileBlockCollection<Ty> c;
-//
-//};
-
-/*****************************************************************************
- * FileBlockCollectionWrapper  Impl                                        *
-*****************************************************************************/
-
-//template<class Ty>
-//FileBlockCollectionWrapper<Ty>::
-//FileBlockCollectionWrapper(std::shared_ptr<bd::Volume const> volume)
-//    : c{ std::move(volume) }
-//{
-//}
-//
-//template<class Ty>
-//FileBlockCollectionWrapper<Ty>::
-//FileBlockCollectionWrapper(FileBlockCollection<Ty> const &col)
-//    : c{ col }
-//{
-//}
-//
-//template<class Ty>
-//void
-//FileBlockCollectionWrapper<Ty>::addBlock(FileBlock const &b)
-//{
-//  c.addBlock(b);
-//}
-
-//
-//template<class Ty>
-//Volume const &
-//FileBlockCollectionWrapper<Ty>::getVolume() const
-//{
-//  return c.volume();
-//}
-
-
-//template<class Ty>
-//std::vector<FileBlock> const &
-//FileBlockCollectionWrapper<Ty>::getBlocks()
-//{
-//  return c.blocks();
-//}
-//
-
-//template<class Ty>
-//std::vector<FileBlock *> const &
-//FileBlockCollectionWrapper<Ty>::getNonEmptyBlocks()
-//{
-//  return c.nonEmptyBlocks();
-//}
-
 /// \brief Generate an index file from the provided FileBlockCollection. The
 ///        IndexFile can be written to disk in either ASCII or binary format.
 class IndexFile
@@ -210,13 +112,6 @@ private:
   bd::Volume m_volume;
 
 };  // class IndexFile
-
-
-/*
-/// \brief IndexFileHeader output stream operator.
-std::ostream &
-operator<<(std::ostream &os, IndexFileHeader const &h);
-*/
 
 
 } // namespace bd
