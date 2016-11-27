@@ -10,21 +10,18 @@
 #include <vector>
 #include "bd/volume/volume.h"
 
+
 namespace bd
 {
-
-
-
 namespace
 {
 ///< Magic number for the file (ascii 'SV')
 uint16_t const MAGIC{ 7376 };
 /// \brief The version of the IndexFile
-uint16_t const VERSION{ 9 };
+uint16_t const VERSION{ 10 };
 /// \brief Length of the IndexFileHeader in bytes.
 uint32_t const HEAD_LEN{ sizeof(IndexFileHeader) };
-}  // namespace
-
+} // namespace
 
 
 /// \brief Generate an index file from the provided FileBlockCollection. The
@@ -42,7 +39,7 @@ public:
   /// \brief Create an empty IndexFile with empty header.
   IndexFile();
 
-  
+
   ~IndexFile();
 
 
@@ -67,34 +64,31 @@ public:
 
 
   /// \brief Get the IndexFileHeader for the index file.
-  IndexFileHeader const &
+  IndexFileHeader const&
   getHeader() const;
 
 
-  std::vector<FileBlock> const &
+  std::vector<FileBlock> const&
   getFileBlocks() const;
 
 
-  std::vector<FileBlock>  &
+  std::vector<FileBlock>&
   getFileBlocks();
 
-  
-  bd::Volume const &
+
+  bd::Volume const&
   getVolume() const;
 
-  bd::Volume &
+
+  bd::Volume&
   getVolume();
 
 
   void
   init(DataType t);
 
-private:
 
-  /// \brief Instantiate a FileBlockCollection<Ty> with \c Ty determined by
-  ///        the \c type parameter.
-  /*static FileBlockCollectionWrapper_Base*
-  instantiate_wrapper(DataType type, const uint64_t* num_vox, const uint64_t* numblocks);*/
+private:
 
 
   /// \brief Read binary index file and populate \c a collection with blocks
@@ -110,10 +104,7 @@ private:
   std::string m_fileName;
   std::vector<bd::FileBlock> m_fileBlocks;
   bd::Volume m_volume;
-
-};  // class IndexFile
-
-
+}; // class IndexFile
 } // namespace bd
 
 

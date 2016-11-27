@@ -2,19 +2,17 @@
 // Created by Jim Pelton on 4/26/16.
 //
 
-#ifndef preproc_volume_h__
-#define preproc_volume_h__
+#ifndef bd_volume_h__
+#define bd_volume_h__
 
 #include <glm/glm.hpp>
 #include <bd/log/logger.h>
 
+
 namespace bd
 {
-
-
 class Volume
 {
-
 public:
   Volume();
 
@@ -29,12 +27,12 @@ public:
 
 
   /// \brief Get/set the number of voxels in each block.
-  const glm::u64vec3 &
+  const glm::u64vec3&
   block_dims() const;
 
 
   /// \brief Get/Set the number of blocks along each axis.
-  glm::u64vec3 const &
+  glm::u64vec3 const&
   block_count() const;
 
 
@@ -48,7 +46,7 @@ public:
 
 
   /// \brief Get/Set the volume's dimensions in voxels
-  const glm::u64vec3 &
+  const glm::u64vec3&
   voxelDims() const;
 
 
@@ -58,16 +56,18 @@ public:
 
 
   /// \brief Get the voxel dimensions of this volume.
-  glm::u64vec3 const &
+  glm::u64vec3 const&
   voxelDims();
 
 
   /// \brief Get/set the volume world dimensions.
-  glm::f32vec3 const &
+  glm::f32vec3 const&
   worldDims() const;
+
 
   void
   worldDims(glm::f32vec3 const &);
+
 
   double
   min() const;
@@ -100,17 +100,22 @@ public:
   void
   total(double);
 
+
   void
-    rovMin(double);
+  rovMin(double);
+
 
   double
-    rovMin() const;
+  rovMin() const;
+
 
   void
-    rovMax(double);
+  rovMax(double);
 
-  double 
+
+  double
   rovMax() const;
+
 
   uint64_t
   numEmptyVoxels() const;
@@ -120,32 +125,36 @@ public:
   numEmptyVoxels(uint64_t);
 
 
-  /// \brief Return the voxel extent covered by the blocks (the blocks may not run from edge to
-  /// edge of the volume).
+  /// \brief Return the voxel extent covered by the blocks.
+  ///
+  /// If volume voxel dimensions are not divisible by the number of
+  /// blocks, then the blocks may not span the entire extent of the
+  /// volume's voxels.
+  ///
   /// \return x, y, z dims of the voxel extent.
   glm::u64vec3
   blocksExtent() const;
 
+
 private:
 
-  glm::u64vec3 m_blockDims;  ///< Dimensions of a block in this volume, in voxels.
+  glm::u64vec3 m_blockDims; ///< Dimensions of a block in this volume, in voxels.
   glm::u64vec3 m_blockCount; ///< Number of equal sized blocks the volume is divided into.
-  glm::u64vec3 m_voxelDims;    ///< Volume dimensions in voxels.
+  glm::u64vec3 m_voxelDims; ///< Volume dimensions in voxels.
   glm::f32vec3 m_worldDims; ///< Volume dimensions in world coords.
   uint64_t m_volEmptyVoxels; ///< Number of non-relevant voxels.
-  double m_volMax;           ///< Max value found in volume.
-  double m_volMin;           ///< Min value found in volume.
-  double m_volAvg;           ///< Avg value found in volume.
-  double m_volTot;           ///< Total of all values in volume.
+  double m_volMax; ///< Max value found in volume.
+  double m_volMin; ///< Min value found in volume.
+  double m_volAvg; ///< Avg value found in volume.
+  double m_volTot; ///< Total of all values in volume.
   double m_rovMin;
   double m_rovMax;
-
-
 };
 
-std::ostream &
+
+std::ostream&
 operator<<(std::ostream &os, bd::Volume const &);
 
 } // namespace bd
 
-#endif // ! preproc_volume_h__
+#endif // ! bd_volume_h__

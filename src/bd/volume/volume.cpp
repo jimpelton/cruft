@@ -7,52 +7,54 @@
 #include <sstream>
 #include "bd/io/indexfileheader.h"
 
+
 namespace bd
 {
-
 namespace
 {
-  glm::vec3 
-  calculateWorldDims(glm::u64vec3 voxelDims)
-  {
-    glm::vec3 worldDims{ 0 };
+glm::vec3
+calculateWorldDims(glm::u64vec3 voxelDims)
+{
+  glm::vec3 worldDims{ 0 };
 
-    glm::u64 longest{ voxelDims.x };
-    if (longest < voxelDims.y) {
-      longest = voxelDims.y;
-    }
-    if (longest < voxelDims.z) {
-      longest = voxelDims.z;
-    }
-
-    worldDims.x = voxelDims.x / glm::f32(longest);
-    worldDims.y = voxelDims.y / glm::f32(longest);
-    worldDims.z = voxelDims.z / glm::f32(longest);
-    
-    return worldDims;
+  glm::u64 longest{ voxelDims.x };
+  if (longest < voxelDims.y) {
+    longest = voxelDims.y;
   }
+  if (longest < voxelDims.z) {
+    longest = voxelDims.z;
+  }
+
+  worldDims.x = voxelDims.x / glm::f32(longest);
+  worldDims.y = voxelDims.y / glm::f32(longest);
+  worldDims.z = voxelDims.z / glm::f32(longest);
+
+  return worldDims;
 }
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 Volume::Volume()
-    : Volume({ }, { 1, 1, 1 })
+  : Volume({ }, { 1, 1, 1 })
 {
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
 Volume::Volume(glm::u64vec3 const &voxelDims, glm::u64vec3 const &numBlocks)
-    : m_blockDims{ }
-    , m_blockCount{ }
-    , m_voxelDims{ voxelDims }
-    , m_worldDims{ 0, 0, 0 }
-    , m_volEmptyVoxels{ 0 }
-    , m_volMax{ std::numeric_limits<double>::lowest() }
-    , m_volMin{ std::numeric_limits<double>::max() }
-    , m_volAvg{ 0.0 }
-    , m_volTot{ 0.0 }
+  : m_blockDims{ }
+  , m_blockCount{ }
+  , m_voxelDims{ voxelDims }
+  , m_worldDims{ 0, 0, 0 }
+  , m_volEmptyVoxels{ 0 }
+  , m_volMax{ std::numeric_limits<double>::lowest() }
+  , m_volMin{ std::numeric_limits<double>::max() }
+  , m_volAvg{ 0.0 }
+  , m_volTot{ 0.0 }
+  , m_rovMin{ 0.0 }
+  , m_rovMax{ 0.0 }
 {
-
   glm::u64vec3 nb{ numBlocks };
   if (numBlocks.x == 0 || numBlocks.y == 0 || numBlocks.z == 0) {
     nb.x = nb.y = nb.z = 1;
@@ -62,21 +64,22 @@ Volume::Volume(glm::u64vec3 const &voxelDims, glm::u64vec3 const &numBlocks)
   m_blockCount = nb;
 
   m_worldDims = calculateWorldDims(voxelDims);
-
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
 Volume::Volume(Volume const &other)
-    : m_blockDims{ other.m_blockDims }
-    , m_blockCount{ other.m_blockCount }
-    , m_voxelDims{ other.m_voxelDims }
-    , m_worldDims{ other.m_worldDims }
-    , m_volEmptyVoxels{ other.m_volEmptyVoxels }
-    , m_volMax{ other.m_volMax }
-    , m_volMin{ other.m_volMin }
-    , m_volAvg{ other.m_volAvg }
-    , m_volTot{ other.m_volTot }
+  : m_blockDims{ other.m_blockDims }
+  , m_blockCount{ other.m_blockCount }
+  , m_voxelDims{ other.m_voxelDims }
+  , m_worldDims{ other.m_worldDims }
+  , m_volEmptyVoxels{ other.m_volEmptyVoxels }
+  , m_volMax{ other.m_volMax }
+  , m_volMin{ other.m_volMin }
+  , m_volAvg{ other.m_volAvg }
+  , m_volTot{ other.m_volTot }
+  , m_rovMin{ other.m_rovMin }
+  , m_rovMax{ other.m_rovMax }
 {
 }
 
@@ -88,7 +91,7 @@ Volume::~Volume()
 
 
 ///////////////////////////////////////////////////////////////////////////////
-const glm::u64vec3 &
+const glm::u64vec3&
 Volume::block_dims() const
 {
   return m_blockDims;
@@ -96,23 +99,7 @@ Volume::block_dims() const
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//glm::u64vec3 &
-//Volume::block_dims()
-//{
-//  return m_blockDims;
-//}
-
-
-///////////////////////////////////////////////////////////////////////////////
-//void
-//Volume::block_dims(const glm::u64vec3 &dims)
-//{
-//  m_blockDims = dims;
-//}
-
-
-///////////////////////////////////////////////////////////////////////////////
-const glm::u64vec3 &
+const glm::u64vec3&
 Volume::block_count() const
 {
   return m_blockCount;
@@ -136,7 +123,7 @@ Volume::total_block_count() const
 
 
 ///////////////////////////////////////////////////////////////////////////////
-const glm::u64vec3 &
+const glm::u64vec3&
 Volume::voxelDims() const
 {
   return m_voxelDims;
@@ -154,13 +141,14 @@ Volume::voxelDims(const glm::u64vec3 &voxdims)
 
 
 ///////////////////////////////////////////////////////////////////////////////
-glm::u64vec3 const &
+glm::u64vec3 const&
 Volume::voxelDims()
 {
   return m_voxelDims;
 }
 
 
+///////////////////////////////////////////////////////////////////////////////
 void
 Volume::worldDims(glm::f32vec3 const &wd)
 {
@@ -168,7 +156,8 @@ Volume::worldDims(glm::f32vec3 const &wd)
 }
 
 
-glm::f32vec3 const &
+///////////////////////////////////////////////////////////////////////////////
+glm::f32vec3 const&
 Volume::worldDims() const
 {
   return m_worldDims;
@@ -241,6 +230,38 @@ Volume::total(double t)
 
 ///////////////////////////////////////////////////////////////////////////////
 void
+Volume::rovMin(double r)
+{
+  m_rovMin = r;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+double
+Volume::rovMin() const
+{
+  return m_rovMin;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+void
+Volume::rovMax(double r)
+{
+  m_rovMax = r;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+double
+Volume::rovMax() const
+{
+  return m_rovMax;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+void
 Volume::numEmptyVoxels(uint64_t empty)
 {
   m_volEmptyVoxels = empty;
@@ -259,20 +280,17 @@ Volume::numEmptyVoxels() const
 glm::u64vec3
 Volume::blocksExtent() const
 {
-  return m_blockCount * m_blockDims;  // component-wise multiply
+  return m_blockCount * m_blockDims; // component-wise multiply
 }
 
 
-
-
-std::ostream &
+std::ostream&
 operator<<(std::ostream &os, bd::Volume const &v)
 {
   os <<
     "\"volume\": {\n"
     "  \"num_blocks\": [" << v.block_count().x << ", " << v.block_count().y << ", "
     << v.block_count().z << "],\n"
-
     "  \"volume_extent\": [" << v.voxelDims().x << ", " << v.voxelDims().y
     << ", " << v.voxelDims().z << "],\n"
     "  \"blocks_extent\": [" << v.blocksExtent().x << ", " << v.blocksExtent().y
@@ -287,7 +305,7 @@ operator<<(std::ostream &os, bd::Volume const &v)
     "  \"rov_min\": " << std::fixed << v.rovMin() << ",\n"
     "  \"rov_max\": " << std::fixed << v.rovMax() << "\n"
     "}";
-    
-}
 
+  return os;
+}
 } // namespace bd

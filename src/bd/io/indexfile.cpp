@@ -1,4 +1,3 @@
-
 #include <bd/io/indexfile.h>
 #include <bd/filter/blockaveragefilter.h>
 #include <bd/util/util.h>
@@ -11,7 +10,6 @@
 
 namespace bd
 {
-
 /*****************************************************************************
  * IndexFile                                                                 *
 *****************************************************************************/
@@ -31,7 +29,7 @@ IndexFile::fromBinaryIndexFile(std::string const &path)
 
   if (idxfile->getHeader().version != VERSION) {
     Err() << "The index file provided is the wrong version! You should regenerate the"
-        "index file.";
+      "index file.";
     return nullptr;
   }
 
@@ -41,9 +39,9 @@ IndexFile::fromBinaryIndexFile(std::string const &path)
 
 ///////////////////////////////////////////////////////////////////////////////
 IndexFile::IndexFile()
-    : m_header{ }
-    , m_fileName{ }
-    , m_fileBlocks( )
+  : m_header{ }
+  , m_fileName{ }
+  , m_fileBlocks()
 {
 }
 
@@ -55,7 +53,7 @@ IndexFile::~IndexFile()
 
 
 ///////////////////////////////////////////////////////////////////////////////
-const IndexFileHeader &
+const IndexFileHeader&
 IndexFile::getHeader() const
 {
   return m_header;
@@ -66,8 +64,9 @@ IndexFile::getHeader() const
 void
 IndexFile::writeBinaryIndexFile(std::ostream &os) const
 {
-  // write header to stream.
-  IndexFileHeader::writeToStream(os, m_header);
+  os.write(reinterpret_cast<const char *>(&m_header), sizeof(IndexFileHeader));
+  os.write(reinterpret_cast<const char *>(&m_volume), sizeof(Volume));
+
   // read all the blocks
   for (auto &b : m_fileBlocks) {
     os.write(reinterpret_cast<const char *>(&b), sizeof(FileBlock));
@@ -89,7 +88,6 @@ IndexFile::writeBinaryIndexFile(std::string const &outpath) const
   writeBinaryIndexFile(os);
   os.flush();
   os.close();
-
 }
 
 
@@ -101,8 +99,10 @@ IndexFile::writeAsciiIndexFile(std::ostream &os) const
   //
   // Open outer JSON object
   os << "{\n";
-  os << m_header << ",\n\"blocks\": { \n";
+  os << m_header << ",\n"
+        << m_volume << ",\n";
 
+  os << "\"blocks\": { \n";
   if (m_fileBlocks.size() > 0) {
     for (size_t i{ 0 }; i < m_fileBlocks.size() - 1; ++i) {
       os << m_fileBlocks[i] << ",\n";
@@ -133,7 +133,7 @@ IndexFile::writeAsciiIndexFile(std::string const &outpath) const
 
 
 ///////////////////////////////////////////////////////////////////////////////
-std::vector<FileBlock> const &
+std::vector<FileBlock> const&
 IndexFile::getFileBlocks() const
 {
   return m_fileBlocks;
@@ -141,7 +141,7 @@ IndexFile::getFileBlocks() const
 
 
 ///////////////////////////////////////////////////////////////////////////////
-std::vector<FileBlock>  &
+std::vector<FileBlock>&
 IndexFile::getFileBlocks()
 {
   return m_fileBlocks;
@@ -149,7 +149,7 @@ IndexFile::getFileBlocks()
 
 
 ///////////////////////////////////////////////////////////////////////////////
-bd::Volume const &
+bd::Volume const&
 IndexFile::getVolume() const
 {
   return m_volume;
@@ -157,7 +157,7 @@ IndexFile::getVolume() const
 
 
 ///////////////////////////////////////////////////////////////////////////////
-bd::Volume &
+bd::Volume&
 IndexFile::getVolume()
 {
   return m_volume;
@@ -176,7 +176,7 @@ IndexFile::readBinaryIndexFile()
   }
 
   is.seekg(0, std::ios::beg);
-  
+
   // read header
   IndexFileHeader ifh;
   is.read(reinterpret_cast<char *>(&ifh), sizeof(IndexFileHeader));
@@ -199,16 +199,17 @@ IndexFile::readBinaryIndexFile()
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void IndexFile::init(bd::DataType type)
+void
+IndexFile::init(bd::DataType type)
 {
   size_t tySize{ bd::to_sizeType(type) };
-  
+
   // bc: number of blocks
   glm::u64vec3 bc{ m_volume.block_count() };
 
   // vd: volume voxel dimensions
   glm::u64vec3 vd{ m_volume.voxelDims() };
-  
+
   // bd: block dimensions
   glm::u64vec3 bd{ m_volume.block_dims() };
 
@@ -234,14 +235,14 @@ void IndexFile::init(bd::DataType type)
 
         // block center in world coordinates
         glm::vec3 const blkOrigin{ (worldLoc + (worldLoc + wd)) * 0.5f };
-        
+
         // voxel start of block within volume
         glm::u64vec3 const startVoxel{ blkId * bd };
 
         FileBlock blk;
         blk.block_index = bd::to1D(bxi, byj, bzk, bc.x, bc.y);
         blk.data_offset = tySize *
-            bd::to1D(startVoxel.x, startVoxel.y, startVoxel.z, vd.x, vd.y);
+          bd::to1D(startVoxel.x, startVoxel.y, startVoxel.z, vd.x, vd.y);
 
         blk.voxel_dims[0] = static_cast<decltype(blk.voxel_dims[0])>(bd.x);
         blk.voxel_dims[1] = static_cast<decltype(blk.voxel_dims[1])>(bd.y);
@@ -270,48 +271,43 @@ void IndexFile::init(bd::DataType type)
 void
 IndexFile::initHeader(DataType dt)
 {
-
   m_header.magic_number = MAGIC;
   m_header.version = VERSION;
   m_header.header_length = HEAD_LEN;
   m_header.dataType = IndexFileHeader::getTypeInt(dt);
 
-//  m_header.numblocks[0] = m_volume.block_count().x;
-//  m_header.numblocks[1] = m_volume.block_count().y;
-//  m_header.numblocks[2] = m_volume.block_count().z;
-//
-//  m_header.dataType = IndexFileHeader::getTypeInt(dt);
-//
-//  m_header.volume_extent[0] = m_volume.voxelDims().x;
-//  m_header.volume_extent[1] = m_volume.voxelDims().y;
-//  m_header.volume_extent[2] = m_volume.voxelDims().z;
-//
-//  m_header.volume_world_dims[0] = m_volume.worldDims().x;
-//  m_header.volume_world_dims[1] = m_volume.worldDims().y;
-//  m_header.volume_world_dims[2] = m_volume.worldDims().z;
-//
-//  glm::u64vec3 blkExt = m_volume.blocksExtent();
-//  m_header.blocks_extent[0] = blkExt.x;
-//  m_header.blocks_extent[1] = blkExt.y;
-//  m_header.blocks_extent[2] = blkExt.z;
-//
-//  m_header.vol_empty_voxels = m_volume.numEmptyVoxels();
-//  m_header.vol_avg = m_volume.avg();
-//  m_header.vol_max = m_volume.max();
-//  m_header.vol_min = m_volume.min();
-//  m_header.vol_total = m_volume.total();
-
+  //  m_header.numblocks[0] = m_volume.block_count().x;
+  //  m_header.numblocks[1] = m_volume.block_count().y;
+  //  m_header.numblocks[2] = m_volume.block_count().z;
+  //
+  //  m_header.dataType = IndexFileHeader::getTypeInt(dt);
+  //
+  //  m_header.volume_extent[0] = m_volume.voxelDims().x;
+  //  m_header.volume_extent[1] = m_volume.voxelDims().y;
+  //  m_header.volume_extent[2] = m_volume.voxelDims().z;
+  //
+  //  m_header.volume_world_dims[0] = m_volume.worldDims().x;
+  //  m_header.volume_world_dims[1] = m_volume.worldDims().y;
+  //  m_header.volume_world_dims[2] = m_volume.worldDims().z;
+  //
+  //  glm::u64vec3 blkExt = m_volume.blocksExtent();
+  //  m_header.blocks_extent[0] = blkExt.x;
+  //  m_header.blocks_extent[1] = blkExt.y;
+  //  m_header.blocks_extent[2] = blkExt.z;
+  //
+  //  m_header.vol_empty_voxels = m_volume.numEmptyVoxels();
+  //  m_header.vol_avg = m_volume.avg();
+  //  m_header.vol_max = m_volume.max();
+  //  m_header.vol_min = m_volume.min();
+  //  m_header.vol_total = m_volume.total();
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
 // FileBlock operator<<
-std::ostream &
+std::ostream&
 operator<<(std::ostream &os, bd::FileBlock const &block)
 {
   return os << block.to_string();
 }
-
-
-
 } // namepsace bd

@@ -7,6 +7,7 @@
 
 #include <functional>
 
+
 namespace bd
 {
 class BlockCollection
@@ -23,8 +24,9 @@ public:
 
   BlockCollection(BlockCollection const &&) = delete;
 
-//  void initBlocksFromIndexFile(const std::string &fileName);
-//  void initBlocksFromIndexFile(std::unique_ptr<bd::IndexFile> index);
+
+  //  void initBlocksFromIndexFile(const std::string &fileName);
+  //  void initBlocksFromIndexFile(std::unique_ptr<bd::IndexFile> index);
 
   void
   initBlocksFromIndexFile(std::shared_ptr<IndexFile const> index);
@@ -36,33 +38,35 @@ public:
   /// \param numBlocks[in]  The number of blocks to generate in each dimension.
   void
   initBlocksFromFileBlocks(std::vector<bd::FileBlock> const &fileBlocks,
-                             glm::f32vec3 const &vd,
-                             glm::u64vec3 const &numblocks);
+                           glm::f32vec3 const &vd,
+                           glm::u64vec3 const &numblocks);
 
 
   void
   filterBlocks(std::function<bool(bd::Block const &)> filter);
 
+
   void
   filterBlocksByROVRange(double rov_min, double rov_max);
+
 
   bool
   initBlockTextures(std::string const &rawFile, bd::DataType type);
 
 
-  std::vector<Block *> const &
+  std::vector<Block *> const&
   blocks() const;
 
 
-  std::vector<Block *> &
+  std::vector<Block *>&
   blocks();
 
 
-  std::vector<Block *> const &
+  std::vector<Block *> const&
   nonEmptyBlocks() const;
 
 
-  std::vector<Block *> &
+  std::vector<Block *>&
   nonEmptyBlocks();
 
 
@@ -75,7 +79,7 @@ public:
 private:
 
   /// \brief initialize block texture from the raw data at \c file.
-  template<class Ty>
+  template <class Ty>
   bool
   do_initBlockTextures(std::string const &file);
 
@@ -84,7 +88,7 @@ private:
   /// \param b[in] The block for which data should be read.
   /// \param infile[in] Source data
   /// \param blockBuffer[out] Destination space for data.
-  template<class Ty>
+  template <class Ty>
   void
   fillBlockData(Block const &b, std::istream &infile, Ty *blockBuffer) const;
 
@@ -93,14 +97,13 @@ private:
 
   std::vector<Block *> m_nonEmptyBlocks;
 
-  std::vector<int> m_indexesToDraw;
+//  std::vector<int> m_indexesToDraw;
 
   bd::Volume m_volume;
-
 };
 
 
-template<typename Ty>
+template <typename Ty>
 bool
 BlockCollection::do_initBlockTextures(std::string const &file)
 {
@@ -132,10 +135,15 @@ BlockCollection::do_initBlockTextures(std::string const &file)
 
   // Generate textures for each non-empty block
   std::cout << std::endl;
+  int every = 0.1f * m_nonEmptyBlocks.size();
+  every = every == 0 ? 1 : every;
+
   for (Block *b : m_nonEmptyBlocks) {
 
-    std::cout << "\rInitializing texture block "
-              << ++i << "/" << m_nonEmptyBlocks.size() << std::flush;
+    if (i % every == 0) {
+      std::cout << "\rInitializing texture block " << ++i
+                   << "/" << m_nonEmptyBlocks.size();
+    }
 
 
     // Read data for this block from the disk.
@@ -165,18 +173,17 @@ BlockCollection::do_initBlockTextures(std::string const &file)
 }
 
 
-template<typename Ty>
+template <typename Ty>
 void
 BlockCollection::fillBlockData(Block const &b, std::istream &infile,
                                Ty *blockBuffer) const
 {
-
   // block's dimensions in voxels
   glm::u64vec3 const &be{ b.voxel_extent() };
 
   // volume's dimensions in voxels.
   glm::u64vec2 const &ve{ m_volume.voxelDims().x,
-                          m_volume.voxelDims().y };
+    m_volume.voxelDims().y };
 
   // start element = block index w/in volume * block size
   const glm::u64vec3 start{ b.ijk() * be };
@@ -205,10 +212,6 @@ BlockCollection::fillBlockData(Block const &b, std::istream &infile,
     }
   }
 }
-
-
 } // namespace bd
 
 #endif // !block_collection_h__
-
-
