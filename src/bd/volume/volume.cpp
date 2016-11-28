@@ -12,6 +12,9 @@ namespace bd
 {
 namespace
 {
+
+/// \brief Compute the world dimensions between 0 and 1 along each
+///  axis. The aspect ratio is maintained.
 glm::vec3
 calculateWorldDims(glm::u64vec3 voxelDims)
 {

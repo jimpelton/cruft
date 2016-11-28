@@ -75,13 +75,16 @@ public:
   /// \brief String rep. of this blockeroo.
   std::string to_string() const;
 
+  size_t byteSize() const;
+
 private:
   FileBlock m_fb;        ///< The FileBlock (contains the info from IndexFile)
   glm::u64vec3 m_ijk;    ///< Block's location in block coordinates.
   glm::vec3 m_origin;    ///< This blocks center in world coordinates.
   glm::mat4 m_transform; ///< Block's model-to-world transform matrix.
   Texture m_tex;         ///< Texture data assoc'd with this block.
-  bool m_empty;          ///< True if this block was determined empty.
+
+  size_t m_bytes;
 
 }; // class Block
 

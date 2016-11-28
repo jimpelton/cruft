@@ -22,6 +22,7 @@ Block::Block(const glm::u64vec3& ijk, const FileBlock &fb)
   , m_origin{ fb.world_oigin[0], fb.world_oigin[1], fb.world_oigin[2] }
   , m_transform{ 1.0f }  // identity matrix
   , m_tex{ bd::Texture::Target::Tex3D }
+  , m_bytes{ 0 }
 {
 
   glm::vec3 wld_dims{ fb.world_dims[0], fb.world_dims[1], fb.world_dims[2] };
@@ -130,6 +131,14 @@ Block::to_string() const
 
   return ss.str();
 }
+
+
+///////////////////////////////////////////////////////////////////////////////
+size_t Block::byteSize() const
+{
+  return m_bytes;
+}
+
 
 std::ostream&
 operator<<(std::ostream& os, const Block& b)

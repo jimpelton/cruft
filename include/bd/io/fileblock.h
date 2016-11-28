@@ -29,6 +29,7 @@ struct FileBlock
   FileBlock()
       : block_index{ 0 }
       , data_offset{ 0 }
+      , data_bytes{ 0 }
       , voxel_dims{ 0 }
       , world_dims{ 0 }
       , world_oigin{ 0 }
@@ -45,6 +46,7 @@ struct FileBlock
   FileBlock(const FileBlock& other)
       : block_index{ other.block_index }
       , data_offset{ other.data_offset }
+      , data_bytes{ other.data_bytes }
       , voxel_dims{ other.voxel_dims[0], other.voxel_dims[1], other.voxel_dims[2] }
       , world_dims{ other.world_dims[0], other.world_dims[1], other.world_dims[2] }
       , world_oigin{ other.world_oigin[0], other.world_oigin[1], other.world_oigin[2] }
@@ -63,6 +65,7 @@ struct FileBlock
 
   uint64_t block_index;    ///< The 1D idx of this block (derived from the i,j,k block-grid coordinates).
   uint64_t data_offset;    ///< Offset into the raw file that the block data starts.
+  uint64_t data_bytes;     ///< Size in bytes of this blocks data.
   uint64_t voxel_dims[3];  ///< Dimensions of this block in voxels.
   double world_dims[3];    ///< Dims of this block in world coordinates
   double world_oigin[3];   ///< Center coordinates within canonical cube.

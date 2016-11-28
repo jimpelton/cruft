@@ -84,7 +84,6 @@ BlockCollection::initBlocksFromFileBlocks(std::vector<FileBlock> const &fileBloc
 void
 BlockCollection::filterBlocks(std::function<bool(Block const &)> notEmpty)
 {
-//  m_indexesToDraw.clear();
   m_nonEmptyBlocks.clear();
 
   for (Block *b : m_blocks) {
@@ -92,7 +91,6 @@ BlockCollection::filterBlocks(std::function<bool(Block const &)> notEmpty)
 
     if (notEmpty(*b)) {
       m_nonEmptyBlocks.push_back(b);
-//      m_indexesToDraw.push_back(idx);
     }
   }
 
@@ -103,19 +101,23 @@ BlockCollection::filterBlocks(std::function<bool(Block const &)> notEmpty)
 void
 BlockCollection::filterBlocksByROVRange(double rov_min, double rov_max)
 {
-//  m_indexesToDraw.clear();
   m_nonEmptyBlocks.clear();
+  
+  size_t bytes{ 0 };
 
   for (Block *b : m_blocks) {
+    bytes += b->fileBlock().data_bytes;
+    
+    if (bytes > m_maxBlockBytes) {
+      return;
+    }
     
     uint64_t idx{ b->fileBlock().block_index };
     double rov{ b->fileBlock().rov };
     
     if (rov >= rov_min && rov <= rov_max) {
       m_nonEmptyBlocks.push_back(b);
-//      m_indexesToDraw.push_back(idx);
     }
-
   }
 }
 

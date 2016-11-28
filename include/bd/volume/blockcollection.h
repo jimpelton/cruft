@@ -25,9 +25,6 @@ public:
   BlockCollection(BlockCollection const &&) = delete;
 
 
-  //  void initBlocksFromIndexFile(const std::string &fileName);
-  //  void initBlocksFromIndexFile(std::unique_ptr<bd::IndexFile> index);
-
   void
   initBlocksFromIndexFile(std::shared_ptr<IndexFile const> index);
 
@@ -35,7 +32,8 @@ public:
   /// \brief Initializes \c blocks from the provided vector of FileBlock.
   /// \note Blocks are sized to fit it within the world-extent of the volume data.
   /// \param fileBlocks[in] The FileBlocks generated from the IndexFile.
-  /// \param numBlocks[in]  The number of blocks to generate in each dimension.
+  /// \param vd[in]  The voxel dimensions of the volume data
+  /// \param numblocks[in]  The number of blocks to generate in each dimension.
   void
   initBlocksFromFileBlocks(std::vector<bd::FileBlock> const &fileBlocks,
                            glm::f32vec3 const &vd,
@@ -92,13 +90,14 @@ private:
   void
   fillBlockData(Block const &b, std::istream &infile, Ty *blockBuffer) const;
 
-
+  size_t m_maxBlocks;
   std::vector<Block *> m_blocks;
-
   std::vector<Block *> m_nonEmptyBlocks;
 
-//  std::vector<int> m_indexesToDraw;
+  size_t m_maxBlockBytes; ///< Number of bytes taken up by drawable blocks.
 
+  bool m_blocksToEvict;
+  bool m_blocksToLoad;
   bd::Volume m_volume;
 };
 
@@ -130,8 +129,8 @@ BlockCollection::do_initBlockTextures(std::string const &file)
 
 
   int i{ 0 };
-  double vol_min = m_volume.min(); //m_indexFile->getHeader().vol_min;
-  double diff{ m_volume.max() - vol_min };
+  double const vol_min = m_volume.min(); //m_indexFile->getHeader().vol_min;
+  double const diff{ m_volume.max() - vol_min };
 
   // Generate textures for each non-empty block
   std::cout << std::endl;
@@ -212,6 +211,7 @@ BlockCollection::fillBlockData(Block const &b, std::istream &infile,
     }
   }
 }
+
 } // namespace bd
 
 #endif // !block_collection_h__

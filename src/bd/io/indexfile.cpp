@@ -244,6 +244,8 @@ IndexFile::init(bd::DataType type)
         blk.data_offset = tySize *
           bd::to1D(startVoxel.x, startVoxel.y, startVoxel.z, vd.x, vd.y);
 
+        blk.data_bytes = tySize * bd.x * bd.y * bd.z;
+          
         blk.voxel_dims[0] = static_cast<decltype(blk.voxel_dims[0])>(bd.x);
         blk.voxel_dims[1] = static_cast<decltype(blk.voxel_dims[1])>(bd.y);
         blk.voxel_dims[2] = static_cast<decltype(blk.voxel_dims[2])>(bd.z);
