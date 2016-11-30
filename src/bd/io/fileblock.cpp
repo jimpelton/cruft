@@ -18,6 +18,7 @@ FileBlock::to_string() const
      "   \"block_" << block_index << "\": {\n"
       "      \"index\":" << block_index << ",\n"
       "      \"data_offset\": " << data_offset << ",\n"
+      "      \"data_bytes\": " << data_bytes << ",\n"
       "      \"voxel_dims\": [" << voxel_dims[0] << ", " << voxel_dims[1] << ", "
      << voxel_dims[2] << "],\n"
       "      \"world_dims\": [" << world_dims[0] << ", " << world_dims[1] << ", "

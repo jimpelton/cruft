@@ -30,16 +30,6 @@ BlockCollection::initBlocksFromIndexFile(std::shared_ptr<IndexFile const> index)
 {
   m_volume = index->getVolume();
 
-//  bd::IndexFileHeader const &header = index->getHeader();
-
-  Dbg() << "Initializing blocks from index file."; //<< fileName;
-
-  //glm::u64vec3 nb{ header.numblocks[0], header.numblocks[1], header.numblocks[2] };
-  //glm::f64vec3 vol_dims{ header.volume_world_dims[0],
-  //                       header.volume_world_dims[1],
-  //                       header.volume_world_dims[2]};
-  
-  
   initBlocksFromFileBlocks(index->getFileBlocks(),
     m_volume.worldDims(),
     m_volume.block_count());
@@ -52,6 +42,13 @@ BlockCollection::initBlocksFromFileBlocks(std::vector<FileBlock> const &fileBloc
                                           glm::f32vec3 const &vd,
                                           glm::u64vec3 const &nb)
 {
+
+  if (fileBlocks.size() == 0)
+  {
+    bd::Warn() << "No blocks in list of file blocks to initialize.";
+    return;
+  }
+
   m_blocks.reserve(fileBlocks.size());
 //  m_indexesToDraw.reserve(fileBlocks.size());
   m_nonEmptyBlocks.reserve(fileBlocks.size());
@@ -81,20 +78,19 @@ BlockCollection::initBlocksFromFileBlocks(std::vector<FileBlock> const &fileBloc
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void
-BlockCollection::filterBlocks(std::function<bool(Block const &)> notEmpty)
-{
-  m_nonEmptyBlocks.clear();
-
-  for (Block *b : m_blocks) {
-    uint64_t idx{ b->fileBlock().block_index };
-
-    if (notEmpty(*b)) {
-      m_nonEmptyBlocks.push_back(b);
-    }
-  }
-
-}
+//void
+//BlockCollection::filterBlocks(std::function<bool(Block const &)> notEmpty)
+//{
+//  m_nonEmptyBlocks.clear();
+//
+//  for (Block *b : m_blocks) {
+//    uint64_t idx{ b->fileBlock().block_index };
+//
+//    if (notEmpty(*b)) {
+//      m_nonEmptyBlocks.push_back(b);
+//    }
+//  }
+//}
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -126,9 +122,14 @@ BlockCollection::filterBlocksByROVRange(double rov_min, double rov_max)
 bool
 BlockCollection::initBlockTextures(std::string const &file, bd::DataType type)
 {
-  bool rval = false;
-//  DataType type{ IndexFileHeader::getType(m_indexFile->getHeader()) };
+  if (m_blocks.size() == 0)
+  {
+    bd::Warn() << "No blocks to initialize textures for.";
+    return true;
+  }
 
+  bool rval = false;
+  
   switch (type) {
     case DataType::UnsignedCharacter:
       rval = do_initBlockTextures<unsigned char>(file);
