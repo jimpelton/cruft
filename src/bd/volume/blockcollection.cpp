@@ -97,6 +97,7 @@ BlockCollection::initBlocksFromFileBlocks(std::vector<FileBlock> const &fileBloc
 void
 BlockCollection::filterBlocksByROVRange(double rov_min, double rov_max)
 {
+
   m_nonEmptyBlocks.clear();
   
   size_t bytes{ 0 };

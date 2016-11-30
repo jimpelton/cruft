@@ -68,10 +68,10 @@ public:
 
   /// /brief Get the number of elements in a single buffer in the buffer pool.
   size_t
-  singleBufferElements();
+  singleBufferElements() const;
 
   size_t
-  totalBufferBytes();
+  totalBufferBytes() const;
 
 private:
   std::string m_path;
@@ -192,7 +192,7 @@ BufferedReader<Ty>::waitReturnEmpty(Buffer<Ty> *buf)
 
 template<class Ty>
 size_t
-BufferedReader<Ty>::singleBufferElements()
+BufferedReader<Ty>::singleBufferElements() const
 {
   return m_pool->bufferSizeElements();
 }
@@ -200,7 +200,7 @@ BufferedReader<Ty>::singleBufferElements()
 
 template<class Ty>
 size_t
-BufferedReader<Ty>::totalBufferBytes()
+BufferedReader<Ty>::totalBufferBytes() const 
 {
   return m_bufSizeBytes;
 }

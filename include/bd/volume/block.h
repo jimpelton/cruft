@@ -84,7 +84,6 @@ private:
   glm::mat4 m_transform; ///< Block's model-to-world transform matrix.
   Texture m_tex;         ///< Texture data assoc'd with this block.
 
-  size_t m_bytes;
 
 }; // class Block
 

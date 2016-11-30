@@ -134,9 +134,10 @@ Block::to_string() const
 
 
 ///////////////////////////////////////////////////////////////////////////////
-size_t Block::byteSize() const
+size_t 
+Block::byteSize() const
 {
-  return m_bytes;
+  return m_fb.data_bytes;
 }
 
 
