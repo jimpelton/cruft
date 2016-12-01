@@ -10,11 +10,18 @@
 
 namespace bd
 {
+
+class BlockMemoryManager
+{
+
+};
+
 class BlockCollection
 {
 public:
   BlockCollection();
 
+  BlockCollection(size_t gpuMem, size_t blockMem);
 
   ~BlockCollection();
 
@@ -90,11 +97,11 @@ private:
   void
   fillBlockData(Block const &b, std::istream &infile, Ty *blockBuffer) const;
 
-  size_t m_maxBlocks;
   std::vector<Block *> m_blocks;
   std::vector<Block *> m_nonEmptyBlocks;
 
-  size_t m_maxBlockBytes; ///< Number of bytes taken up by drawable blocks.
+  size_t m_gpuMem; ///< Number of bytes allowed for nonEmptyBlocks on the GPU.
+  size_t m_blkMem; ///< Bytes allowed for blocks in CPU memory.
 
   bool m_blocksToEvict;
   bool m_blocksToLoad;

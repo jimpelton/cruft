@@ -84,6 +84,12 @@ private:
   glm::mat4 m_transform; ///< Block's model-to-world transform matrix.
   Texture m_tex;         ///< Texture data assoc'd with this block.
 
+  ///
+  /// 0x01 -- resident in GPU memory
+  /// 0x02 -- resident in CPU memory
+  /// 0x04 --
+  int status;
+
 
 }; // class Block
 

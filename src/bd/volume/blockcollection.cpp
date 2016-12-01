@@ -10,13 +10,19 @@ namespace bd
 
 ///////////////////////////////////////////////////////////////////////////////
 BlockCollection::BlockCollection()
-    : m_blocks()
-    , m_nonEmptyBlocks()
-    , m_volume{ }
-//    , m_indexFile{ nullptr }
+    : BlockCollection(0, 0)
 {
 }
 
+
+BlockCollection::BlockCollection(size_t gpuMem, size_t blockMem)
+    : m_blocks()
+    , m_nonEmptyBlocks()
+    , m_volume{ }
+    , m_gpuMem{ gpuMem }
+    , m_blkMem{ blockMem }
+{
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 BlockCollection::~BlockCollection()
@@ -31,8 +37,8 @@ BlockCollection::initBlocksFromIndexFile(std::shared_ptr<IndexFile const> index)
   m_volume = index->getVolume();
 
   initBlocksFromFileBlocks(index->getFileBlocks(),
-    m_volume.worldDims(),
-    m_volume.block_count());
+                           m_volume.worldDims(),
+                           m_volume.block_count());
 }
 
 
@@ -74,6 +80,11 @@ BlockCollection::initBlocksFromFileBlocks(std::vector<FileBlock> const &fileBloc
   }
   std::cout << std::endl;
 
+//  std::sort(m_blocks.begin(), m_blocks.end(),
+//            [](Block const *lhs, Block const *rhs) -> bool {
+//              return lhs->fileBlock().rov < rhs->fileBlock().rov;
+//            });
+
 }
 
 
@@ -103,19 +114,22 @@ BlockCollection::filterBlocksByROVRange(double rov_min, double rov_max)
   size_t bytes{ 0 };
 
   for (Block *b : m_blocks) {
-    bytes += b->fileBlock().data_bytes;
-    
-    if (bytes > m_maxBlockBytes) {
-      return;
-    }
-    
-    uint64_t idx{ b->fileBlock().block_index };
+    //uint64_t idx{ b->fileBlock().block_index };
+
     double rov{ b->fileBlock().rov };
-    
     if (rov >= rov_min && rov <= rov_max) {
+      bytes += b->fileBlock().data_bytes;
+
+      if (bytes > m_gpuMem) {
+        return;
+      }
+
       m_nonEmptyBlocks.push_back(b);
     }
-  }
+
+
+
+  } // for
 }
 
 
