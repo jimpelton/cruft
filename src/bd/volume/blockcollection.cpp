@@ -1,3 +1,5 @@
+#include <GL/glew.h>
+
 #include <bd/volume/blockcollection.h>
 
 #include <bd/log/gl_log.h>
@@ -8,19 +10,78 @@
 namespace bd
 {
 
-///////////////////////////////////////////////////////////////////////////////
-BlockCollection::BlockCollection()
-    : BlockCollection(0, 0)
+BlockMemoryManager::BlockMemoryManager()
 {
 }
 
 
-BlockCollection::BlockCollection(size_t gpuMem, size_t blockMem)
+BlockMemoryManager::BlockMemoryManager(size_t blockSizeBytes,
+                                       size_t gpuMemBytes,
+                                       size_t cpuMembytes,
+                                       int bW, int bH, int bD)
+  : m_maxGpuBlocks{ }
+  , m_maxCpuBlocks{ }
+  , m_gpu{ }
+  , m_cpu{ }
+{
+  if (blockSizeBytes > 0) {
+
+    m_maxGpuBlocks = gpuMemBytes / blockSizeBytes;
+
+    m_maxCpuBlocks = cpuMembytes / blockSizeBytes;
+
+  } else {
+    Warn() << "Block size of zero given to the memory manager. Only one block will be allocated.";
+    m_maxGpuBlocks = 1;
+  }
+
+}
+
+
+BlockMemoryManager::~BlockMemoryManager()
+{
+}
+
+
+Block*
+BlockMemoryManager::operator[](size_t idx)
+{
+  assert(false && "not implemented");
+}
+
+void
+BlockMemoryManager::init(DataType type, int bW, int bH, int bD)
+{
+  m_gpu.reserve(m_maxGpuBlocks);
+  m_cpu.reserve(m_maxCpuBlocks);
+
+  m_data = new char[m_maxCpuBlocks * to_sizeType(type)];
+
+  Texture::GenTextures3d(m_maxGpuBlocks, type, Texture::Format::RED, bW, bH, bD, &m_texs);
+}
+
+void
+BlockMemoryManager::update(double minR, double maxR)
+{
+}
+
+
+void
+BlockMemoryManager::loadToGpu(Block const *b)
+{
+
+}
+
+BlockCollection::BlockCollection()
+  : BlockCollection{ nullptr }
+{
+}
+
+BlockCollection::BlockCollection(std::unique_ptr<BlockMemoryManager> man)
     : m_blocks()
     , m_nonEmptyBlocks()
     , m_volume{ }
-    , m_gpuMem{ gpuMem }
-    , m_blkMem{ blockMem }
+    , m_man{ std::move(man) }
 {
 }
 
@@ -39,6 +100,12 @@ BlockCollection::initBlocksFromIndexFile(std::shared_ptr<IndexFile const> index)
   initBlocksFromFileBlocks(index->getFileBlocks(),
                            m_volume.worldDims(),
                            m_volume.block_count());
+
+//  glm::u64vec3 dims{ index->getVolume().block_dims() };
+//  size_t blkSz{ dims.x * dims.y * dims.z };
+//  size_t typeSz{ to_sizeType(IndexFileHeader::getType(index->getHeader())) };
+//  size_t blockBytes{ blkSz * typeSz };
+
 }
 
 
@@ -108,7 +175,7 @@ BlockCollection::initBlocksFromFileBlocks(std::vector<FileBlock> const &fileBloc
 void
 BlockCollection::filterBlocksByROVRange(double rov_min, double rov_max)
 {
-
+  //TODO: move filterBlocksByROVRange to mem manager.
   m_nonEmptyBlocks.clear();
   
   size_t bytes{ 0 };
@@ -120,9 +187,9 @@ BlockCollection::filterBlocksByROVRange(double rov_min, double rov_max)
     if (rov >= rov_min && rov <= rov_max) {
       bytes += b->fileBlock().data_bytes;
 
-      if (bytes > m_gpuMem) {
-        return;
-      }
+//      if (bytes > m_gpuMem) {
+//        return;
+//      }
 
       m_nonEmptyBlocks.push_back(b);
     }
@@ -227,6 +294,7 @@ BlockCollection::findLargestBlock(std::vector<Block *> &blocks)
 
   Block *blk{ *largest };
   return blk->voxel_extent().x * blk->voxel_extent().y * blk->voxel_extent().z;
+
 }
 
 

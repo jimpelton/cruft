@@ -4,8 +4,10 @@
 #include <bd/graphics/shader.h>
 #include <bd/io/datatypes.h>
 
+
 #include <string>
 #include <cstdlib>
+#include <vector>
 
 namespace bd
 {
@@ -43,6 +45,20 @@ public:
   };
 
 
+  /// \brief Generate \c n textures, allocate OpenGL storage on GPU and place them into the
+  /// given vector.
+  ///
+  /// \note The vector will be cleared of data.
+  /// \param v storage for the textures
+  /// \param n number of textures to generate
+  static void
+  GenTextures3d(int num,
+                DataType t,
+                Format internal,
+                int w, int h, int d,
+                std::vector<Texture> *v);
+
+
   Texture(Target textureType);
 
 
@@ -60,17 +76,33 @@ public:
 
 
   unsigned int
-  genGLTex1d(float const *img, Format ity, Format ety, size_t w);
+  genGLTex1d(float const *img, Format internal, Format external, size_t w);
 
 
   unsigned int
-  genGLTex2d(float *img, Format ity, Format ety, size_t w, size_t h);
+  genGLTex2d(float *img, Format internal, Format external, size_t w, size_t h);
 
 
   unsigned int
   genGLTex3d(Format internal, Format external, size_t w, size_t h, size_t d,
              DataType ty, void *pixelData);
 
+
+  void
+  subImage1D(Format external,
+             int xoff, int w,
+             DataType type, void const *pixelData);
+
+
+  void
+  subImage2D(Format external, int xoff, int yoff, int w, int h,
+             DataType type, void const *pixelData);
+
+
+  void
+  subImage3D(Format external,
+             int xoff, int yoff, int zoff, int w, int h, int d,
+             DataType type, void const *pixelData);
 
   unsigned int
   id() const
@@ -91,15 +123,8 @@ public:
 
 
 private:
-  ///////////////////////////////////////////////////////////////////////////////
-  // Data members
-  ///////////////////////////////////////////////////////////////////////////////
-
   unsigned int m_id; ///< OpenGL id of the texture data.
-  //  unsigned int m_samplerUniform;  ///< OpenGL id of the texture sampler to use.
-  //  unsigned int m_unit; ///< Texture sampling unit.
-  Target m_type; ///< the gl target to bind to.
-  //    Sampler m_sampler; ///
+  Target m_type;     ///< the gl target to bind to.
 };
 
 

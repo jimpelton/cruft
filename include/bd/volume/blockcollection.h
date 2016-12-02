@@ -14,6 +14,55 @@ namespace bd
 class BlockMemoryManager
 {
 
+public:
+
+  /// \brief Manage memory and block texture cache on GPU.
+  BlockMemoryManager();
+
+
+  /// \brief Manage memory and block texture cache on GPU.
+  /// \param blockSize - bytes for single block
+  /// \param gpuMem - bytes to use on GPU for block textures
+  /// \param cpuMem - bytes to use on CPU for block texture cache
+  /// \param bW - block width
+  /// \param bH - block height
+  /// \param bD - block depth
+  BlockMemoryManager(size_t blockSize, size_t gpuMem, size_t cpuMem,
+                     int bW, int bH, int bD);
+
+
+  ~BlockMemoryManager();
+
+
+  Block *
+  operator[](size_t idx);
+
+
+  void
+  init(DataType type, int bW, int bH, int bD);
+
+
+  /// Evict blocks from GPU if space is needed.
+  /// Load blocks to GPU.
+  void
+  update(double minR, double maxR);
+
+
+private:
+
+
+  void
+  loadToGpu(Block const *b);
+
+
+  int m_maxGpuBlocks;
+  int m_maxCpuBlocks;
+
+  std::vector<Block *> m_gpu;
+  std::vector<Block *> m_cpu;
+  std::vector<Texture> m_texs;
+  char * m_data;
+
 };
 
 class BlockCollection
@@ -21,7 +70,7 @@ class BlockCollection
 public:
   BlockCollection();
 
-  BlockCollection(size_t gpuMem, size_t blockMem);
+  BlockCollection(std::unique_ptr<BlockMemoryManager> man);
 
   ~BlockCollection();
 
@@ -100,12 +149,10 @@ private:
   std::vector<Block *> m_blocks;
   std::vector<Block *> m_nonEmptyBlocks;
 
-  size_t m_gpuMem; ///< Number of bytes allowed for nonEmptyBlocks on the GPU.
-  size_t m_blkMem; ///< Bytes allowed for blocks in CPU memory.
+  Volume m_volume;
 
-  bool m_blocksToEvict;
-  bool m_blocksToLoad;
-  bd::Volume m_volume;
+  std::unique_ptr<BlockMemoryManager> m_man;
+
 };
 
 

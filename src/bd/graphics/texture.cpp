@@ -58,6 +58,40 @@ pixelType(DataType dt)
 
 } // namespace
 
+
+void
+Texture::GenTextures3d(int num,
+                       DataType t,
+                       Format internal,
+                       int w, int h, int d,
+                       std::vector<Texture> *v)
+{
+  v->clear();
+  v->resize(num, Texture{ Target::Tex3D });
+
+  GLuint * texs{ new GLuint[num] };
+  gl_check(glGenTextures(num, texs));
+
+  // allocate on the gpu and set Texture's GL id.
+  for(int i{ 0 }; i < num; ++i) {
+    GLuint id{ texs[i] };
+    gl_check(glTextureStorage3D(id, 1,
+                                gl_format[bd::ordinal(internal)],
+                                w, h, d));
+    (*v)[i].m_id = id;
+
+    gl_check(glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+    gl_check(glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+    gl_check(glTextureParameteri(id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+    gl_check(glTextureParameteri(id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+    gl_check(glTextureParameteri(id, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
+  }
+
+  delete[] texs;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
 Texture::Texture(Target textureType)
     : m_id{ 0 }
     , m_type{ textureType }
@@ -65,11 +99,13 @@ Texture::Texture(Target textureType)
 }
 
 
+////////////////////////////////////////////////////////////////////////////////
 Texture::~Texture()
 {
 }
 
 
+////////////////////////////////////////////////////////////////////////////////
 void
 Texture::bind() const
 {
@@ -77,6 +113,7 @@ Texture::bind() const
 }
 
 
+////////////////////////////////////////////////////////////////////////////////
 void
 Texture::bind(unsigned int unit) const
 {
@@ -86,6 +123,7 @@ Texture::bind(unsigned int unit) const
 }
 
 
+////////////////////////////////////////////////////////////////////////////////
 unsigned int
 Texture::genGLTex1d(float const *img, Format ity, Format ety, size_t w)
 {
@@ -115,6 +153,7 @@ Texture::genGLTex1d(float const *img, Format ity, Format ety, size_t w)
 }
 
 
+////////////////////////////////////////////////////////////////////////////////
 unsigned int
 Texture::genGLTex2d(float *img, Format ity, Format ety, size_t w, size_t h)
 {
@@ -146,6 +185,7 @@ Texture::genGLTex2d(float *img, Format ity, Format ety, size_t w, size_t h)
 }
 
 
+////////////////////////////////////////////////////////////////////////////////
 unsigned int
 Texture::genGLTex3d(Format ity, Format ety, size_t w, size_t h, size_t d,
                     DataType ty, void *pixelData)
@@ -181,7 +221,48 @@ Texture::genGLTex3d(Format ity, Format ety, size_t w, size_t h, size_t d,
   return texId;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+void
+Texture::subImage1D(Texture::Format external,
+                    int xoff,
+                    int w,
+                    DataType type,
+                    void const *pixelData)
+{
+  assert(false && "not implemented");
+}
 
+
+////////////////////////////////////////////////////////////////////////////////
+void
+Texture::subImage2D(Texture::Format external,
+                    int xoff,
+                    int yoff,
+                    int w,
+                    int h,
+                    DataType type,
+                    void const *pixelData)
+{
+  assert(false && "not implemented");
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+void
+Texture::subImage3D(Format external,
+                    int xoff, int yoff, int zoff,
+                    int w, int h, int d,
+                    DataType type, void const *pixelData)
+{
+  gl_check(glTextureSubImage3D(m_id, 0,
+                      xoff, yoff, zoff, w, h, d,
+                      gl_format[ordinal(external)],
+                      pixelType(type),
+                      pixelData));
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
 std::string
 Texture::to_string() const
 {
@@ -230,6 +311,7 @@ Texture::to_string() const
   ss << " }";
   return ss.str();
 }
+
 
 
 std::ostream &
