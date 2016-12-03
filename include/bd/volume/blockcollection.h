@@ -215,8 +215,8 @@ BlockCollection::do_initBlockTextures(std::string const &file)
     }
 
     //TODO: try not normalizing the texture data and see what happens... :)
-    b->texture().genGLTex3d(bd::Texture::Format::RED,
-                            bd::Texture::Format::RED,
+    b->texture().subImage3D(bd::Texture::Format::RED,
+                            0,0,0,
                             b->voxel_extent().x,
                             b->voxel_extent().y,
                             b->voxel_extent().z,

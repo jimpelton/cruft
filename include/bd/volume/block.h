@@ -35,62 +35,88 @@ public:
   /// \param[in] fb This block's FileBlock.
   Block(glm::u64vec3 const &ijk, FileBlock const &fb);
 
-  virtual ~Block();
+
+  virtual
+  ~Block();
+
+
+  bool
+  visible() const;
+
+
+  void
+  visible(bool);
 
   /// \brief Get the FileBlock for this block.
-  const FileBlock& fileBlock() const;
+  const FileBlock&
+  fileBlock() const;
 
 
   /// \brief Get the ijk location of this block.
-  const glm::u64vec3 & ijk() const;
+  const glm::u64vec3 &
+  ijk() const;
   /// \brief Set the ijk location of this block.
-  void ijk(glm::u64vec3 const & ijk);
+  void
+  ijk(glm::u64vec3 const & ijk);
 
 
   /// \brief Set if this block is marked empty.
 //  void empty(bool);
   /// \brief Get if this block is marked empty.
-  bool empty() const;
+  bool
+  empty() const;
 
 
   /// \brief Get the average value of this here block.
-  double avg() const;
+  double
+  avg() const;
 
 
-  /// \brief Get the center coordinates of this block.
-  glm::vec3 const & origin() const;
+  /// \brief Get the center world coordinates of this block.
+  glm::vec3 const &
+  origin() const;
 
 
   /// \brief Get the texture assoc'd with this block.
-  bd::Texture const & texture() const;
+  bd::Texture const &
+  texture() const;
 
 
   /// \brief Get a reference to this blocks model-to-world transform matrix.
-  glm::mat4& transform();
+  glm::mat4&
+  transform();
 
 
-  /// \brief Get dimensions of this block in voxels.
-  glm::u64vec3 voxel_extent() const;
+  /// \brief Construct a vector containing the dimensions of this block in voxels.
+  glm::u64vec3
+  voxel_extent() const;
 
 
   /// \brief String rep. of this blockeroo.
   std::string to_string() const;
 
+
   size_t byteSize() const;
+
 
 private:
   FileBlock m_fb;        ///< The FileBlock (contains the info from IndexFile)
   glm::u64vec3 m_ijk;    ///< Block's location in block coordinates.
   glm::vec3 m_origin;    ///< This blocks center in world coordinates.
   glm::mat4 m_transform; ///< Block's model-to-world transform matrix.
-  std::shared_ptr<Texture> m_tex;         ///< Texture data assoc'd with this block.
+  std::shared_ptr<Texture> m_tex; ///< Texture data assoc'd with this block.
 
+  static const int VISIBLE = 0x01;
+  static const int GPU_RES = 0x02;
+  static const int CPU_RES = 0x04;
   ///
-  /// 0x01 -- resident in GPU memory
-  /// 0x02 -- resident in CPU memory
+  /// 0x01 -- visible.
+  /// 0x02 -- resident in GPU memory
+  /// 0x04 -- resident in CPU memory
   /// 0x04 --
   int status;
 
+  bool m_isVisible;
 
 }; // class Block
 
