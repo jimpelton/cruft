@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <memory>
 
 namespace bd
 {
@@ -61,7 +62,7 @@ public:
 
 
   /// \brief Get the texture assoc'd with this block.
-  bd::Texture& texture();
+  bd::Texture const & texture() const;
 
 
   /// \brief Get a reference to this blocks model-to-world transform matrix.
@@ -82,7 +83,7 @@ private:
   glm::u64vec3 m_ijk;    ///< Block's location in block coordinates.
   glm::vec3 m_origin;    ///< This blocks center in world coordinates.
   glm::mat4 m_transform; ///< Block's model-to-world transform matrix.
-  Texture m_tex;         ///< Texture data assoc'd with this block.
+  std::shared_ptr<Texture> m_tex;         ///< Texture data assoc'd with this block.
 
   ///
   /// 0x01 -- resident in GPU memory

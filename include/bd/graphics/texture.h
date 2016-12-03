@@ -91,18 +91,19 @@ public:
   void
   subImage1D(Format external,
              int xoff, int w,
-             DataType type, void const *pixelData);
+             DataType type, void const *pixelData) const;
 
 
   void
-  subImage2D(Format external, int xoff, int yoff, int w, int h,
-             DataType type, void const *pixelData);
+  subImage2D(Format external,
+             int xoff, int yoff, int w, int h,
+             DataType type, void const *pixelData) const;
 
 
   void
   subImage3D(Format external,
              int xoff, int yoff, int zoff, int w, int h, int d,
-             DataType type, void const *pixelData);
+             DataType type, void const *pixelData) const;
 
   unsigned int
   id() const

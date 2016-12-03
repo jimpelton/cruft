@@ -98,10 +98,10 @@ Block::avg() const
 
 
 ///////////////////////////////////////////////////////////////////////////////
-bd::Texture&
-Block::texture()
+bd::Texture const &
+Block::texture() const
 {
-  return m_tex;
+  return *(m_tex.get());
 }
 
 

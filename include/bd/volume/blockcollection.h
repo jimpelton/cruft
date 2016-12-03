@@ -6,6 +6,7 @@
 #include <bd/util/util.h>
 
 #include <functional>
+#include <list>
 
 
 namespace bd
@@ -28,7 +29,7 @@ public:
   /// \param bH - block height
   /// \param bD - block depth
   BlockMemoryManager(size_t blockSize, size_t gpuMem, size_t cpuMem,
-                     int bW, int bH, int bD);
+                     int bW, int bH, int bD, std::vector<Block*> const &blocks);
 
 
   ~BlockMemoryManager();
@@ -45,7 +46,7 @@ public:
   /// Evict blocks from GPU if space is needed.
   /// Load blocks to GPU.
   void
-  update(double minR, double maxR);
+  update(std::vector<Block*> &blocks);
 
 
 private:
@@ -58,9 +59,12 @@ private:
   int m_maxGpuBlocks;
   int m_maxCpuBlocks;
 
-  std::vector<Block *> m_gpu;
-  std::vector<Block *> m_cpu;
-  std::vector<Texture> m_texs;
+  std::list<Block *> m_gpu;
+  std::list<Block *> m_cpu;
+  std::vector<Texture> m_texs;  // Textures available on the GPU.
+
+  std::vector<Block *> m_blockList;
+
   char * m_data;
 
 };
@@ -103,6 +107,8 @@ public:
   void
   filterBlocksByROVRange(double rov_min, double rov_max);
 
+  void
+  updateBlockCache();
 
   bool
   initBlockTextures(std::string const &rawFile, bd::DataType type);

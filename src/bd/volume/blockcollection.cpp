@@ -18,11 +18,13 @@ BlockMemoryManager::BlockMemoryManager()
 BlockMemoryManager::BlockMemoryManager(size_t blockSizeBytes,
                                        size_t gpuMemBytes,
                                        size_t cpuMembytes,
-                                       int bW, int bH, int bD)
+                                       int bW, int bH, int bD,
+                                       std::vector<Block*> const &blocks)
   : m_maxGpuBlocks{ }
   , m_maxCpuBlocks{ }
   , m_gpu{ }
   , m_cpu{ }
+  , m_blockList{ blocks }
 {
   if (blockSizeBytes > 0) {
 
@@ -54,15 +56,24 @@ BlockMemoryManager::init(DataType type, int bW, int bH, int bD)
 {
   m_gpu.reserve(m_maxGpuBlocks);
   m_cpu.reserve(m_maxCpuBlocks);
-
   m_data = new char[m_maxCpuBlocks * to_sizeType(type)];
 
   Texture::GenTextures3d(m_maxGpuBlocks, type, Texture::Format::RED, bW, bH, bD, &m_texs);
 }
 
 void
-BlockMemoryManager::update(double minR, double maxR)
+BlockMemoryManager::update(std::vector<Block*> &blocks)
 {
+  for (Block *b : m_gpu) {
+
+  }
+  for (Block * b : blocks) {
+    // if b not in gpu
+    //   mark last block in gpu list evictable
+
+
+    //
+  }
 }
 
 
@@ -181,22 +192,26 @@ BlockCollection::filterBlocksByROVRange(double rov_min, double rov_max)
   size_t bytes{ 0 };
 
   for (Block *b : m_blocks) {
-    //uint64_t idx{ b->fileBlock().block_index };
 
-    double rov{ b->fileBlock().rov };
+    double rov = b->fileBlock().rov;
+
     if (rov >= rov_min && rov <= rov_max) {
-      bytes += b->fileBlock().data_bytes;
-
-//      if (bytes > m_gpuMem) {
-//        return;
-//      }
-
+//      bytes += b->fileBlock().data_bytes;
+      b->visible(true);
       m_nonEmptyBlocks.push_back(b);
+    } else {
+      b->visible(false);
     }
 
-
-
   } // for
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+void
+BlockCollection::updateBlockCache()
+{
+  m_man->update(m_nonEmptyBlocks);
 }
 
 

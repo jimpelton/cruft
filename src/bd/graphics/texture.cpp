@@ -227,7 +227,7 @@ Texture::subImage1D(Texture::Format external,
                     int xoff,
                     int w,
                     DataType type,
-                    void const *pixelData)
+                    void const *pixelData) const
 {
   assert(false && "not implemented");
 }
@@ -241,7 +241,7 @@ Texture::subImage2D(Texture::Format external,
                     int w,
                     int h,
                     DataType type,
-                    void const *pixelData)
+                    void const *pixelData) const
 {
   assert(false && "not implemented");
 }
@@ -252,7 +252,8 @@ void
 Texture::subImage3D(Format external,
                     int xoff, int yoff, int zoff,
                     int w, int h, int d,
-                    DataType type, void const *pixelData)
+                    DataType type,
+                    void const *pixelData) const
 {
   gl_check(glTextureSubImage3D(m_id, 0,
                       xoff, yoff, zoff, w, h, d,
