@@ -21,7 +21,7 @@ Block::Block(const glm::u64vec3& ijk, const FileBlock &fb)
   , m_ijk{ ijk }
   , m_origin{ fb.world_oigin[0], fb.world_oigin[1], fb.world_oigin[2] }
   , m_transform{ 1.0f }  // identity matrix
-  , m_tex{ bd::Texture::Target::Tex3D }
+  , m_tex{ nullptr }
 {
 
   glm::vec3 wld_dims{ fb.world_dims[0], fb.world_dims[1], fb.world_dims[2] };
@@ -38,6 +38,28 @@ Block::Block(const glm::u64vec3& ijk, const FileBlock &fb)
 ///////////////////////////////////////////////////////////////////////////////
 Block::~Block()
 {
+}
+
+
+void
+Block::evictYourself()
+{
+
+}
+
+
+void
+Block::uploadYourself(Texture::Format format, DataType type, void const *voxels)
+{
+  m_tex->subImage3D(0, 0, 0,
+                    (int)m_fb.voxel_dims[0],
+                    (int)m_fb.voxel_dims[1],
+                    (int)m_fb.voxel_dims[2],
+                    format, type, voxels);
+
+  m_status = m_status | GPU_RES;
+  m_status = m_status | CPU_RES;
+
 }
 
 
@@ -90,18 +112,10 @@ Block::empty() const
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//void
-//Block::empty(bool b)
-//{
-//  m_empty = b;
-//}
-
-
-///////////////////////////////////////////////////////////////////////////////
 glm::vec3 const &
 Block::origin() const
 {
-  return m_origin; // { m_fb.world_oigin[0], m_fb.world_oigin[1], m_fb.world_oigin[2] };
+  return m_origin;
 }
 
 
@@ -117,7 +131,15 @@ Block::avg() const
 bd::Texture const &
 Block::texture() const
 {
-  return *(m_tex.get());
+  return *m_tex;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+void
+Block::texture(Texture * tex)
+{
+  m_tex = tex;
 }
 
 
@@ -156,12 +178,23 @@ Block::byteSize() const
 }
 
 
+///////////////////////////////////////////////////////////////////////////////
+int
+Block::status() const
+{
+  return m_status;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
 std::ostream&
 operator<<(std::ostream& os, const Block& b)
 {
   return os << b.to_string();
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
 glm::u64vec3
 Block::voxel_extent() const
 {

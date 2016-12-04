@@ -54,8 +54,8 @@ BlockMemoryManager::operator[](size_t idx)
 void
 BlockMemoryManager::init(DataType type, int bW, int bH, int bD)
 {
-  m_gpu.reserve(m_maxGpuBlocks);
-  m_cpu.reserve(m_maxCpuBlocks);
+//  m_gpu.reserve(m_maxGpuBlocks);
+//  m_cpu.reserve(m_maxCpuBlocks);
   m_data = new char[m_maxCpuBlocks * to_sizeType(type)];
 
   Texture::GenTextures3d(m_maxGpuBlocks, type, Texture::Format::RED, bW, bH, bD, &m_texs);
@@ -65,23 +65,12 @@ void
 BlockMemoryManager::update(std::vector<Block*> &blocks)
 {
   for (Block *b : m_gpu) {
-
   }
+
   for (Block * b : blocks) {
-    // if b not in gpu
-    //   mark last block in gpu list evictable
-
-
-    //
   }
 }
 
-
-void
-BlockMemoryManager::loadToGpu(Block const *b)
-{
-
-}
 
 BlockCollection::BlockCollection()
   : BlockCollection{ nullptr }
@@ -95,6 +84,7 @@ BlockCollection::BlockCollection(std::unique_ptr<BlockMemoryManager> man)
     , m_man{ std::move(man) }
 {
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 BlockCollection::~BlockCollection()
@@ -111,11 +101,6 @@ BlockCollection::initBlocksFromIndexFile(std::shared_ptr<IndexFile const> index)
   initBlocksFromFileBlocks(index->getFileBlocks(),
                            m_volume.worldDims(),
                            m_volume.block_count());
-
-//  glm::u64vec3 dims{ index->getVolume().block_dims() };
-//  size_t blkSz{ dims.x * dims.y * dims.z };
-//  size_t typeSz{ to_sizeType(IndexFileHeader::getType(index->getHeader())) };
-//  size_t blockBytes{ blkSz * typeSz };
 
 }
 
@@ -134,7 +119,6 @@ BlockCollection::initBlocksFromFileBlocks(std::vector<FileBlock> const &fileBloc
   }
 
   m_blocks.reserve(fileBlocks.size());
-//  m_indexesToDraw.reserve(fileBlocks.size());
   m_nonEmptyBlocks.reserve(fileBlocks.size());
   
   int every = 0.1f * fileBlocks.size();

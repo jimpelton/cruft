@@ -101,9 +101,9 @@ public:
 
 
   void
-  subImage3D(Format external,
-             int xoff, int yoff, int zoff, int w, int h, int d,
-             DataType type, void const *pixelData) const;
+  subImage3D(int xoff, int yoff, int zoff, int w, int h, int d,
+             Format external, DataType type, void const *pixelData) const;
+
 
   unsigned int
   id() const
@@ -117,6 +117,8 @@ public:
   {
     return m_type;
   }
+
+
 
 
   std::string

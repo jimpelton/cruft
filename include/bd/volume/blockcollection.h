@@ -52,11 +52,6 @@ public:
 
 private:
 
-
-  void
-  loadToGpu(Block const *b);
-
-
   int m_maxGpuBlocks;
   int m_maxCpuBlocks;
 
@@ -216,11 +211,11 @@ BlockCollection::do_initBlockTextures(std::string const &file)
     }
 
     //TODO: try not normalizing the texture data and see what happens... :)
-    b->texture().subImage3D(bd::Texture::Format::RED,
-                            0,0,0,
-                            b->voxel_extent().x,
-                            b->voxel_extent().y,
-                            b->voxel_extent().z,
+    b->texture().subImage3D(0,0,0,
+                            (int)b->voxel_extent().x,
+                            (int)b->voxel_extent().y,
+                            (int)b->voxel_extent().z,
+                            bd::Texture::Format::RED,
                             DataType::Float,
                             tex);
   } //for
@@ -245,8 +240,9 @@ namespace
                   std::vector<Buffer<Ty> *> &empty_bufs,
                   std::istream &infile)
   {
-    for (Block b : blocks) {
-      infile.seekg(b.fileBlock().data_offset);
+    for (Block *b : blocks) {
+      infile.seekg(b->fileBlock().data_offset);
+
     }
 
 

@@ -40,12 +40,21 @@ public:
   ~Block();
 
 
+  void
+  evictYourself();
+
+
+  void
+  uploadYourself(Texture::Format format, DataType type, void const *voxels);
+
+
   bool
   visible() const;
 
 
   void
   visible(bool);
+
 
   /// \brief Get the FileBlock for this block.
   const FileBlock&
@@ -55,6 +64,8 @@ public:
   /// \brief Get the ijk location of this block.
   const glm::u64vec3 &
   ijk() const;
+
+
   /// \brief Set the ijk location of this block.
   void
   ijk(glm::u64vec3 const & ijk);
@@ -82,6 +93,10 @@ public:
   texture() const;
 
 
+  void
+  texture(Texture * tex);
+
+
   /// \brief Get a reference to this blocks model-to-world transform matrix.
   glm::mat4&
   transform();
@@ -99,22 +114,28 @@ public:
   size_t byteSize() const;
 
 
+  int
+  status() const;
+
+
+  static const int VISIBLE = 0x01;
+  static const int GPU_RES = 0x02;
+  static const int CPU_RES = 0x04;
+
+
 private:
   FileBlock m_fb;        ///< The FileBlock (contains the info from IndexFile)
   glm::u64vec3 m_ijk;    ///< Block's location in block coordinates.
   glm::vec3 m_origin;    ///< This blocks center in world coordinates.
   glm::mat4 m_transform; ///< Block's model-to-world transform matrix.
-  std::shared_ptr<Texture> m_tex; ///< Texture data assoc'd with this block.
+  Texture *m_tex ; ///< Texture data assoc'd with this block.
 
-  static const int VISIBLE = 0x01;
-  static const int GPU_RES = 0x02;
-  static const int CPU_RES = 0x04;
   ///
   /// 0x01 -- visible.
   /// 0x02 -- resident in GPU memory
   /// 0x04 -- resident in CPU memory
   /// 0x04 --
-  int status;
+  int m_status;
 
   bool m_isVisible;
 
