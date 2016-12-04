@@ -3,11 +3,12 @@
 
 #include <bd/volume/block.h>
 #include <bd/io/indexfile.h>
+#include <bd/io/buffer.h>
 #include <bd/util/util.h>
 
 #include <functional>
 #include <list>
-
+#include <future>
 
 namespace bd
 {
@@ -201,7 +202,7 @@ BlockCollection::do_initBlockTextures(std::string const &file)
 
     if (i % every == 0) {
       std::cout << "\rInitializing texture block " << ++i
-                   << "/" << m_nonEmptyBlocks.size();
+                << "/" << m_nonEmptyBlocks.size();
     }
 
 
@@ -231,6 +232,28 @@ BlockCollection::do_initBlockTextures(std::string const &file)
   return true;
 }
 
+namespace
+{
+///
+/// \tparam Ty
+/// \param blocks - load texture data for these blocks
+/// \param empty_bufs - put the data into these buffers
+/// \param infile - read raw data from this stream
+  template<class Ty>
+  void
+  async_load_data(std::vector<Block*> &blocks,
+                  std::vector<Buffer<Ty> *> &empty_bufs,
+                  std::istream &infile)
+  {
+    for (Block b : blocks) {
+      infile.seekg(b.fileBlock().data_offset);
+    }
+
+
+
+//    std::async(std::launch::async, )
+  }
+}
 
 template <typename Ty>
 void
@@ -242,7 +265,7 @@ BlockCollection::fillBlockData(Block const &b, std::istream &infile,
 
   // volume's dimensions in voxels.
   glm::u64vec2 const &ve{ m_volume.voxelDims().x,
-    m_volume.voxelDims().y };
+                          m_volume.voxelDims().y };
 
   // start element = block index w/in volume * block size
   const glm::u64vec3 start{ b.ijk() * be };
@@ -270,6 +293,8 @@ BlockCollection::fillBlockData(Block const &b, std::istream &infile,
       offset *= sizeof(Ty);
     }
   }
+
+
 }
 
 } // namespace bd

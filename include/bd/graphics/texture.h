@@ -124,7 +124,7 @@ public:
 
 
 private:
-  unsigned int m_id; ///< OpenGL id of the texture data.
+  unsigned int m_id; ///< OpenGL handle for the texture.
   Target m_type;     ///< the gl target to bind to.
 };
 
