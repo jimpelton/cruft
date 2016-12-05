@@ -4,6 +4,7 @@
 #include <bd/graphics/shader.h>
 #include <bd/io/datatypes.h>
 
+#include <glm/glm.hpp>
 
 #include <string>
 #include <cstdlib>
@@ -102,7 +103,11 @@ public:
 
   void
   subImage3D(int xoff, int yoff, int zoff, int w, int h, int d,
-             Format external, DataType type, void const *pixelData) const;
+             void const *pixelData) const;
+
+
+  void
+  subImage3D(void const *pixelData) const;
 
 
   unsigned int
@@ -115,10 +120,14 @@ public:
   Target
   target() const
   {
-    return m_type;
+    return m_target;
   }
 
-
+  DataType
+  dataType() const
+  {
+    return m_dType;
+  }
 
 
   std::string
@@ -127,7 +136,12 @@ public:
 
 private:
   unsigned int m_id; ///< OpenGL handle for the texture.
-  Target m_type;     ///< the gl target to bind to.
+  Target m_target;     ///< the gl target (ex, GL_TEXTURE_2D) to bind to.
+  Format m_external;
+  Format m_internal;
+  DataType m_dType;
+  glm::u32vec3 m_dims;
+
 };
 
 

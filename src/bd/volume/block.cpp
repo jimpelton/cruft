@@ -22,6 +22,8 @@ Block::Block(const glm::u64vec3& ijk, const FileBlock &fb)
   , m_origin{ fb.world_oigin[0], fb.world_oigin[1], fb.world_oigin[2] }
   , m_transform{ 1.0f }  // identity matrix
   , m_tex{ nullptr }
+  , m_status{ 0x0 }
+  , m_isVisible{ false }
 {
 
   glm::vec3 wld_dims{ fb.world_dims[0], fb.world_dims[1], fb.world_dims[2] };
@@ -49,17 +51,10 @@ Block::evictYourself()
 
 
 void
-Block::uploadYourself(Texture::Format format, DataType type, void const *voxels)
+Block::uploadYourself()
 {
-  m_tex->subImage3D(0, 0, 0,
-                    (int)m_fb.voxel_dims[0],
-                    (int)m_fb.voxel_dims[1],
-                    (int)m_fb.voxel_dims[2],
-                    format, type, voxels);
-
-  m_status = m_status | GPU_RES;
-  m_status = m_status | CPU_RES;
-
+  m_tex->subImage3D(m_pixelData);
+  m_status |= GPU_RES;
 }
 
 
@@ -139,6 +134,11 @@ Block::texture() const
 void
 Block::texture(Texture * tex)
 {
+  if (!tex){
+    // if we are removing our texture, we aren't gpu resident anymore.
+    m_status &= ~GPU_RES;
+  }
+
   m_tex = tex;
 }
 
@@ -151,22 +151,11 @@ Block::transform()
 }
 
 
-
 ///////////////////////////////////////////////////////////////////////////////
-std::string
-Block::to_string() const
+glm::u64vec3
+Block::voxel_extent() const
 {
-  std::stringstream ss;
-  ss << "{ ijk: ("
-      << m_ijk.x << ',' << m_ijk.y << ',' << m_ijk.z << "),\n"
-      "Origin: ("
-          << m_fb.world_oigin[0]
-          << ',' << m_fb.world_oigin[1]
-          << ',' << m_fb.world_oigin[2] << "),\n"
-      "Empty: " << (empty() ? "True" : "False") << "\n"
-      "Texture: " << m_tex << " }";
-
-  return ss.str();
+  return { m_fb.voxel_dims[0], m_fb.voxel_dims[1], m_fb.voxel_dims[2] };
 }
 
 
@@ -187,19 +176,51 @@ Block::status() const
 
 
 ///////////////////////////////////////////////////////////////////////////////
+void const *
+Block::pixelData() const
+{
+  return m_pixelData;
+}
+
+
+void
+Block::pixelData(void const *data)
+{
+  if (data) {
+    // if we have texture data, we know we have CPU residency.
+    m_status |= CPU_RES;
+  } else {
+    // data is nullptr, so block is not cpu or gpu res
+    m_status &= ~(CPU_RES & GPU_RES);
+  }
+
+  m_pixelData = data;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+std::string
+Block::to_string() const
+{
+  std::stringstream ss;
+  ss << "{ ijk: ("
+     << m_ijk.x << ',' << m_ijk.y << ',' << m_ijk.z << "),\n"
+         "Origin: ("
+     << m_fb.world_oigin[0]
+     << ',' << m_fb.world_oigin[1]
+     << ',' << m_fb.world_oigin[2] << "),\n"
+         "Empty: " << (empty() ? "True" : "False") << "\n"
+         "Texture: " << m_tex << " }";
+
+  return ss.str();
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
 std::ostream&
 operator<<(std::ostream& os, const Block& b)
 {
   return os << b.to_string();
 }
 
-
-///////////////////////////////////////////////////////////////////////////////
-glm::u64vec3
-Block::voxel_extent() const
-{
-  return { m_fb.voxel_dims[0], m_fb.voxel_dims[1], m_fb.voxel_dims[2] };
-}
 } // namespace bd
-
-

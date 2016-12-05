@@ -94,7 +94,7 @@ Texture::GenTextures3d(int num,
 ////////////////////////////////////////////////////////////////////////////////
 Texture::Texture(Target textureType)
     : m_id{ 0 }
-    , m_type{ textureType }
+    , m_target{ textureType }
 {
 }
 
@@ -109,7 +109,7 @@ Texture::~Texture()
 void
 Texture::bind() const
 {
-  glBindTexture(gl_target[bd::ordinal<Target>(m_type)], m_id);
+  glBindTexture(gl_target[bd::ordinal<Target>(m_target)], m_id);
 }
 
 
@@ -118,7 +118,7 @@ void
 Texture::bind(unsigned int unit) const
 {
   glActiveTexture(GL_TEXTURE0 + unit);
-  glBindTexture(gl_target[ordinal<Target>(m_type)], m_id);
+  glBindTexture(gl_target[ordinal<Target>(m_target)], m_id);
   //  glUniform1i(m_samplerUniform, unit);
 }
 
@@ -146,7 +146,7 @@ Texture::genGLTex1d(float const *img, Format ity, Format ety, size_t w)
   gl_check(glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
   gl_check(glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP));
 
-  m_type = Target::Tex1D;
+  m_target = Target::Tex1D;
   m_id = texId;
 
   return texId;
@@ -178,7 +178,7 @@ Texture::genGLTex2d(float *img, Format ity, Format ety, size_t w, size_t h)
 
   gl_check(glBindTexture(GL_TEXTURE_2D, 0));
 
-  m_type = Target::Tex2D;
+  m_target = Target::Tex2D;
   m_id = texId;
 
   return texId;
@@ -215,7 +215,7 @@ Texture::genGLTex3d(Format ity, Format ety, size_t w, size_t h, size_t d,
 
   gl_check(glBindTexture(GL_TEXTURE_3D, 0));
 
-  m_type = Target::Tex3D;
+  m_target = Target::Tex3D;
   m_id = texId;
 
   return texId;
@@ -251,15 +251,21 @@ Texture::subImage2D(Texture::Format external,
 void
 Texture::subImage3D(int xoff, int yoff, int zoff,
                     int w, int h, int d,
-                    Format external,
-                    DataType type,
                     void const *pixelData) const
 {
   gl_check(glTextureSubImage3D(m_id, 0,
                       xoff, yoff, zoff, w, h, d,
-                      gl_format[ordinal(external)],
-                      pixelType(type),
+                      gl_format[ordinal(m_external)],
+                      pixelType(m_dType),
                       pixelData));
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+void
+Texture::subImage3D(void const *pixelData) const
+{
+  subImage3D(0, 0, 0, m_dims.x, m_dims.y, m_dims.z, pixelData);
 }
 
 
@@ -269,7 +275,7 @@ Texture::to_string() const
 {
   std::stringstream ss;
   GLenum tt;
-  tt = gl_target[bd::ordinal<Target>(m_type)];
+  tt = gl_target[bd::ordinal<Target>(m_target)];
 
   ss << "{ Id: " << m_id << ", Type: " << bd::gl_to_string(tt);
   if (m_id != 0) {

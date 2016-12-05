@@ -29,8 +29,12 @@ public:
   /// \param bW - block width
   /// \param bH - block height
   /// \param bD - block depth
-  BlockMemoryManager(size_t blockSize, size_t gpuMem, size_t cpuMem,
-                     int bW, int bH, int bD, std::vector<Block*> const &blocks);
+  BlockMemoryManager(size_t blockBytes,
+                     size_t gpuMem,
+                     size_t cpuMem,
+                     glm::u64vec3 const &blkDims,
+                     glm::u64vec2 const &slabDims,
+                     std::vector<Block*> const &blocks);
 
 
   ~BlockMemoryManager();
@@ -41,7 +45,7 @@ public:
 
 
   void
-  init(DataType type, int bW, int bH, int bD);
+  init(DataType type, glm::u64vec3 const &blockDims);
 
 
   /// Evict blocks from GPU if space is needed.
@@ -49,11 +53,27 @@ public:
   void
   update(std::vector<Block*> &blocks);
 
+  /// \brief Assign block it's texture data and a vacant texture
+  ///        if necessary.
+  /// \param blocks - load texture data for these blocks
+  /// \param empty_bufs - put the data into these buffers
+  /// \param infile - read raw data from this stream
+  Block *
+  load_data(Block *b);
+
+private:
+  Texture* popTexture() { assert(false && "not implemented"); return nullptr; }
+
+  char* popBuffer() {  assert(false && "not implemented"); return nullptr; };
+
+  void
+  fillBlockData(Block *b, char *blockBuffer) const;
 
 private:
 
   int m_maxGpuBlocks;
   int m_maxCpuBlocks;
+  glm::u64vec2 m_slabDims;  ///< dims for a slab in the volume.
 
   std::list<Block *> m_gpu;
   std::list<Block *> m_cpu;
@@ -63,7 +83,13 @@ private:
 
   char * m_data;
 
+  std::istream *m_infile;
+
 };
+
+
+
+
 
 class BlockCollection
 {
@@ -229,26 +255,7 @@ BlockCollection::do_initBlockTextures(std::string const &file)
 
 namespace
 {
-///
-/// \tparam Ty
-/// \param blocks - load texture data for these blocks
-/// \param empty_bufs - put the data into these buffers
-/// \param infile - read raw data from this stream
-  template<class Ty>
-  void
-  async_load_data(std::vector<Block*> &blocks,
-                  std::vector<Buffer<Ty> *> &empty_bufs,
-                  std::istream &infile)
-  {
-    for (Block *b : blocks) {
-      infile.seekg(b->fileBlock().data_offset);
 
-    }
-
-
-
-//    std::async(std::launch::async, )
-  }
 }
 
 template <typename Ty>

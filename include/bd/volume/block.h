@@ -14,8 +14,6 @@
 namespace bd
 {
 
-
-
 //////////////////////////////////////////////////////////////////////////
 /// \brief Associates volumetric data in voxel space with a location
 /// in world coordinates.
@@ -23,8 +21,9 @@ namespace bd
 /// 3D world space. The block's texture contains the GL id/name of the 3D
 /// texture that should be sampled by the proxy geometry.
 //////////////////////////////////////////////////////////////////////////
-class Block //: public bd::BDObj
+class Block
 {
+
 public:
 
 
@@ -45,7 +44,7 @@ public:
 
 
   void
-  uploadYourself(Texture::Format format, DataType type, void const *voxels);
+  uploadYourself();
 
 
   bool
@@ -89,12 +88,12 @@ public:
 
 
   /// \brief Get the texture assoc'd with this block.
-  bd::Texture const &
+  Texture const &
   texture() const;
 
 
   void
-  texture(Texture * tex);
+  texture(Texture *tex);
 
 
   /// \brief Get a reference to this blocks model-to-world transform matrix.
@@ -107,16 +106,25 @@ public:
   voxel_extent() const;
 
 
-  /// \brief String rep. of this blockeroo.
-  std::string to_string() const;
-
-
-  size_t byteSize() const;
+  size_t
+  byteSize() const;
 
 
   int
   status() const;
 
+
+  void const *
+  pixelData() const;
+
+
+  void
+  pixelData(void const *data);
+
+
+  /// \brief String rep. of this blockeroo.
+  std::string
+  to_string() const;
 
   static const int VISIBLE = 0x01;
   static const int GPU_RES = 0x02;
@@ -128,7 +136,9 @@ private:
   glm::u64vec3 m_ijk;    ///< Block's location in block coordinates.
   glm::vec3 m_origin;    ///< This blocks center in world coordinates.
   glm::mat4 m_transform; ///< Block's model-to-world transform matrix.
-  Texture *m_tex ; ///< Texture data assoc'd with this block.
+
+  Texture *m_tex ; ///< Texture assoc'd with this block.
+  void const *m_pixelData; ///< CPU resident texture data (nullptr if non-resident).
 
   ///
   /// 0x01 -- visible.
