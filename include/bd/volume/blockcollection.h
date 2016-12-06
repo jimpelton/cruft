@@ -34,7 +34,8 @@ public:
                      size_t cpuMem,
                      glm::u64vec3 const &blkDims,
                      glm::u64vec2 const &slabDims,
-                     std::vector<Block*> const &blocks);
+                     std::vector<Block*> const &blocks,
+                     std::istream *in);
 
 
   ~BlockMemoryManager();
@@ -48,6 +49,14 @@ public:
   init(DataType type, glm::u64vec3 const &blockDims);
 
 
+
+
+
+
+
+  void
+  evictGpuNonVisible();
+
   /// Evict blocks from GPU if space is needed.
   /// Load blocks to GPU.
   void
@@ -59,7 +68,7 @@ public:
   /// \param empty_bufs - put the data into these buffers
   /// \param infile - read raw data from this stream
   Block *
-  load_data(Block *b);
+  preloadGpuData(Block *b);
 
 private:
   Texture* popTexture() { assert(false && "not implemented"); return nullptr; }
@@ -69,14 +78,17 @@ private:
   void
   fillBlockData(Block *b, char *blockBuffer) const;
 
+
 private:
 
-  int m_maxGpuBlocks;
-  int m_maxCpuBlocks;
+  size_t m_cpuMem;
+  size_t m_gpuMem;
+  size_t m_maxGpuBlocks;
+  size_t m_maxCpuBlocks;
   glm::u64vec2 m_slabDims;  ///< dims for a slab in the volume.
 
   std::list<Block *> m_gpu;
-  std::list<Block *> m_cpu;
+  std::list<char *> m_cpu;
   std::vector<Texture> m_texs;  // Textures available on the GPU.
 
   std::vector<Block *> m_blockList;
@@ -84,6 +96,11 @@ private:
   char * m_data;
 
   std::istream *m_infile;
+
+  BlockCollection *m_collection;
+
+  std::future<int> m_loadThreadFuture;
+
 
 };
 

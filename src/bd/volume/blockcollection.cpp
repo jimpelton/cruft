@@ -20,25 +20,29 @@ BlockMemoryManager::BlockMemoryManager(size_t blockBytes,
                                        size_t cpuMem,
                                        glm::u64vec3 const &blkDims,
                                        glm::u64vec2 const &slabDims,
-                                       std::vector<Block *> const &blocks)
+                                       std::vector<Block *> const &blocks,
+                                       std::istream *in)
   : m_maxGpuBlocks{ }
   , m_maxCpuBlocks{ }
+  , m_cpuMem{ }
+  , m_gpuMem{ }
   , m_gpu{ }
   , m_cpu{ }
   , m_blockList{ blocks }
+  , m_infile{ in }
 {
-  if (blockBytes > 0) {
+  if (blkDims.x > 0 && blkDims.y > 0 && blkDims.z > 0) {
 
-    m_maxGpuBlocks = static_cast<int>(gpuMem / blockBytes);
-
-    m_maxCpuBlocks = static_cast<int>(cpuMem / blockBytes);
+    size_t blockTextureBytes = blkDims.x * blkDims.y * blkDims.z * sizeof(float);
+    m_maxGpuBlocks = gpuMem / blockTextureBytes;
+    m_maxCpuBlocks = cpuMem / blockTextureBytes;
+    m_cpuMem = m_maxCpuBlocks * blockTextureBytes;
+    m_gpuMem = m_maxGpuBlocks * blockTextureBytes;
 
   } else {
-    Warn() << "Block size of zero given to the memory manager. Only one block will be allocated.";
-    m_maxGpuBlocks = 1;
+    Warn() << "Block size of zero given to the memory manager. Max blocks set to 0 (no blocks will be rendered)";
+    m_maxGpuBlocks = 0;
   }
-
-
 
 }
 
@@ -58,23 +62,25 @@ BlockMemoryManager::operator[](size_t idx)
 void
 BlockMemoryManager::init(DataType type, glm::u64vec3 const &bd)
 {
-  m_data = new char[m_maxCpuBlocks * to_sizeType(type)];
+  m_data = new char[m_cpuMem];
 
   Texture::GenTextures3d(m_maxGpuBlocks, type, Texture::Format::RED,
                          (int)bd.x, (int)bd.y, (int)bd.z, &m_texs);
+
+  
+
 }
 
 
 void
-BlockMemoryManager::update(std::vector<Block*> &visibleBlocks)
+BlockMemoryManager::evictGpuNonVisible()
 {
   using iterator = std::list<Block*>::iterator;
-
-  // evict blocks from gpu list.
   iterator i = m_gpu.begin();
-  while(i != m_gpu.end()) {
+
+  while (i != m_gpu.end()) {
     Block *b = *i;
-    if (! b->visible()) {
+    if (!b->visible()) {
       m_texs.push_back(b->texture());
       b->texture(nullptr);
       i = m_gpu.erase(i);
@@ -83,19 +89,34 @@ BlockMemoryManager::update(std::vector<Block*> &visibleBlocks)
     }
   }
 
+}
+
+void
+BlockMemoryManager::update(std::vector<Block*> &visibleBlocks)
+{
+  // evict blocks from gpu list.
+  if (m_gpu.size() >= m_maxGpuBlocks) {
+    evictGpuNonVisible();
+  }
+
+  // if there is still not enough room, evict enough blocks off the
+  // back to make room.
+  long long diff{ visibleBlocks.size() - m_gpu.size() };
+  while (diff < 0) {
+    m_gpu.pop_back();
+    ++diff;
+  }
+
   // load as many visible blocks into GPU as possible.
   for (Block * b : visibleBlocks) {
-    if (m_gpu.size() < m_maxGpuBlocks){
-      load_data(b);
-    } else {
-      break;
-    }
+      preloadGpuData(b);
+      m_gpu.push_front(b);
   }
 }
 
 
 Block *
-BlockMemoryManager::load_data(Block *b)
+BlockMemoryManager::preloadGpuData(Block *b)
 {
   if (b->status() & Block::GPU_RES) {
 
@@ -105,7 +126,6 @@ BlockMemoryManager::load_data(Block *b)
 
     Texture *t{ popTexture() };
     b->texture(t);
-    m_gpu.push_back(b);
     return b;
 
   } else {
