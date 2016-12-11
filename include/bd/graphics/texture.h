@@ -57,7 +57,7 @@ public:
                 DataType t,
                 Format internal,
                 int w, int h, int d,
-                std::vector<Texture> *v);
+                std::vector<Texture *> *v);
 
 
   Texture(Target textureType);

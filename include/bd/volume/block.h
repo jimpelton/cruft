@@ -88,8 +88,8 @@ public:
 
 
   /// \brief Get the texture assoc'd with this block.
-  Texture const &
-  texture() const;
+  Texture* 
+  texture() ;
 
 
   void
@@ -114,12 +114,12 @@ public:
   status() const;
 
 
-  void const *
-  pixelData() const;
+  char* 
+  pixelData();
 
 
   void
-  pixelData(void const *data);
+  pixelData(char *data);
 
 
   /// \brief String rep. of this blockeroo.
@@ -138,7 +138,7 @@ private:
   glm::mat4 m_transform; ///< Block's model-to-world transform matrix.
 
   Texture *m_tex ; ///< Texture assoc'd with this block.
-  void const *m_pixelData; ///< CPU resident texture data (nullptr if non-resident).
+  char *m_pixelData; ///< CPU resident texture data (nullptr if non-resident).
 
   ///
   /// 0x01 -- visible.

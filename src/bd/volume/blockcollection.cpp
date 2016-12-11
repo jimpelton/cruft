@@ -10,34 +10,126 @@
 namespace bd
 {
 
-BlockMemoryManager::BlockMemoryManager()
+//BlockLoader::BlockLoader(BlockMemoryManager *man, std::string const &rawFile, size_t maxBlocks, glm::vec2 const &slabdims)
+//  : m_man{ man }
+//  , m_loadQueue{ }
+//  , m_rawPath{ rawFile }
+//  , m_maxBlocks{ maxBlocks }
+//  , m_volumeSlabDims{ slabdims }
+//  , m_stopThread { false }
+//  , m_loadQueueLock{ }
+//  , m_loadQueueWait{ }
+//{
+//}
+//
+//
+//BlockLoader::~BlockLoader()
+//{
+//}
+//
+
+
+
+
+//bool 
+//BlockLoader::tryAddBlock(Block* b)
+//{
+//  std::lock_guard<std::mutex> lock(m_loadQueueLock);
+//  if (m_loadQueue.size() >= m_maxBlocks) {
+//    return false;
+//  }
+//
+//  m_loadQueue.push_back(b);
+//  m_loadQueueWait.notify_all();
+//
+//  return true;
+//}
+//
+//
+//void
+//BlockLoader::stop()
+//{
+//  m_stopThread = true;
+//}
+//
+//
+//Block *
+//BlockLoader::popBlock()
+//{
+//  std::lock_guard<std::mutex> lock(m_loadQueueLock);
+//  while(m_loadQueue.size() == 0 && !m_stopThread) {
+//    m_loadQueueWait.wait(m_loadQueueLock);
+//  }
+//
+//  if (m_loadQueue.size() == 0 && m_stopThread) {
+//    return nullptr;
+//  }
+//
+//  Block * r{ m_loadQueue.back() };
+//  m_loadQueue.pop_back();
+//
+//  return r;
+//}
+//
+
+void
+BlockMemoryManager::fillBlockData(Block *b, std::istream *infile) const
 {
+  char * blockBuffer{ b->pixelData() };
+
+  // block's dimensions in voxels
+  glm::u64vec3 const be{ b->voxel_extent() };
+  // start element = block index w/in volume * block size
+  glm::u64vec3 const start{ b->ijk() * be };
+  // block end element = block voxel start voxelDims + block size
+  glm::u64vec3 const end{ start + be };
+
+  size_t const blockRowLength{ be.x };
+  size_t const sizeType{ to_sizeType(b->texture()->dataType()) };
+
+  // byte offset into file to read from
+  size_t offset{ b->fileBlock().data_offset };
+
+  // Loop through rows and slabs of volume reading rows of voxels into memory.
+  for (auto slab = start.z; slab < end.z; ++slab) {
+    for (auto row = start.y; row < end.y; ++row) {
+
+      // seek to start of row
+      infile->seekg(offset);
+
+      // read the bytes of current row
+      infile->read(blockBuffer, blockRowLength * sizeType);
+      blockBuffer += blockRowLength;
+
+      // offset of next row
+      offset = bd::to1D(start.x, row + 1, slab, m_volumeSlabDims.x, m_volumeSlabDims.y);
+      offset *= sizeType;
+    }
+  }
 }
 
 
 BlockMemoryManager::BlockMemoryManager(size_t blockBytes,
                                        size_t gpuMem,
                                        size_t cpuMem,
-                                       glm::u64vec3 const &blkDims,
+                                       glm::u64vec3 const &largestBlock,
                                        glm::u64vec2 const &slabDims,
-                                       std::vector<Block *> const &blocks,
-                                       std::istream *in)
+                                       std::vector<Block *> const &blocks)
   : m_maxGpuBlocks{ }
   , m_maxCpuBlocks{ }
-  , m_cpuMem{ }
-  , m_gpuMem{ }
+  , m_cpuMemBytes{ }
+  , m_gpuMemBytes{ }
   , m_gpu{ }
   , m_cpu{ }
-  , m_blockList{ blocks }
-  , m_infile{ in }
+  , m_allBlocks{ blocks }
 {
-  if (blkDims.x > 0 && blkDims.y > 0 && blkDims.z > 0) {
+  if (largestBlock.x > 0 && largestBlock.y > 0 && largestBlock.z > 0) {
 
-    size_t blockTextureBytes = blkDims.x * blkDims.y * blkDims.z * sizeof(float);
+    size_t blockTextureBytes = largestBlock.x * largestBlock.y * largestBlock.z * sizeof(float);
     m_maxGpuBlocks = gpuMem / blockTextureBytes;
     m_maxCpuBlocks = cpuMem / blockTextureBytes;
-    m_cpuMem = m_maxCpuBlocks * blockTextureBytes;
-    m_gpuMem = m_maxGpuBlocks * blockTextureBytes;
+    m_cpuMemBytes = m_maxCpuBlocks * blockTextureBytes;
+    m_gpuMemBytes = m_maxGpuBlocks * blockTextureBytes;
 
   } else {
     Warn() << "Block size of zero given to the memory manager. Max blocks set to 0 (no blocks will be rendered)";
@@ -49,26 +141,42 @@ BlockMemoryManager::BlockMemoryManager(size_t blockBytes,
 
 BlockMemoryManager::~BlockMemoryManager()
 {
+  if (m_data) 
+    delete[] m_data;
 }
 
 
-Block*
-BlockMemoryManager::operator[](size_t idx)
+int 
+BlockMemoryManager::threadFunction(std::istream *raw)
 {
-  assert(false && "not implemented");
+
+  while (! m_stopThread) {
+    Block *b{ popLoadQueue() };
+
+    if (!b) {
+      continue;
+    }
+
+    char const * data{ b->pixelData() };
+    
+    fillBlockData(b, raw);
+    
+    pushGPUReadyBlock(b);
+  }
+
+
+  return 0;
 }
 
 
 void
 BlockMemoryManager::init(DataType type, glm::u64vec3 const &bd)
 {
-  m_data = new char[m_cpuMem];
+  m_data = new char[m_cpuMemBytes];
+  //TODO: fill m_cpu
 
   Texture::GenTextures3d(m_maxGpuBlocks, type, Texture::Format::RED,
-                         (int)bd.x, (int)bd.y, (int)bd.z, &m_texs);
-
-  
-
+                         int(bd.x), int(bd.y), int(bd.z), &m_texs);
 }
 
 
@@ -101,7 +209,8 @@ BlockMemoryManager::update(std::vector<Block*> &visibleBlocks)
 
   // if there is still not enough room, evict enough blocks off the
   // back to make room.
-  long long diff{ visibleBlocks.size() - m_gpu.size() };
+  long long diff{ long long(visibleBlocks.size()) - long long(m_gpu.size()) };
+  
   while (diff < 0) {
     m_gpu.pop_back();
     ++diff;
@@ -118,61 +227,113 @@ BlockMemoryManager::update(std::vector<Block*> &visibleBlocks)
 Block *
 BlockMemoryManager::preloadGpuData(Block *b)
 {
-  if (b->status() & Block::GPU_RES) {
+//if (b->status() & Block::GPU_RES) {
+    //  do nothing, just return the block.
+//} else 
+  if (b->status() & Block::CPU_RES) {
 
-    return b;
-
-  } else if (b->status() & Block::CPU_RES) {
-
+    // Block ready for gpu upload.
     Texture *t{ popTexture() };
     b->texture(t);
-    return b;
+    pushGPUReadyBlock(b);
 
   } else {
 
-    // block needs to be read of disk
+    // Block needs to be read of disk
     Texture *t{ popTexture() };
-    char * buf{ popBuffer() };
-    fillBlockData(b, buf);
+    char * buf{ popCPUBuffer() };
     b->pixelData(buf);
     b->texture(t);
+    pushLoadQueue(b);
 
   }
+
+  return b;
+}
+
+
+void 
+BlockMemoryManager::asyncLoadBlock(Block* b)
+{
+      
+}
+
+
+Texture* 
+BlockMemoryManager::popTexture()
+{
+  if (m_texs.size() == 0) {
+    return nullptr;
+  }
+
+  Texture *t = m_texs.back();
+  m_texs.pop_back();
+
+  return t;
+}
+
+
+char* 
+BlockMemoryManager::popCPUBuffer()
+{
+  if (m_cpu.size() == 0) {
+    return nullptr;
+  }
+
+  char *r{ m_cpu.back() };
+  m_cpu.pop_back();
+
+  return r;
+}
+
+
+Block* 
+BlockMemoryManager::popLoadQueue()
+{
+  std::lock_guard<std::mutex> lock(m_loadQueueLock);
+
+  while (m_loadQueue.size() == 0 && !m_stopThread) {
+    m_loadQueueWait.wait(m_loadQueueLock);
+  }
+
+  // keep going until no more blocks, even if a stop 
+  // has been requested.
+  if (m_loadQueue.size() == 0 && m_stopThread) {
+    return nullptr;
+  }
+
+  Block * r{ m_loadQueue.back() };
+  m_loadQueue.pop_back();
+
+  return r;
+}
+
+
+void 
+BlockMemoryManager::pushLoadQueue(Block* b)
+{
+  std::lock_guard<std::mutex> lock(m_loadQueueLock);
+
+  m_loadQueue.push_back(b);
+  m_loadQueueWait.notify_all();
+}
+
+
+void 
+BlockMemoryManager::pushGPUReadyBlock(Block* b)
+{
+  std::lock_guard<std::mutex> lock(m_readyForGpuLock);
+
+  m_readyForGPU.push_back(b);
 }
 
 
 void
-BlockMemoryManager::fillBlockData(Block *b, char *blockBuffer) const
+BlockMemoryManager::getGPUReadyBlocks(std::vector<Block *> &readies)
 {
-  // block's dimensions in voxels
-  glm::u64vec3 const be{ b->voxel_extent() };
-  // start element = block index w/in volume * block size
-  glm::u64vec3 const start{ b->ijk() * be };
-  // block end element = block voxel start voxelDims + block size
-  glm::u64vec3 const end{ start + be };
-
-  size_t const blockRowLength{ be.x };
-  size_t const sizeType{ to_sizeType(b->texture().dataType()) };
-
-  // byte offset into file to read from
-  size_t offset{ b->fileBlock().data_offset };
-
-  // Loop through rows and slabs of volume reading rows of voxels into memory.
-  for (auto slab = start.z; slab < end.z; ++slab) {
-    for (auto row = start.y; row < end.y; ++row) {
-
-      // seek to start of row
-      m_infile->seekg(offset);
-
-      // read the bytes of current row
-      m_infile->read(blockBuffer, blockRowLength * sizeType);
-      blockBuffer += blockRowLength;
-
-      // offset of next row
-      offset = bd::to1D(start.x, row + 1, slab, m_slabDims.x, m_slabDims.y);
-      offset *= sizeType;
-    }
-  }
+  std::lock_guard<std::mutex> lock(m_readyForGpuLock);
+  readies = m_readyForGPU;
+  m_readyForGPU.clear();
 }
 
 
@@ -255,19 +416,23 @@ BlockCollection::initBlocksFromFileBlocks(std::vector<FileBlock> const &fileBloc
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//void
-//BlockCollection::filterBlocks(std::function<bool(Block const &)> notEmpty)
-//{
-//  m_nonEmptyBlocks.clear();
-//
-//  for (Block *b : m_blocks) {
-//    uint64_t idx{ b->fileBlock().block_index };
-//
-//    if (notEmpty(*b)) {
-//      m_nonEmptyBlocks.push_back(b);
-//    }
-//  }
-//}
+void
+BlockCollection::filterBlocks(std::function<bool(Block const &)> isEmpty)
+{
+  m_nonEmptyBlocks.clear();
+
+  for (Block *b : m_blocks) {
+    uint64_t idx{ b->fileBlock().block_index };
+
+    if (! isEmpty(*b)) {
+      b->visible(true);
+      m_nonEmptyBlocks.push_back(b);
+      m_man->asyncLoadBlock(b);
+    } else {
+      b->visible(false);
+    }
+  }
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -287,6 +452,7 @@ BlockCollection::filterBlocksByROVRange(double rov_min, double rov_max)
 //      bytes += b->fileBlock().data_bytes;
       b->visible(true);
       m_nonEmptyBlocks.push_back(b);
+      m_man->asyncLoadBlock(b);
     } else {
       b->visible(false);
     }
@@ -304,36 +470,38 @@ BlockCollection::updateBlockCache()
 
 
 ///////////////////////////////////////////////////////////////////////////////
-bool
-BlockCollection::initBlockTextures(std::string const &file, bd::DataType type)
-{
-  if (m_blocks.size() == 0)
-  {
-    bd::Warn() << "No blocks to initialize textures for.";
-    return true;
-  }
-
-  bool rval = false;
-  
-  switch (type) {
-    case DataType::UnsignedCharacter:
-      rval = do_initBlockTextures<unsigned char>(file);
-      break;
-    case DataType::UnsignedShort:
-      rval = do_initBlockTextures<unsigned short>(file);
-      break;
-    case DataType::Double:
-      rval = do_initBlockTextures<double>(file);
-      break;
-    case DataType::Float:
-    default:
-      rval = do_initBlockTextures<float>(file);
-      break;
-  }
-
-  return rval;
-
-}
+//bool
+//BlockCollection::initBlockTextures(std::string const &file, bd::DataType type)
+//{
+//  if (m_blocks.size() == 0)
+//  {
+//    bd::Warn() << "No blocks to initialize textures for.";
+//    return true;
+//  }
+//
+//  bool rval = false;
+//
+//
+//  
+//  switch (type) {
+//    case DataType::UnsignedCharacter:
+//      rval = do_initBlockTextures<unsigned char>(file);
+//      break;
+//    case DataType::UnsignedShort:
+//      rval = do_initBlockTextures<unsigned short>(file);
+//      break;
+//    case DataType::Double:
+//      rval = do_initBlockTextures<double>(file);
+//      break;
+//    case DataType::Float:
+//    default:
+//      rval = do_initBlockTextures<float>(file);
+//      break;
+//  }
+//
+//  return rval;
+//
+//}
 
 
 ///////////////////////////////////////////////////////////////////////////////

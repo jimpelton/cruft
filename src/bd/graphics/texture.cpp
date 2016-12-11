@@ -64,10 +64,10 @@ Texture::GenTextures3d(int num,
                        DataType t,
                        Format internal,
                        int w, int h, int d,
-                       std::vector<Texture> *v)
+                       std::vector<Texture *> *v)
 {
   v->clear();
-  v->resize(num, Texture{ Target::Tex3D });
+  v->resize(num); // , Texture{ Target::Tex3D });
 
   GLuint * texs{ new GLuint[num] };
   gl_check(glGenTextures(num, texs));
@@ -78,7 +78,9 @@ Texture::GenTextures3d(int num,
     gl_check(glTextureStorage3D(id, 1,
                                 gl_format[bd::ordinal(internal)],
                                 w, h, d));
-    (*v)[i].m_id = id;
+
+    (*v)[i] = new Texture{ Target::Tex3D };
+    (*v)[i]->m_id = id;
 
     gl_check(glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
     gl_check(glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, GL_LINEAR));

@@ -123,10 +123,10 @@ Block::avg() const
 
 
 ///////////////////////////////////////////////////////////////////////////////
-bd::Texture const &
-Block::texture() const
+Texture *
+Block::texture() 
 {
-  return *m_tex;
+  return m_tex;
 }
 
 
@@ -176,15 +176,14 @@ Block::status() const
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void const *
-Block::pixelData() const
+char* Block::pixelData() 
 {
   return m_pixelData;
 }
 
 
 void
-Block::pixelData(void const *data)
+Block::pixelData(char *data)
 {
   if (data) {
     // if we have texture data, we know we have CPU residency.
