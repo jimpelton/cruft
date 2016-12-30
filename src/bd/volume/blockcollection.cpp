@@ -7,73 +7,140 @@
 #include <bd/util/util.h>
 #include <bd/io/indexfile.h>
 
+
+
+
 namespace bd
 {
 
-//BlockLoader::BlockLoader(BlockMemoryManager *man, std::string const &rawFile, size_t maxBlocks, glm::vec2 const &slabdims)
-//  : m_man{ man }
-//  , m_loadQueue{ }
-//  , m_rawPath{ rawFile }
-//  , m_maxBlocks{ maxBlocks }
-//  , m_volumeSlabDims{ slabdims }
-//  , m_stopThread { false }
-//  , m_loadQueueLock{ }
-//  , m_loadQueueWait{ }
-//{
-//}
-//
-//
-//BlockLoader::~BlockLoader()
-//{
-//}
-//
+BlockLoader::BlockLoader(BlockMemoryManager *man,
+                         std::string const &filename,
+                         size_t maxblocks,
+                         glm::vec2 const &slabdims)
+{
 
+}
 
+BlockLoader::~BlockLoader()
+{
 
+}
 
-//bool 
-//BlockLoader::tryAddBlock(Block* b)
-//{
-//  std::lock_guard<std::mutex> lock(m_loadQueueLock);
-//  if (m_loadQueue.size() >= m_maxBlocks) {
-//    return false;
-//  }
-//
-//  m_loadQueue.push_back(b);
-//  m_loadQueueWait.notify_all();
-//
-//  return true;
-//}
-//
-//
-//void
-//BlockLoader::stop()
-//{
-//  m_stopThread = true;
-//}
-//
-//
-//Block *
-//BlockLoader::popBlock()
-//{
-//  std::lock_guard<std::mutex> lock(m_loadQueueLock);
-//  while(m_loadQueue.size() == 0 && !m_stopThread) {
-//    m_loadQueueWait.wait(m_loadQueueLock);
-//  }
-//
-//  if (m_loadQueue.size() == 0 && m_stopThread) {
-//    return nullptr;
-//  }
-//
-//  Block * r{ m_loadQueue.back() };
-//  m_loadQueue.pop_back();
-//
-//  return r;
-//}
-//
+int
+BlockLoader::operator()(std::string const &raw_name)
+{
+  std::ifstream raw{ raw_name, std::ios::binary };
+  if (! raw.is_open()) {
+    return -1;
+  }
+
+  std::list<Block *> gpu;
+  std::list<Block *> cpu;
+  std::vector<Texture *> texs;
+
+  while (! m_stopThread) {
+
+    Block *b{ popLoadQueue() };
+
+    if (!b) {
+      continue;
+    }
+
+    auto foundIt = std::find(gpu.begin(), gpu.end(), b);
+    if (foundIt == gpu.end()) {
+      foundIt = std::find(cpu.begin(), cpu.end(), b);
+      if (foundIt == cpu.end()) {
+
+        // not in cpu memory -- load from disk
+        // push to loadToGpuQueue.
+
+      } else {
+
+        // in cpu memory -- just push to loadToGpuQueue
+        if (gpu.size() == m_maxGpuBlocks) {
+
+        }
+        Texture *t{ popTexture() };
+
+        b->texture(t);
+        pushGPUReadyBlock(b);
+
+      }
+    } // else { in gpu memory already, do nothing. }
+
+    char const * data{ b->pixelData() };
+
+    fillBlockData(b, &raw);
+
+    pushGPUReadyBlock(b);
+  }
+
+  raw.close();
+
+  return 0;
+
+}
+
+Block*
+BlockLoader::popLoadQueue()
+{
+  std::lock_guard<std::mutex> lock(m_loadQueueLock);
+
+  while (m_loadQueue.size() == 0 && !m_stopThread) {
+    m_loadQueueWait.wait(m_loadQueueLock);
+  }
+
+  // keep going until no more blocks, even if a stop
+  // has been requested.
+  if (m_loadQueue.size() == 0 && m_stopThread) {
+    return nullptr;
+  }
+
+  Block * r{ m_loadQueue.back() };
+  m_loadQueue.pop();
+
+  return r;
+}
 
 void
-BlockMemoryManager::fillBlockData(Block *b, std::istream *infile) const
+BlockLoader::pushLoadQueue(Block* b)
+{
+  std::lock_guard<std::mutex> lock(m_loadQueueLock);
+
+  m_loadQueue.push(b);
+  m_loadQueueWait.notify_all();
+}
+
+Texture*
+BlockLoader::popTexture(std::vector<Texture*> &texs)
+{
+  if (texs.size() == 0) {
+    return nullptr;
+  }
+
+  Texture *t = texs.back();
+  texs.pop_back();
+
+  return t;
+}
+
+
+char*
+BlockLoader::popCPUBuffer(std::list<char*> &cpu)
+{
+  if (cpu.size() == 0) {
+    return nullptr;
+  }
+
+  char *r{ cpu.back() };
+  cpu.pop_back();
+
+  return r;
+}
+
+
+void
+BlockLoader::fillBlockData(Block *b, std::istream *infile) const
 {
   char * blockBuffer{ b->pixelData() };
 
@@ -119,13 +186,14 @@ BlockMemoryManager::BlockMemoryManager(size_t blockBytes,
   , m_maxCpuBlocks{ }
   , m_cpuMemBytes{ }
   , m_gpuMemBytes{ }
-  , m_gpu{ }
-  , m_cpu{ }
+//  , m_gpu{ }
+//  , m_cpu{ }
   , m_allBlocks{ blocks }
 {
   if (largestBlock.x > 0 && largestBlock.y > 0 && largestBlock.z > 0) {
 
-    size_t blockTextureBytes = largestBlock.x * largestBlock.y * largestBlock.z * sizeof(float);
+    size_t blockTextureBytes = largestBlock.x * largestBlock.y *
+        largestBlock.z * sizeof(float);
     m_maxGpuBlocks = gpuMem / blockTextureBytes;
     m_maxCpuBlocks = cpuMem / blockTextureBytes;
     m_cpuMemBytes = m_maxCpuBlocks * blockTextureBytes;
@@ -135,6 +203,8 @@ BlockMemoryManager::BlockMemoryManager(size_t blockBytes,
     Warn() << "Block size of zero given to the memory manager. Max blocks set to 0 (no blocks will be rendered)";
     m_maxGpuBlocks = 0;
   }
+
+
 
 }
 
@@ -146,52 +216,39 @@ BlockMemoryManager::~BlockMemoryManager()
 }
 
 
-int 
-BlockMemoryManager::threadFunction(std::istream *raw)
-{
 
-  while (! m_stopThread) {
-    Block *b{ popLoadQueue() };
-
-    if (!b) {
-      continue;
-    }
-
-    char const * data{ b->pixelData() };
-    
-    fillBlockData(b, raw);
-    
-    pushGPUReadyBlock(b);
-  }
-
-
-  return 0;
-}
 
 
 void
-BlockMemoryManager::init(DataType type, glm::u64vec3 const &bd)
+BlockMemoryManager::init(DataType type,
+                         glm::u64vec3 const &bd,
+                         std::string const &rawPath)
 {
   m_data = new char[m_cpuMemBytes];
   //TODO: fill m_cpu
 
-  Texture::GenTextures3d(m_maxGpuBlocks, type, Texture::Format::RED,
-                         int(bd.x), int(bd.y), int(bd.z), &m_texs);
+  Texture::GenTextures3d(static_cast<int>(m_maxGpuBlocks),
+                         type, Texture::Format::RED,
+                         int(bd.x), int(bd.y), int(bd.z),
+                         &m_texs);
+
+  m_loadThreadFuture =
+      std::async(&BlockMemoryManager::loadThreadFunc, rawPath, this);
 }
 
 
 void
-BlockMemoryManager::evictGpuNonVisible()
+BlockMemoryManager::evictGpuNonVisible(std::list<Block *> &gpu)
 {
   using iterator = std::list<Block*>::iterator;
-  iterator i = m_gpu.begin();
+  iterator i = gpu.begin();
 
-  while (i != m_gpu.end()) {
+  while (i != gpu.end()) {
     Block *b = *i;
     if (!b->visible()) {
       m_texs.push_back(b->texture());
       b->texture(nullptr);
-      i = m_gpu.erase(i);
+      i = gpu.erase(i);
     } else {
       ++i;
     }
@@ -199,29 +256,30 @@ BlockMemoryManager::evictGpuNonVisible()
 
 }
 
-void
-BlockMemoryManager::update(std::vector<Block*> &visibleBlocks)
-{
-  // evict blocks from gpu list.
-  if (m_gpu.size() >= m_maxGpuBlocks) {
-    evictGpuNonVisible();
-  }
-
-  // if there is still not enough room, evict enough blocks off the
-  // back to make room.
-  long long diff{ long long(visibleBlocks.size()) - long long(m_gpu.size()) };
-  
-  while (diff < 0) {
-    m_gpu.pop_back();
-    ++diff;
-  }
-
-  // load as many visible blocks into GPU as possible.
-  for (Block * b : visibleBlocks) {
-      preloadGpuData(b);
-      m_gpu.push_front(b);
-  }
-}
+//void
+//BlockMemoryManager::update(std::vector<Block*> &visibleBlocks)
+//{
+//  // evict blocks from gpu list.
+//  if (m_gpu.size() >= m_maxGpuBlocks) {
+//    evictGpuNonVisible(<#initializer#>);
+//  }
+//
+//  // if there is still not enough room, evict enough blocks off the
+//  // back to make room.
+//  long long diff{ static_cast<long long>(visibleBlocks.size()) -
+//                      static_cast<long long>(m_gpu.size()) };
+//
+//  while (diff < 0) {
+//    m_gpu.pop_back();
+//    ++diff;
+//  }
+//
+//  // load as many visible blocks into GPU as possible.
+//  for (Block * b : visibleBlocks) {
+//      preloadGpuData(b);
+//      m_gpu.push_front(b);
+//  }
+//}
 
 
 Block *
@@ -259,64 +317,64 @@ BlockMemoryManager::asyncLoadBlock(Block* b)
 }
 
 
-Texture* 
-BlockMemoryManager::popTexture()
-{
-  if (m_texs.size() == 0) {
-    return nullptr;
-  }
-
-  Texture *t = m_texs.back();
-  m_texs.pop_back();
-
-  return t;
-}
-
-
-char* 
-BlockMemoryManager::popCPUBuffer()
-{
-  if (m_cpu.size() == 0) {
-    return nullptr;
-  }
-
-  char *r{ m_cpu.back() };
-  m_cpu.pop_back();
-
-  return r;
-}
-
-
-Block* 
-BlockMemoryManager::popLoadQueue()
-{
-  std::lock_guard<std::mutex> lock(m_loadQueueLock);
-
-  while (m_loadQueue.size() == 0 && !m_stopThread) {
-    m_loadQueueWait.wait(m_loadQueueLock);
-  }
-
-  // keep going until no more blocks, even if a stop 
-  // has been requested.
-  if (m_loadQueue.size() == 0 && m_stopThread) {
-    return nullptr;
-  }
-
-  Block * r{ m_loadQueue.back() };
-  m_loadQueue.pop_back();
-
-  return r;
-}
+//Texture*
+//BlockMemoryManager::popTexture()
+//{
+//  if (m_texs.size() == 0) {
+//    return nullptr;
+//  }
+//
+//  Texture *t = m_texs.back();
+//  m_texs.pop_back();
+//
+//  return t;
+//}
+//
+//
+//char*
+//BlockMemoryManager::popCPUBuffer()
+//{
+//  if (m_cpu.size() == 0) {
+//    return nullptr;
+//  }
+//
+//  char *r{ m_cpu.back() };
+//  m_cpu.pop_back();
+//
+//  return r;
+//}
 
 
-void 
-BlockMemoryManager::pushLoadQueue(Block* b)
-{
-  std::lock_guard<std::mutex> lock(m_loadQueueLock);
+//Block*
+//BlockMemoryManager::popLoadQueue()
+//{
+//  std::lock_guard<std::mutex> lock(m_loadQueueLock);
+//
+//  while (m_loadQueue.size() == 0 && !m_stopThread) {
+//    m_loadQueueWait.wait(m_loadQueueLock);
+//  }
+//
+//  // keep going until no more blocks, even if a stop
+//  // has been requested.
+//  if (m_loadQueue.size() == 0 && m_stopThread) {
+//    return nullptr;
+//  }
+//
+//  Block * r{ m_loadQueue.back() };
+//  m_loadQueue.pop_back();
+//
+//  return r;
+//}
 
-  m_loadQueue.push_back(b);
-  m_loadQueueWait.notify_all();
-}
+
+//void
+//BlockMemoryManager::pushLoadQueue(Block* b)
+//{
+//  std::lock_guard<std::mutex> lock(m_loadQueueLock);
+//
+//  m_loadQueue.push_back(b);
+//  m_loadQueueWait.notify_all();
+//}
 
 
 void 

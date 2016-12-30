@@ -5,55 +5,68 @@
 #include <bd/io/indexfile.h>
 #include <bd/io/buffer.h>
 #include <bd/util/util.h>
+#include <bd/io/bufferpool.h>
 
 #include <functional>
 #include <list>
+#include <vector>
 #include <future>
-#include "bd/io/bufferpool.h"
 
 namespace bd
 {
 class BlockCollection;
 class BlockMemoryManager;
 
-//class BlockLoader
-//{
-//public:
-//  
-//  BlockLoader(BlockMemoryManager *man, 
-//              std::string const & filename,
-//              size_t maxblocks,
-//              glm::vec2 const &slabdims);
-//   
-//
-//  ~BlockLoader();
+class BlockLoader
+{
+public:
+
+  BlockLoader(BlockMemoryManager *man,
+              std::string const & filename,
+              size_t maxblocks,
+              glm::vec2 const &slabdims);
 
 
-//  int
-//  operator()(std::ifstream *raw);
-//
-//
-//  bool
-//  tryAddBlock(Block* b);
-//
-
-//  void
-//  stop();
+  ~BlockLoader();
 
 
-//private:
+  int
+  operator()(std::string const &raw_name);
 
 
-//  Block *
-//  popBlock();
+  void
+  pushLoadQueue(Block* b);
 
 
+  void
+  stop();
 
-//private:
 
-//  BlockMemoryManager *m_man;
-//
-//}; // class BlockLoader
+private:
+
+  Block *
+  popLoadQueue();
+
+  void
+  fillBlockData(Block *b, std::istream *infile) const;
+
+  char*
+  popCPUBuffer(std::list<char*> &);
+
+  Texture*
+  popTexture(std::vector<Texture*> &);
+
+private:
+
+  BlockMemoryManager *m_man;
+  std::queue<Block*> m_loadQueue;
+  std::mutex m_loadQueueLock;
+  std::condition_variable_any m_loadQueueWait;
+
+  std::atomic_bool m_stopThread;
+
+
+}; // class BlockLoader
 
 class BlockMemoryManager
 {
@@ -75,8 +88,7 @@ public:
                      size_t cpuMem,
                      glm::u64vec3 const &largestBlock,
                      glm::u64vec2 const &slabDims,
-                     std::vector<Block*> const &blocks
-                     );
+                     std::vector<Block*> const &blocks);
 
 
   ~BlockMemoryManager();
@@ -87,17 +99,19 @@ public:
 
   /// \brief Allocated cpu mem and create OpenGL textures.
   void
-  init(DataType type, glm::u64vec3 const &blockDims);
+  init(DataType type,
+         glm::u64vec3 const &blockDims,
+         std::string const &rawPath);
 
 
   void
-  evictGpuNonVisible();
+  evictGpuNonVisible(std::list<Block *> &gpu);
 
 
   /// Evict blocks from GPU if space is needed.
   /// Load blocks to GPU.
-  void
-  update(std::vector<Block*> &blocks);
+//  void
+//  update(std::vector<Block*> &blocks);
 
 
   /// \brief Assign block it's texture data and a vacant texture
@@ -115,11 +129,8 @@ public:
 
 private:
 
-  int
-  threadFunction(std::istream *raw);
-
-  void
-  fillBlockData(Block *b, std::istream *raw) const;
+//  void
+//  fillBlockData(Block *b, std::istream *raw) const;
 
 
   Texture*
@@ -137,10 +148,10 @@ private:
   Block*
   popLoadQueue();
 
-  void
-  pushLoadQueue(Block *b);
+//  void
+//  pushLoadQueue(Block *b);
 
-  /// Push a block that is loaded and ready for upload to GPU.
+  /// Push a block that is loaded to cpu mem and ready for upload to GPU.
   void
   pushGPUReadyBlock(Block *b);
 
@@ -161,23 +172,20 @@ private:
   /// Blocks resident in gpu memory (visible or non-visible).
   /// Thread access: 
   ///   1. Single thead
-  std::list<Block *> m_gpu;         
+//  std::list<Block *> m_gpu;
 
   /// Available CPU resident texture data buffers. 
   /// Thread access: 
   ///   1. Single thead
-  std::vector<char *> m_cpu;        
+//  std::vector<char *> m_cpu;
 
   /// Textures that can be used for blocks needing to be uploaded.
   /// Thread access: 
   ///   1. Single thead
-  std::vector<Texture *> m_texs;    ///< Textures available on the GPU.
+//  std::vector<Texture *> m_texs;    ///< Textures available on the GPU.
   std::vector<Block *> m_allBlocks; ///< All the blocks!
 
   char * m_data;  ///< CPU resident texture data.
-
-
-  std::string m_rawPath;
 
 
   /// Visible blocks not in GPU memory, but in cpu memory.
@@ -191,13 +199,13 @@ private:
   /// Thread access: 
   ///   1. Consumer: Load thread
   ///   2. Producer: some other thread
-  std::vector<Block *> m_loadQueue;
+//  std::vector<Block *> m_loadQueue;
   /// Load thread waits on m_loadQueue for new blocks.
-  std::mutex m_loadQueueLock;
-  std::condition_variable_any m_loadQueueWait;
+//  std::mutex m_loadQueueLock;
+//  std::condition_variable_any m_loadQueueWait;
 
   std::future<int> m_loadThreadFuture;
-  std::atomic_bool m_stopThread;
+//  std::atomic_bool m_stopThread;
 
 };
 
@@ -272,20 +280,6 @@ public:
 
 
 private:
-
-  /// \brief initialize block texture from the raw data at \c file.
-//  template <class Ty>
-//  bool
-//  do_initBlockTextures(std::string const &file);
-
-
-  /// \brief Fills \c blockBuffer with the data from \c infile corresponding to block (i,j,k).
-  /// \param b[in] The block for which data should be read.
-  /// \param infile[in] Source data
-  /// \param blockBuffer[out] Destination space for data.
-//  template <class Ty>
-//  void
-//  fillBlockData(Block const &b, std::istream &infile, Ty *blockBuffer) const;
 
   std::vector<Block *> m_blocks;
   std::vector<Block *> m_nonEmptyBlocks;
