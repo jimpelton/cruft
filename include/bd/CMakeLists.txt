@@ -16,7 +16,6 @@ add_subdirectory(volume)
 
 
 set(bd_HEADERS
-#    "${context_HEADERS}"
     "${datastructure_HEADERS}"
     "${io_HEADERS}"
     "${filter_HEADERS}"

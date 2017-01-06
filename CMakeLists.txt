@@ -73,9 +73,10 @@ include_directories(
         "${GLM_INCLUDE_DIR}"
         "${GLFW_INCLUDE_DIRS}"
         "${INTELTBB_INCLUDE_DIR}"
-        "${CMAKE_CURRENT_SOURCE_DIR}/include" )
+        )
 
-include_directories()
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
+
 
 add_subdirectory("include/bd")
 add_subdirectory("src/bd")
