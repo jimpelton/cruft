@@ -42,16 +42,16 @@ Block::~Block()
 {
 }
 
-
 void
-Block::evictYourself()
+Block::evictFromGpu()
 {
-
+  pixelData(nullptr);
+  visible(false);
 }
 
 
 void
-Block::uploadYourself()
+Block::sendToGpu()
 {
   m_tex->subImage3D(m_pixelData);
   m_status |= GPU_RES;
@@ -70,6 +70,11 @@ Block::visible() const
 void
 Block::visible(bool v)
 {
+  if (!v) {
+    m_status &= ~VISIBLE;
+  } else {
+    m_status |= VISIBLE;
+  }
   m_isVisible = v;
 }
 

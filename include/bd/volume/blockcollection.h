@@ -11,207 +11,12 @@
 #include <list>
 #include <vector>
 #include <future>
+#include <bd/datastructure/blockingqueue.h>
 
 namespace bd
 {
 class BlockCollection;
 //class BlockMemoryManager;
-
-class BlockLoader
-{
-public:
-
-  BlockLoader(/*BlockMemoryManager *man,*/
-              std::string const & filename,
-              size_t maxblocks,
-              glm::vec2 const &slabdims);
-
-
-  ~BlockLoader();
-
-
-  int
-  operator()(std::string const &raw_name, size_t maxGpuBlocks, size_t maxCpuBlocks);
-
-
-  void
-  pushLoadQueue(Block* b);
-
-
-  void
-  stop();
-
-
-private:
-
-  Block *
-  popLoadQueue();
-
-  void
-  fillBlockData(Block *b, std::istream *infile) const;
-
-  char*
-  popCPUBuffer(std::list<char*> &);
-
-  Texture*
-  popTexture(std::vector<Texture*> &);
-
-private:
-
-//  BlockMemoryManager *m_man;
-  std::queue<Block*> m_loadQueue;
-  std::mutex m_loadQueueLock;
-  std::condition_variable_any m_loadQueueWait;
-
-  std::atomic_bool m_stopThread;
-
-  size_t volumeSlabX,
-      volumeSlabY;
-
-
-}; // class BlockLoader
-
-//class BlockMemoryManager
-//{
-//
-//public:
-//
-//  /// \brief Manage memory and block texture cache on GPU.
-//  BlockMemoryManager() = delete;
-//
-//
-//  /// \brief Manage memory and block texture cache on GPU.
-//  /// \param blockBytes - bytes for single block
-//  /// \param gpuMem - bytes to use on GPU for block textures
-//  /// \param cpuMem - bytes to use on CPU for block texture cache
-//  /// \param slabDims - voxel dimensions of a slab in the volume
-//  /// \param blocks - block depth
-//  BlockMemoryManager(size_t blockBytes,
-//                     size_t gpuMem,
-//                     size_t cpuMem,
-//                     glm::u64vec3 const &largestBlock,
-//                     glm::u64vec2 const &slabDims,
-//                     std::vector<Block*> const &blocks);
-//
-//
-//  ~BlockMemoryManager();
-//
-//
-////  Block *
-////  operator[](size_t idx);
-//
-//  /// \brief Allocated cpu mem and create OpenGL textures.
-//  void
-//  init(DataType type,
-//         glm::u64vec3 const &blockDims,
-//         std::string const &rawPath);
-//
-//
-//  void
-//  evictGpuNonVisible(std::list<Block *> &gpu);
-//
-//
-//  /// Evict blocks from GPU if space is needed.
-//  /// Load blocks to GPU.
-////  void
-////  update(std::vector<Block*> &blocks);
-//
-//
-//  /// \brief Assign block it's texture data and a vacant texture
-//  ///        if necessary.
-//  /// \param blocks - load texture data for these blocks
-//  /// \param empty_bufs - put the data into these buffers
-//  /// \param infile - read raw data from this stream
-//  Block *
-//  preloadGpuData(Block *b);
-//
-//  /// \brief submit block for async loading.
-//  void
-//  asyncLoadBlock(Block *b);
-//
-//
-//private:
-//
-////  void
-////  fillBlockData(Block *b, std::istream *raw) const;
-//
-//
-//  Texture*
-//  popTexture();
-//
-//  /// Get a pointer to cpu memory that can be used for new block data.
-//  char*
-//  popCPUBuffer();
-//
-//
-//  void
-//  pushCPUBuffer(char *buf);
-//
-//  /// Grab a block from the non-cpu resident blocks.
-//  Block*
-//  popLoadQueue();
-//
-////  void
-////  pushLoadQueue(Block *b);
-//
-//  /// Push a block that is loaded to cpu mem and ready for upload to GPU.
-//  void
-//  pushGPUReadyBlock(Block *b);
-//
-//  /// Copy the blocks ready for CPU upload into \c readies
-//  void
-//  getGPUReadyBlocks(std::vector<Block *> &readies);
-//
-//private:
-//
-//  size_t m_cpuMemBytes;
-//  size_t m_gpuMemBytes;
-//  size_t m_maxGpuBlocks;
-//  size_t m_maxCpuBlocks;
-//  glm::u64vec2 m_volumeSlabDims;    ///< Dims for a slab in the volume.
-//
-//  BlockCollection *m_collection;
-//
-//  /// Blocks resident in gpu memory (visible or non-visible).
-//  /// Thread access:
-//  ///   1. Single thead
-////  std::list<Block *> m_gpu;
-//
-//  /// Available CPU resident texture data buffers.
-//  /// Thread access:
-//  ///   1. Single thead
-////  std::vector<char *> m_cpu;
-//
-//  /// Textures that can be used for blocks needing to be uploaded.
-//  /// Thread access:
-//  ///   1. Single thead
-////  std::vector<Texture *> m_texs;    ///< Textures available on the GPU.
-//  std::vector<Block *> m_allBlocks; ///< All the blocks!
-//
-//  char * m_data;  ///< CPU resident texture data.
-//
-//
-//  /// Visible blocks not in GPU memory, but in cpu memory.
-//  /// Thread access:
-//  ///   1. Consumer: some other thread (copies and clears the list)
-//  ///   2. Producer: Load thread pushes after loading data to cpu mem
-//  std::vector<Block *> m_readyForGPU;
-//  std::mutex m_readyForGpuLock;
-//
-//  /// Visible blocks that need loading from disk.
-//  /// Thread access:
-//  ///   1. Consumer: Load thread
-//  ///   2. Producer: some other thread
-////  std::vector<Block *> m_loadQueue;
-//  /// Load thread waits on m_loadQueue for new blocks.
-////  std::mutex m_loadQueueLock;
-////  std::condition_variable_any m_loadQueueWait;
-//
-//  std::future<int> m_loadThreadFuture;
-////  std::atomic_bool m_stopThread;
-//
-//};
-
 
 class BlockCollection
 {
@@ -256,8 +61,8 @@ public:
   void
   updateBlockCache();
 
-  bool
-  initBlockTextures(std::string const &rawFile, bd::DataType type);
+//  bool
+//  initBlockTextures(std::string const &rawFile, bd::DataType type);
 
 
   std::vector<Block *> const&

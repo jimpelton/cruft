@@ -52,8 +52,8 @@ public:
 
 
   /// \brief Return true if the read thread is still active.
-  bool
-  isReading() const;
+//  bool
+//  isReading() const;
 
 
   /// \brief Grab the next buffer data from the pool as soon as it is ready.

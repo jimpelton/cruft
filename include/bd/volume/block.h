@@ -40,11 +40,11 @@ public:
 
 
   void
-  evictYourself();
+  evictFromGpu();
 
 
   void
-  uploadYourself();
+  sendToGpu();
 
 
   bool
