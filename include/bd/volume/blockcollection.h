@@ -6,12 +6,12 @@
 #include <bd/io/buffer.h>
 #include <bd/util/util.h>
 #include <bd/io/bufferpool.h>
+#include <bd/datastructure/blockingqueue.h>
 
 #include <functional>
 #include <list>
 #include <vector>
 #include <future>
-#include <bd/datastructure/blockingqueue.h>
 
 namespace bd
 {

@@ -23,6 +23,8 @@ struct BLThreadData
   std::string filename;
 };
 
+/// Threaded load block data from disk. Blocks to load are put into a queue by
+/// a thread. 
 class BlockLoader
 {
 public:
@@ -44,11 +46,22 @@ public:
   void
   stop();
 
+  void
+  queueBlock(Block *block);
+
 
 private:
-  bd::BlockingQueue<Block *> m_loadQueue;
-  std::atomic_bool m_stopThread;
 
+  Block* 
+  waitNextBlock();
+
+  void
+  fillBlockData(Block *b, std::istream *infile, size_t vX, size_t vY) const;
+
+  std::queue<Block *> m_loadQueue;
+  std::atomic_bool m_stopThread;
+  std::mutex m_mutex;
+  std::condition_variable_any m_wait;
 
 }; // class BlockLoader
 
