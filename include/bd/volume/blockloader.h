@@ -46,6 +46,7 @@ public:
   void
   stop();
 
+
   void
   queueBlock(Block *block);
 
@@ -53,12 +54,13 @@ public:
 private:
 
   Block* 
-  waitNextBlock();
+  waitPopLoadQueue();
 
   void
   fillBlockData(Block *b, std::istream *infile, size_t vX, size_t vY) const;
 
   std::queue<Block *> m_loadQueue;
+  std::shared_ptr<Block*> m_gpuLoadQueue;
   std::atomic_bool m_stopThread;
   std::mutex m_mutex;
   std::condition_variable_any m_wait;

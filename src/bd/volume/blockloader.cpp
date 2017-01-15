@@ -16,6 +16,34 @@
 namespace bd
 {
 
+Block *
+removeLastInvisibleBlock(std::list<Block *> &list)
+{
+  auto rend = list.rend();
+  std::list<Block *>::reverse_iterator not_vis =
+      std::find_if(list.rbegin(), rend,
+                   [](Block *be) -> bool {
+                     return ( be->status() & Block::VISIBLE ) == 0;
+                   });
+
+  if (not_vis == rend) {
+    // no non-visible blocks in the cpu queue
+    // (only happens if size gpu == size cpu)
+    return nullptr;
+  }
+
+  auto byebye = list.erase(( not_vis.base()-- ));
+  return *byebye;
+}
+
+
+bool
+isInList(Block *b, std::list<Block*> &list) {
+  auto end = list.end();
+  auto found = std::find(list.begin(), end, b);
+  return found != end;
+}
+
 int
 BlockLoader::operator()(BLThreadData const &data)
 {
@@ -24,62 +52,80 @@ BlockLoader::operator()(BLThreadData const &data)
     return -1;
   }
 
+  // GPU blocks have valid pixelData ptrs and valid texture ptrs.
   std::list<Block *> gpu;
+  // CPU blocks have valid pixelData ptrs, and may have valid texture ptrs.
+  // (if they are visible).
   std::list<Block *> cpu;
   std::vector<Texture *> texs;
+  std::vector<char *> buffers;
 
   while (!m_stopThread) {
 
-    Block *b{ waitNextBlock() };
+    // get a block marked as visible
+    Block *b{ waitPopLoadQueue() };
 
     if (!b) {
       continue;
     }
 
-    auto found = std::find(gpu.begin(), gpu.end(), b);
-    if (found == gpu.end()) {
-
-      // not in GPU, check the CPU cache
-      found = std::find(cpu.begin(), cpu.end(), b);
-      if (found == cpu.end()) {
-
-        // not in the cpu cache, find a free buffer and load it.
-        // if no space in cpu cache, remove the last non-visible Block
+    if (! isInList(b, gpu)) {
+      // Not in GPU, check the CPU cache
+      if (! isInList(b, cpu)) {
+        // Not in CPU, or GPU
+        // b must be loaded to CPU.
+        char *pixData{ nullptr };
         if (cpu.size() == data.maxCpuBlocks) {
+          // Cpu full, evict a non-visible block
+          Block *notvis{ removeLastInvisibleBlock(cpu) };
+          if (notvis) {
+            pixData = notvis->pixelData();
+            notvis->pixelData(nullptr);
+          }
+        } else {
+          pixData = buffers.back();
+          buffers.pop_back();
+        }
 
-          std::list<Block*>::reverse_iterator not_vis = std::find_if(cpu.rbegin(), cpu.rend(),
-            [](Block *be) -> bool { return (be->status() & Block::VISIBLE) == 0; });
+        b->pixelData(pixData);
+        fillBlockData(b, &raw, data.slabDims[0], data.slabDims[1]);
+        cpu.push_front(b);
+        // put back to load queue so it can be processed for GPU.
+        pushLoadQueue(b);
 
-          if (not_vis == cpu.rend()) {
-            // no non-visible blocks in the cpu queue (only happens if size gpu == size cpu)
-            continue;
+      } // ! cpu list
+      else
+      {
+        // Is in cpu, but not in GPU
+        // Give b a texture so it will be uploaded to GPU
+        Texture *tex{ nullptr };
+        if (gpu.size() == data.maxGpuBlocks) {
+
+          // no textures, evict non-vis from gpu
+          Block *notvis{ removeLastInvisibleBlock(gpu) };
+          if (notvis) {
+            // nonvis block found, give it a texture
+            tex = notvis->texture();
+            notvis->texture(nullptr);
           }
 
-          cpu.erase(not_vis);
+        } else {
+
+          tex = texs.back();
+          texs.pop_back();
 
         }
+
+        b->texture(tex);
+        gpu.push_front(b);
+        //TODO: submitForGpuLoad(b);
       }
-      b->pixelData();
-      fillBlockData(b, &raw, data.slabDims[0], data.slabDims[1]);
+    } // ! gpu list
+    else
+    {
 
     }
-    else {
-      // in cpu memory -- just push to loadToGpuQueue
-      if (gpu.size() == data.maxGpuBlocks) {
-        // remove a non-gpu resident block from the end of the gpu list
-        // if no non-visible gpu resident blocks exist, then continue
-      }
-      //Texture *t{ popTexture(texs) };
-
-      //b->texture(t);
-      //        pushGPUReadyBlock(b);
-
-    }
-
-
-    //fillBlockData(b, &raw);
-  }
-  //    pushGPUReadyBlock(b);
+  } // while
 
   raw.close();
   bd::Dbg() << "Exiting block loader thread.";
@@ -88,7 +134,7 @@ BlockLoader::operator()(BLThreadData const &data)
 } // operator()
 
 bd::Block* 
-BlockLoader::waitNextBlock()
+BlockLoader::waitPopLoadQueue()
 {
   std::unique_lock<std::mutex> lock(m_mutex);
   while (m_loadQueue.size() == 0 && !m_stopThread) {
