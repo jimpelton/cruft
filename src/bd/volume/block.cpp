@@ -42,12 +42,12 @@ Block::~Block()
 {
 }
 
-void
-Block::evictFromGpu()
-{
-  pixelData(nullptr);
-  visible(false);
-}
+//void
+//Block::evictFromGpu()
+//{
+//  pixelData(nullptr);
+//  visible(false);
+//}
 
 
 void
@@ -128,7 +128,7 @@ Block::avg() const
 
 
 ///////////////////////////////////////////////////////////////////////////////
-Texture *
+bd::Texture *
 Block::texture() 
 {
   return m_tex;
@@ -137,7 +137,7 @@ Block::texture()
 
 ///////////////////////////////////////////////////////////////////////////////
 void
-Block::texture(Texture * tex)
+Block::texture(bd::Texture * tex)
 {
   if (!tex){
     // if we are removing our texture, we aren't gpu resident anymore.
@@ -145,6 +145,16 @@ Block::texture(Texture * tex)
   }
 
   m_tex = tex;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+bd::Texture *
+Block::removeTexture()   
+{
+  Texture *rval{ m_tex };
+  texture(nullptr);
+  return rval;
 }
 
 
@@ -197,7 +207,7 @@ Block::pixelData(char *data)
     m_status |= CPU_RES;
   } else {
     // data is nullptr, so block is not cpu or gpu res
-    m_status &= ~(CPU_RES & GPU_RES);
+    m_status &= ~(CPU_RES | GPU_RES);
   }
 
   m_pixelData = data;

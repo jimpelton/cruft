@@ -40,10 +40,6 @@ public:
 
 
   void
-  evictFromGpu();
-
-
-  void
   sendToGpu();
 
 
@@ -95,6 +91,8 @@ public:
   void
   texture(Texture *tex);
 
+  bd::Texture *
+  removeTexture();
 
   /// \brief Get a reference to this blocks model-to-world transform matrix.
   glm::mat4&
