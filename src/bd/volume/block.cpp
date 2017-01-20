@@ -53,8 +53,11 @@ Block::~Block()
 void
 Block::sendToGpu()
 {
-  m_tex->subImage3D(m_pixelData);
+  if (m_status & GPU_WAIT)
+    m_tex->subImage3D(m_pixelData);
+
   m_status |= GPU_RES;
+  m_status &= ~GPU_WAIT;
 }
 
 
@@ -141,7 +144,9 @@ Block::texture(bd::Texture * tex)
 {
   if (!tex){
     // if we are removing our texture, we aren't gpu resident anymore.
-    m_status &= ~GPU_RES;
+    m_status &= ~(GPU_RES | GPU_WAIT);
+  } else {
+    m_status |= GPU_WAIT;
   }
 
   m_tex = tex;
@@ -226,7 +231,8 @@ Block::to_string() const
      << ',' << m_fb.world_oigin[1]
      << ',' << m_fb.world_oigin[2] << "),\n"
          "Empty: " << (empty() ? "True" : "False") << "\n"
-         "Texture: " << m_tex << " }";
+         "Texture: " << m_tex << "\n"
+         "Status: " << std::ios::hex << m_status << " }";
 
   return ss.str();
 }

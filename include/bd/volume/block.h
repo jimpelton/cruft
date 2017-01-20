@@ -91,6 +91,8 @@ public:
   void
   texture(Texture *tex);
 
+  /// \brief Remove the Block's texture.
+  /// Same as calling texture(nullptr)
   bd::Texture *
   removeTexture();
 
