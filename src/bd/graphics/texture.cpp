@@ -67,7 +67,7 @@ Texture::GenTextures3d(int num,
                        std::vector<Texture *> *v)
 {
   v->clear();
-  v->resize(num); // , Texture{ Target::Tex3D });
+  v->resize(num);
 
   GLuint * texs{ new GLuint[num] };
   gl_check(glGenTextures(num, texs));
@@ -75,18 +75,21 @@ Texture::GenTextures3d(int num,
   // allocate on the gpu and set Texture's GL id.
   for(int i{ 0 }; i < num; ++i) {
     GLuint id{ texs[i] };
-    gl_check(glTextureStorage3D(id, 1,
+
+    gl_check(glBindTexture(GL_TEXTURE_3D, id));
+    gl_check(glTexStorage3D(GL_TEXTURE_3D, 1,
                                 gl_format[bd::ordinal(internal)],
                                 w, h, d));
 
-    (*v)[i] = new Texture{ Target::Tex3D };
-    (*v)[i]->m_id = id;
+    gl_check(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+    gl_check(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+    gl_check(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+    gl_check(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+    gl_check(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
 
-    gl_check(glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-    gl_check(glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-    gl_check(glTextureParameteri(id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
-    gl_check(glTextureParameteri(id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
-    gl_check(glTextureParameteri(id, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
+    Texture *t{ new Texture{ Target::Tex3D }};
+    t->m_id = id;
+    (*v)[i] = t;
   }
 
   delete[] texs;
