@@ -133,8 +133,16 @@ public:
   static const int CPU_RES = 0x08;
   static const int CPU_WAIT= 0x10;
 
-
-
+  /**
+    statuses:
+     0 -- CLEAR                        (Block is not in cpu/gpu cache's and is not visible)
+     1 -- VISIBLE                      (Visible, waiting to be loaded from disk)
+     9 -- VISIBLE & CPU_RES            (In cpu cache, waiting for texture, waiting in load queue)
+     8 -- CPU_RES                      (non-vis, but still in cpu cache)
+    10 -- GPU_RES & CPU_RES            (non-vis, but still in gpu/cpu cache)
+    11 -- VISIBLE & GPU_RES  & CPU_RES (Ready for drawing, has been uploaded to GPU)
+    13 -- VISIBLE & GPU_WAIT & CPU_RES (Has texture, waiting in render thread loadables queue)
+   */
 
 
 private:

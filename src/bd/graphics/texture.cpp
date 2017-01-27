@@ -87,9 +87,13 @@ Texture::GenTextures3d(int num,
     gl_check(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
     gl_check(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
 
-    Texture *t{ new Texture{ Target::Tex3D }};
-    t->m_id = id;
-    (*v)[i] = t;
+    Texture *tex{ new Texture{ Target::Tex3D }};
+    tex->m_id = id;
+    tex->m_dims = {w, h, d};
+    tex->m_dType = t;
+    tex->m_internal = internal;
+    tex->m_external = Format::RED;
+    (*v)[i] = tex;
   }
 
   delete[] texs;
@@ -153,6 +157,8 @@ Texture::genGLTex1d(float const *img, Format ity, Format ety, size_t w)
 
   m_target = Target::Tex1D;
   m_id = texId;
+  m_internal = ity;
+  m_external = ety;
 
   return texId;
 }
@@ -185,6 +191,9 @@ Texture::genGLTex2d(float *img, Format ity, Format ety, size_t w, size_t h)
 
   m_target = Target::Tex2D;
   m_id = texId;
+
+  m_internal = ity;
+  m_external = ety;
 
   return texId;
 }
@@ -222,6 +231,8 @@ Texture::genGLTex3d(Format ity, Format ety, size_t w, size_t h, size_t d,
 
   m_target = Target::Tex3D;
   m_id = texId;
+  m_internal = ity;
+  m_external = ety;
 
   return texId;
 }
