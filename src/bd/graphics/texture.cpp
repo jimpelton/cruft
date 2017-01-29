@@ -63,6 +63,7 @@ void
 Texture::GenTextures3d(int num,
                        DataType t,
                        Format internal,
+                       Format external,
                        int w, int h, int d,
                        std::vector<Texture *> *v)
 {
@@ -92,7 +93,7 @@ Texture::GenTextures3d(int num,
     tex->m_dims = {w, h, d};
     tex->m_dType = t;
     tex->m_internal = internal;
-    tex->m_external = Format::RED;
+    tex->m_external = external;
     (*v)[i] = tex;
   }
 

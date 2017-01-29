@@ -56,6 +56,7 @@ public:
   GenTextures3d(int num,
                 DataType t,
                 Format internal,
+                Format external,
                 int w, int h, int d,
                 std::vector<Texture *> *v);
 
