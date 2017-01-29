@@ -269,7 +269,8 @@ Texture::subImage3D(int xoff, int yoff, int zoff,
                     int w, int h, int d,
                     void const *pixelData) const
 {
-  gl_check(glTextureSubImage3D(m_id, 0,
+  bind();
+  gl_check(glTexSubImage3D(m_id, 0,
                       xoff, yoff, zoff, w, h, d,
                       gl_format[ordinal(m_external)],
                       pixelType(m_dType),
