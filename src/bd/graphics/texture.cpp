@@ -270,12 +270,38 @@ Texture::subImage3D(int xoff, int yoff, int zoff,
                     int w, int h, int d,
                     void const *pixelData) const
 {
-  bind();
-  gl_check(glTexSubImage3D(m_id, 0,
+
+  const GLint border{ 0 };
+  const GLint mipMapLevel{ 0 };
+
+  gl_check(glBindTexture(GL_TEXTURE_3D, m_id));
+
+  gl_check(glTexSubImage3D(GL_TEXTURE_3D, 0,
                       xoff, yoff, zoff, w, h, d,
                       gl_format[ordinal(m_external)],
                       pixelType(m_dType),
                       pixelData));
+
+//  gl_check(glTexImage3D(
+//      GL_TEXTURE_3D,
+//      mipMapLevel,                         // mip-map detail level
+//      gl_format[ordinal<Format>(m_internal)],  // internal format (how texture is to be stored by GL)
+//      w, h, d,                             // dimensions
+//      border,                              // border
+//      gl_format[ordinal<Format>(m_external)],     // pixel data format (R, RG, etc.)
+//      pixelType(m_dType),                       // pixel data type
+//      pixelData));                         // ptr to data
+
+  gl_check(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+  gl_check(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+  gl_check(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+  gl_check(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+  gl_check(glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
+
+  gl_check(glBindTexture(GL_TEXTURE_3D, 0));
+
+
+
 }
 
 
