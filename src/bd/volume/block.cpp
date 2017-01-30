@@ -142,11 +142,11 @@ Block::texture()
 void
 Block::texture(bd::Texture * tex)
 {
-  if (!tex){
+  if (tex){
+    m_status |= GPU_WAIT;
+  } else {
     // if we are removing our texture, we aren't gpu resident anymore.
     m_status &= ~(GPU_RES | GPU_WAIT);
-  } else {
-    m_status |= GPU_WAIT;
   }
 
   m_tex = tex;
