@@ -97,7 +97,7 @@ ColorTransferFunction::interpolate(double v) const
   }
 
   ColorKnot next{ _knots[1] };
-  int i = 1;
+  size_t i = 1;
   while (i < _knots.size() - 1) {
     if (v > next.s) {
       prev = next;

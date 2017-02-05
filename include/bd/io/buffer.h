@@ -12,10 +12,11 @@ template<class ElementType>
 class Buffer
 {
 public:
-  Buffer(ElementType *data, size_t nElems, size_t elementIndex = 0)
+  Buffer(ElementType *data, size_t nMaxElements, size_t elementIndex = 0)
       : m_data{ data }
         , m_elementIndexOffset{ elementIndex }
-        , m_maxElementLength{ nElems }
+        , m_elementLength{ 0 }
+        , m_maxElementLength{ nMaxElements }
   { }
 
   bool operator==(Buffer<ElementType> const  &rhs)

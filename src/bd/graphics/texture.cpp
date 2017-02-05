@@ -271,8 +271,8 @@ Texture::subImage3D(int xoff, int yoff, int zoff,
                     void const *pixelData) const
 {
 
-  const GLint border{ 0 };
-  const GLint mipMapLevel{ 0 };
+//  const GLint border{ 0 };
+//  const GLint mipMapLevel{ 0 };
 
   gl_check(glBindTexture(GL_TEXTURE_3D, m_id));
 

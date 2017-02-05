@@ -97,6 +97,7 @@ to_sizeType(DataType type)
     return sizeof(double);
 
   case DataType::Unknown:
+  default:
     Err() << "Unknown data type, returning size 0 from to_sizeType";
     return 0;
   }

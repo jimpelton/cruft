@@ -43,7 +43,7 @@ public:
     }
 
     // bytes to attempt to read from file.
-    long long const buffer_size_bytes{ static_cast<long long>(m_pool->bufferSizeElements() * sizeof(Ty)) };
+//    long long const buffer_size_bytes{ static_cast<long long>(m_pool->bufferSizeElements() * sizeof(Ty)) };
     size_t total_read_bytes{ 0 };
 
     Dbg() << "Starting reader loop.";
@@ -61,28 +61,23 @@ public:
       buf->setIndexOffset(total_read_bytes/sizeof(Ty));
       Ty *data = buf->getPtr();
 
-
-      m_is->read(reinterpret_cast<char*>(data), buffer_size_bytes);
+      m_is->read(reinterpret_cast<char*>(data), buf->getMaxNumElements());
       std::streamsize amount{ m_is->gcount() };
-
+      buf->setNumElements(amount / sizeof(Ty));
       
       // the last buffer filled may not be a full buffer, so resize!
-      if (amount < buffer_size_bytes) {
+      if (amount == 0) {
+      //Dbg() << "Reader read 0 bytes.";
+        m_pool->returnEmpty(buf);
+        break;
+      }
 
-        buf->setNumElements(amount/sizeof(Ty));
-        if (amount == 0) {
-//          Dbg() << "Reader read 0 bytes.";
-          m_pool->returnEmpty(buf);
-          break;
-        }
-
-      } // if (amount...)
-
-
-      m_pool->returnFull(buf);
 
       total_read_bytes += amount;
       std::cout << "\rRead " << total_read_bytes << " bytes." << std::flush;
+
+      m_pool->returnFull(buf);
+
     } // while
 
     std::cout << std::endl;
