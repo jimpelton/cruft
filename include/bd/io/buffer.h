@@ -15,7 +15,7 @@ public:
   Buffer(ElementType *data, size_t nElems, size_t elementIndex = 0)
       : m_data{ data }
         , m_elementIndexOffset{ elementIndex }
-        , m_elementLength{ nElems }
+        , m_maxElementLength{ nElems }
   { }
 
   bool operator==(Buffer<ElementType> const  &rhs)
@@ -40,6 +40,8 @@ public:
   ///       the number of bytes consumed by the elements in the buffer.
   size_t getNumElements() const { return m_elementLength; }
 
+  size_t getMaxNumElements() const { return m_maxElementLength; }
+
   /// \brief Get the element offset into the data of the first element in this buffer.
   /// If this buffer is being filled from some big block of data (for example, a large
   /// file on disk is being read into memory) then the buffer's index offset would be
@@ -53,6 +55,7 @@ private:
   ElementType *m_data;                   ///< Ptr to memory of this buffer.
   size_t m_elementIndexOffset;  ///< Starting index in data stream of this buffer.
   size_t m_elementLength;       ///< Length of buffer in elements.
+  size_t const m_maxElementLength;
 
 }; // Buffer
 }
