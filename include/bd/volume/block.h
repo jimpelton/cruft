@@ -56,6 +56,10 @@ public:
   fileBlock() const;
 
 
+  uint64_t
+  index() const;
+
+
   /// \brief Get the ijk location of this block.
   const glm::u64vec3 &
   ijk() const;

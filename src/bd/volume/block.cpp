@@ -90,6 +90,12 @@ Block::fileBlock() const
 }
 
 
+uint64_t
+Block::index() const
+{
+  return m_fb.block_index;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 const glm::u64vec3&
 Block::ijk() const
