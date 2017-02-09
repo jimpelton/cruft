@@ -164,6 +164,12 @@ IndexFile::getVolume()
 }
 
 
+std::string const &
+IndexFile::getPath()
+{
+  return m_fileName;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 bool
 IndexFile::readBinaryIndexFile()

@@ -84,6 +84,12 @@ public:
   getVolume();
 
 
+  /// \brief Get the path to the file.
+  /// \Note this is not guaranteed to be an absolute or relative path :( .
+  std::string const &
+  getPath();
+
+
   void
   init(DataType t);
 
