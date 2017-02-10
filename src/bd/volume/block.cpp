@@ -22,6 +22,7 @@ Block::Block(const glm::u64vec3& ijk, const FileBlock &fb)
   , m_origin{ fb.world_oigin[0], fb.world_oigin[1], fb.world_oigin[2] }
   , m_transform{ 1.0f }  // identity matrix
   , m_tex{ nullptr }
+  , m_pixelData{ nullptr }
   , m_status{ 0x0 }
   , m_isVisible{ false }
 {
@@ -124,6 +125,13 @@ void
 Block::empty(bool e)
 {
   m_fb.is_empty = (decltype(m_fb.is_empty)) e;
+
+  if (!e) {
+    m_status &= ~VISIBLE;
+  } else {
+    m_status |= VISIBLE;
+  }
+
 }
 
 
