@@ -62,24 +62,24 @@ Block::sendToGpu()
 
 
 ///////////////////////////////////////////////////////////////////////////////
-bool
-Block::visible() const
-{
-  return m_isVisible;
-}
+//bool
+//Block::visible() const
+//{
+//  return m_isVisible;
+//}
 
 
 ///////////////////////////////////////////////////////////////////////////////
-void
-Block::visible(bool v)
-{
-  if (!v) {
-    m_status &= ~VISIBLE;
-  } else {
-    m_status |= VISIBLE;
-  }
-  m_isVisible = v;
-}
+//void
+//Block::visible(bool v)
+//{
+//  if (!v) {
+//    m_status &= ~VISIBLE;
+//  } else {
+//    m_status |= VISIBLE;
+//  }
+//  m_isVisible = v;
+//}
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -117,6 +117,13 @@ bool
 Block::empty() const
 {
   return m_fb.is_empty == 1;
+}
+
+
+void
+Block::empty(bool e)
+{
+  m_fb.is_empty = (decltype(m_fb.is_empty)) e;
 }
 
 
