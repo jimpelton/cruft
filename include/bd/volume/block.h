@@ -130,12 +130,12 @@ public:
   std::string
   to_string() const;
 
-  static const int CLEAR   = 0x00;
-  static const int VISIBLE = 0x01;
-  static const int GPU_RES = 0x02;
-  static const int GPU_WAIT= 0x04;
-  static const int CPU_RES = 0x08;
-  static const int CPU_WAIT= 0x10;
+  static const int CLEAR     = 0x00;
+  static const int NOT_EMPTY = 0x01;
+  static const int GPU_RES   = 0x02;
+  static const int GPU_WAIT  = 0x04;
+  static const int CPU_RES   = 0x08;
+  static const int CPU_WAIT  = 0x10;
 
   /**
     statuses:

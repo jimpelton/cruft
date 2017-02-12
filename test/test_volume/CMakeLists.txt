@@ -7,7 +7,7 @@
 add_executable(test_volume test_volume_main.cpp
         test_VoxelOpacityFilter.cpp
         test_OpacityTransferFunction.cpp
-        test_BlockCollection.cpp)
+        test_Block.cpp)
 
 
 target_link_libraries(test_volume crufterly)

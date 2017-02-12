@@ -111,4 +111,4 @@ add_custom_target(install_${PROJECT_NAME}
 )
 endif()
 
-# add_subdirectory("test")
+add_subdirectory("test")
