@@ -240,6 +240,16 @@ Block::pixelData(char *data)
 }
 
 
+char *
+Block::removePixelData()
+{
+  char *p{ pixelData() };
+  pixelData(nullptr);
+
+  return p;
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 std::string
 Block::to_string() const

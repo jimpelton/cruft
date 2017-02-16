@@ -125,6 +125,8 @@ public:
   void
   pixelData(char *data);
 
+  char*
+  removePixelData();
 
   /// \brief String rep. of this blockeroo.
   std::string
