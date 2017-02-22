@@ -43,6 +43,12 @@ public:
   ~IndexFile();
 
 
+  bd::FileBlock const &
+  operator[](size_t idx) {
+    return m_fileBlocks[idx];
+  }
+
+
   /// \brief Write binary index file to ostream \c os.
   void
   writeBinaryIndexFile(std::ostream &os) const;
