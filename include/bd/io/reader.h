@@ -9,11 +9,10 @@
 #include <bd/io/buffer.h>
 #include <bd/datastructure/blockingqueue.h>
 #include <bd/log/logger.h>
+#include <bd/util/util.h>
 
 #include <fstream>
 #include <future>
-#include <bd/util/util.h>
-#include "indexfile.h"
 
 namespace bd
 {
@@ -23,14 +22,13 @@ class ReaderStrategyBase
 {
 public:
   ReaderStrategyBase()
-      : ReaderStrategyBase{ nullptr }
+      //: ReaderStrategyBase{ nullptr }
   {
   }
 
-  ReaderStrategyBase(std::istream *in)
+  ReaderStrategyBase()
       : m_bytes{ 0 }
 //      , _cpos{ 0}
-      , m_in{ in }
   {
   }
 
@@ -50,7 +48,7 @@ private:
   /// current offset in the file.
 //  uint64_t _cpos;
 
-  std::istream * m_in;
+  std::istream *m_in;
 
 };
 
@@ -105,7 +103,7 @@ public:
   read(char *buf, size_t blockIndex)
   {
     bd::FileBlock const &b = (*m_idx)[blockIndex];
-
+    fillBlockData(b, in(), m_vx, m_vy);
   }
 
 
@@ -113,22 +111,20 @@ public:
 private:
 
   void
-  fillBlockData(bd::FileBlock *b, std::istream *infile,
-                size_t sizeType, size_t vX, size_t vY) const
+  fillBlockData(bd::FileBlock const *b, std::istream *infile,
+                size_t vX, size_t vY) const
   {
 
     // block's dimensions in voxels
     glm::u64vec3 const be{ b->voxel_dims[0], b->voxel_dims[1], b->voxel_dims[2] };
-    // block dimensions in bytes
-    glm::u64vec3 const bytes{ be * sizeType };
 
     // start element = block index w/in volume * block size
-//    glm::u64vec3 const start{ b->ijk() * be };
+    glm::u64vec3 const start{ b->ijk() * be };
     // block end element = block voxel start voxelDims + block size
-//    glm::u64vec3 const end{ start + be };
+    glm::u64vec3 const end{ start + be };
 
 //    size_t const blockRowLength{ be.x };
-    //size_t const sizeType{ to_sizeType(b->texture()->dataType()) };
+//    size_t const sizeType{ to_sizeType(b->texture()->dataType()) };
 
     // byte offset into file to read from
     size_t offset{ b->data_offset };
@@ -159,6 +155,8 @@ private:
 
   std::shared_ptr<bd::IndexFile> m_idx;
 
+  size_t m_vx; ///< volume slab width;
+  size_t m_vy; ///< Volume slab height;
 
 };
 

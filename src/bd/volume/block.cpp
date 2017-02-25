@@ -18,7 +18,7 @@ namespace bd
 ///////////////////////////////////////////////////////////////////////////////
 Block::Block(const glm::u64vec3& ijk, const FileBlock &fb)
   : m_fb{ fb }
-  , m_ijk{ ijk }
+  , m_ijk{ fb.ijk_index[0], fb.ijk_index[1], fb.ijk_index[2] }
   , m_origin{ fb.world_oigin[0], fb.world_oigin[1], fb.world_oigin[2] }
   , m_transform{ 1.0f }  // identity matrix
   , m_tex{ nullptr }

@@ -96,6 +96,8 @@ public:
   getPath();
 
 
+  /// Initialize this indexfile with datatype t.
+  /// \param t
   void
   init(DataType t);
 

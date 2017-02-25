@@ -64,6 +64,7 @@ struct FileBlock
 
 
   uint64_t block_index;    ///< The 1D idx of this block (derived from the i,j,k block-grid coordinates).
+  uint64_t ijk_index[3];   ///< 3D idx of this block.
   uint64_t data_offset;    ///< Offset into the raw file that the block data starts.
   uint64_t data_bytes;     ///< Size in bytes of this blocks data.
   uint64_t voxel_dims[3];  ///< Dimensions of this block in voxels.

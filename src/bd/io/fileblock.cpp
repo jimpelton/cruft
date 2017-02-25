@@ -16,7 +16,9 @@ FileBlock::to_string() const
   std::stringstream ss;
   ss <<
      "   \"block_" << block_index << "\": {\n"
-      "      \"index\":" << block_index << ",\n"
+      "      \"index\": " << block_index << ",\n"
+      "      \"ijk_index\": [" << ijk_index[0] << ", " << ijk_index[1] << ", "
+     << ijk_index[2] << "],\n"
       "      \"data_offset\": " << data_offset << ",\n"
       "      \"data_bytes\": " << data_bytes << ",\n"
       "      \"voxel_dims\": [" << voxel_dims[0] << ", " << voxel_dims[1] << ", "

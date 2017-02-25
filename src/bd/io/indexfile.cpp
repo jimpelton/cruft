@@ -247,6 +247,9 @@ IndexFile::init(bd::DataType type)
 
         FileBlock blk;
         blk.block_index = bd::to1D(bxi, byj, bzk, bc.x, bc.y);
+        blk.ijk_index[0] = blkId.x;
+        blk.ijk_index[1] = blkId.y;
+        blk.ijk_index[2] = blkId.z;
         blk.data_offset = tySize *
           bd::to1D(startVoxel.x, startVoxel.y, startVoxel.z, vd.x, vd.y);
 
