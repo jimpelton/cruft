@@ -46,6 +46,7 @@ struct FileBlock
 
   FileBlock(const FileBlock& other)
       : block_index{ other.block_index }
+      , ijk_index{ other.ijk_index[0], other.ijk_index[1], other.ijk_index[2] }
       , data_offset{ other.data_offset }
       , data_bytes{ other.data_bytes }
       , voxel_dims{ other.voxel_dims[0], other.voxel_dims[1], other.voxel_dims[2] }

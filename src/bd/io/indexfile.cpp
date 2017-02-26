@@ -231,9 +231,9 @@ IndexFile::init(bd::DataType type)
 
 
   // Loop through all our blocks (identified by <bxi,byj,bzk>) and populate block fields.
-  for (auto bzk = 0ull; bzk < bc.z; ++bzk) {
-    for (auto byj = 0ull; byj < bc.y; ++byj) {
-      for (auto bxi = 0ull; bxi < bc.x; ++bxi) {
+  for (size_t bzk = 0; bzk < bc.z; ++bzk) {
+    for (size_t byj = 0; byj < bc.y; ++byj) {
+      for (size_t bxi = 0; bxi < bc.x; ++bxi) {
         // i,j,k block identifier
         glm::u64vec3 const blkId{ bxi, byj, bzk };
 
