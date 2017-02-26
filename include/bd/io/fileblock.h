@@ -28,6 +28,7 @@ struct FileBlock
 
   FileBlock()
       : block_index{ 0 }
+      , ijk_index{ 0 }
       , data_offset{ 0 }
       , data_bytes{ 0 }
       , voxel_dims{ 0 }
