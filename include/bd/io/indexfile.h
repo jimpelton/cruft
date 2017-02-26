@@ -46,10 +46,14 @@ public:
 
 
   bd::FileBlock const &
-  operator[](size_t idx) {
+  operator[](size_t idx) const {
     return m_fileBlocks[idx];
   }
 
+  bd::FileBlock &
+  operator[](size_t idx)  {
+    return m_fileBlocks[idx];
+  }
 
   /// \brief Write binary index file to ostream \c os.
   void
