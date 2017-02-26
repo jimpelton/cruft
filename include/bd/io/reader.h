@@ -7,6 +7,7 @@
 #define bd_reader_h
 
 #include <bd/io/buffer.h>
+#include <bd/io/indexfile.h>
 #include <bd/datastructure/blockingqueue.h>
 #include <bd/log/logger.h>
 #include <bd/util/util.h>
@@ -21,11 +22,6 @@ template<class Ty>
 class ReaderStrategyBase
 {
 public:
-  ReaderStrategyBase()
-      //: ReaderStrategyBase{ nullptr }
-  {
-  }
-
   ReaderStrategyBase()
       : m_bytes{ 0 }
 //      , _cpos{ 0}
@@ -58,8 +54,8 @@ class LinearReader: public ReaderStrategyBase<Ty>
 {
 
 public:
-  LinearReader(std::istream *in)
-    : ReaderStrategyBase{ in }
+  LinearReader()
+    : ReaderStrategyBase{  }
   { }
 
   virtual ~LinearReader()
@@ -83,12 +79,12 @@ class BlockReader : public ReaderStrategyBase<Ty>
 public:
 
   BlockReader()
-      : ReaderStrategyBase{ nullptr }
+      : ReaderStrategyBase{ }
   { }
 
 
   BlockReader(std::istream *in, std::shared_ptr<bd::IndexFile> idx)
-      : ReaderStrategyBase(in)
+      : ReaderStrategyBase()
   {
   }
 
@@ -102,7 +98,7 @@ public:
   long
   read(char *buf, size_t blockIndex)
   {
-    bd::FileBlock const &b = (*m_idx)[blockIndex];
+    bd::FileBlock const *b = &(*m_idx)[blockIndex];
     fillBlockData(b, in(), m_vx, m_vy);
   }
 
@@ -119,11 +115,13 @@ private:
     glm::u64vec3 const be{ b->voxel_dims[0], b->voxel_dims[1], b->voxel_dims[2] };
 
     // start element = block index w/in volume * block size
-    glm::u64vec3 const start{ b->ijk() * be };
+    glm::u64vec3 const start{
+        glm::u64vec3{ b->ijk_index[0], b->ijk_index[1], b->ijk_index[2] } * be };
+
     // block end element = block voxel start voxelDims + block size
     glm::u64vec3 const end{ start + be };
 
-//    size_t const blockRowLength{ be.x };
+    size_t const row_length{ be.x };
 //    size_t const sizeType{ to_sizeType(b->texture()->dataType()) };
 
     // byte offset into file to read from
@@ -141,12 +139,12 @@ private:
         infile->seekg(offset);
 
         // read the bytes of current row
-        infile->read(temp, bytes.x);
-        temp += bytes.x;
+        infile->read(temp, row_length);
+        temp += row_length;
 
         // offset of next row
         offset = bd::to1D(start.x, row + 1, slab, vX, vY);
-        offset *= sizeType;
+        offset *= sizeof(Ty);
       }
     }
   }
