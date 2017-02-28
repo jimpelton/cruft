@@ -18,11 +18,11 @@ namespace bd
 /// \brief Classifies individual voxels as relevant or irrelevant.
 ///        The classification is saved in the voxel relevance map.
 template<class Ty, class Function, class Storage>
-class ParallelForVoxelClassifier
+class ParallelForVoxelRelevance
 {
 public:
 
-  ParallelForVoxelClassifier(Storage &map,
+  ParallelForVoxelRelevance(Storage &map,
                           Buffer<Ty> const *buf,
                           Function const &relevant)
       : m_map{ &map }
@@ -31,14 +31,14 @@ public:
   {
   }
 
-  ParallelForVoxelClassifier(ParallelForVoxelClassifier const &rhs, tbb::split)
+  ParallelForVoxelRelevance(ParallelForVoxelRelevance const &rhs, tbb::split)
       : m_map{ rhs.m_map }
       , m_buf{ rhs.m_buf }
       , m_isRel{ rhs.m_isRel }
   {
   }
 
-  ~ParallelForVoxelClassifier()
+  ~ParallelForVoxelRelevance()
   {
   }
 
