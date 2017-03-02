@@ -26,23 +26,23 @@ ColorTransferFunction::ColorTransferFunction()
 //  load(filePath);
 //}
 
-bool
+int
 ColorTransferFunction::load(std::string const &filename)
 {
   bd::Dbg() << "Reading CTF: " << filename;
-  bool success{ false };
+//  bool success{ false };
   _knots.clear();
 
   size_t lineNum{ 0 };
   size_t numKnots{ 0 };
   try {
     std::ifstream file;
-    file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+//    file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 
     file.open(filename.c_str(), std::ifstream::in);
     if (!file.is_open()) {
       bd::Err() << "Couldn't open CTF file: " << filename;
-      return false;
+      return -1;
     }
 
     // number of entries/lines in the scalar opacity file.
@@ -62,13 +62,13 @@ ColorTransferFunction::load(std::string const &filename)
     }
 
     if (lineNum < numKnots) {
-      throw std::runtime_error("Not enough knots");
-    } else {
-      bd::Info() << "Read " << numKnots << " scalar-color knots.";
+      bd::Err() << "Not enough color transfer knots!";
+      return -1;
+//      throw std::runtime_error("Not enough knots");
     }
 
     file.close();
-    success = true;
+//    success = true;
   }
   catch (std::ios_base::failure &e) {
     bd::Err() << "Problem reading CTF file: " << e.what();
@@ -79,7 +79,7 @@ ColorTransferFunction::load(std::string const &filename)
   catch(std::exception &e) {
     Err() << "Exception caught in " << __func__ << ": " << e.what();
   }
-  return success;
+  return numKnots;
 }
 
 

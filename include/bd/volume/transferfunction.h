@@ -15,24 +15,32 @@
 namespace bd
 {
 class OpacityTransferFunction;
+
 class ColorTransferFunction;
+
 struct ColorKnot;
 struct OpacityKnot;
 
-std::ostream& 
+
+std::ostream &
 operator<<(std::ostream &os, bd::OpacityTransferFunction const &otf);
 
-std::ostream& 
+
+std::ostream &
 operator<<(std::ostream &os, bd::ColorTransferFunction const &otf);
 
-std::ostream& 
+
+std::ostream &
 operator<<(std::ostream &os, bd::Color const &c);
 
-std::ostream& 
+
+std::ostream &
 operator<<(std::ostream &os, bd::ColorKnot const &knot);
 
-std::ostream& 
+
+std::ostream &
 operator<<(std::ostream &os, bd::OpacityKnot const &knot);
+
 
 /// \brief A knot in an opacity transfer function
 struct OpacityKnot
@@ -51,31 +59,35 @@ struct OpacityKnot
   bool
   operator!=(OpacityKnot const &rhs) const
   {
-    return !(*this == rhs);
+    return !( *this == rhs );
   }
 
 
-  bool operator<(OpacityKnot const &rhs) const
+  bool
+  operator<(OpacityKnot const &rhs) const
   {
     return s < rhs.s;
   }
 
 
-  bool operator>(OpacityKnot const &rhs) const
+  bool
+  operator>(OpacityKnot const &rhs) const
   {
     return rhs < *this;
   }
 
 
-  bool operator<=(OpacityKnot const &rhs) const
+  bool
+  operator<=(OpacityKnot const &rhs) const
   {
-    return !(*this > rhs);
+    return !( *this > rhs );
   }
 
 
-  bool operator>=(OpacityKnot const &rhs) const
+  bool
+  operator>=(OpacityKnot const &rhs) const
   {
-    return !(*this < rhs);
+    return !( *this < rhs );
   }
 
 
@@ -107,31 +119,35 @@ struct ColorKnot
   bool
   operator!=(ColorKnot const &rhs) const
   {
-    return !(*this == rhs);
+    return !( *this == rhs );
   }
 
 
-  bool operator<(ColorKnot const &rhs) const
+  bool
+  operator<(ColorKnot const &rhs) const
   {
     return s < rhs.s;
   }
 
 
-  bool operator>(ColorKnot const &rhs) const
+  bool
+  operator>(ColorKnot const &rhs) const
   {
     return rhs < *this;
   }
 
 
-  bool operator<=(ColorKnot const &rhs) const
+  bool
+  operator<=(ColorKnot const &rhs) const
   {
-    return !(*this > rhs);
+    return !( *this > rhs );
   }
 
 
-  bool operator>=(ColorKnot const &rhs) const
+  bool
+  operator>=(ColorKnot const &rhs) const
   {
-    return !(*this < rhs);
+    return !( *this < rhs );
   }
 
 
@@ -150,8 +166,14 @@ template<class Knot, class Value>
 class TransferFunction
 {
 public:
-  TransferFunction(){ }
-  ~TransferFunction() { }
+  TransferFunction()
+  {
+  }
+
+
+  ~TransferFunction()
+  {
+  }
 //  TransferFunction(TransferFunction const &) = default;
 //  TransferFunction(TransferFunction &&) = default;
 
@@ -163,18 +185,26 @@ public:
   /// \param filename The path to the text file that has the scalar transfer function.
   /// \throws std::runtime_error If the file could not be parsed.
   /// \throws std::ifstream::failure If there was a problem reading the file.
-  virtual bool
+  virtual int
   load(std::string const &filename) = 0;
+
 
   virtual Value
   interpolate(double scalar) const = 0;
 
+
   size_t
-  getNumKnots() { return _knots.size(); }
+  getNumKnots()
+  {
+    return _knots.size();
+  }
 
 
   std::vector<Knot> const &
-  getKnotsVector() const { return _knots; }
+  getKnotsVector() const
+  {
+    return _knots;
+  }
 
 
   virtual std::string
@@ -182,8 +212,8 @@ public:
   {
     std::stringstream ss;
     ss << '{';
-    for (auto &k : _knots) { 
-      ss << k << ", "; 
+    for (auto &k : _knots) {
+      ss << k << ", ";
     }
     ss << '}';
 
@@ -210,8 +240,10 @@ public:
 
   OpacityTransferFunction();
 
-  bool
+
+  int
   load(std::string const &filename) override;
+
 
   double
   interpolate(double v) const override;
@@ -236,8 +268,9 @@ public:
 //  ColorTransferFunction(ColorTransferFunction const &o) = default;
 //  ColorTransferFunction(ColorTransferFunction &&o) = default;
 
-  bool
-  load(std::string const & filename) override;
+  int
+  load(std::string const &filename) override;
+
 
   Color
   interpolate(double scalar) const override;

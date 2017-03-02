@@ -19,23 +19,23 @@ OpacityTransferFunction::OpacityTransferFunction()
 }
 
 
-bool
+int
 OpacityTransferFunction::load(std::string const &filename)
 {
   bd::Dbg() << "Reading OTF: " << filename;
-  bool success{ false };
+//  bool success{ false };
   _knots.clear();
 
   size_t lineNum{ 0 };
   size_t numKnots{ 0 };
   try {
     std::ifstream file;
-    file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+//    file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 
     file.open(filename.c_str(), std::ifstream::in);
     if (!file.is_open()) {
       bd::Err() << "Couldn't open OTF file: " << filename;
-      return false;
+      return -1;
     }
 
     // number of entries/lines in the scalar opacity file.
@@ -55,13 +55,13 @@ OpacityTransferFunction::load(std::string const &filename)
     }
 
     if (lineNum < numKnots) {
-      throw std::runtime_error("Not enough knots");
-    } else {
-      bd::Info() << "Read " << numKnots << " scalar-opacity knots.";
+      bd::Err() << "Not enough knots!";
+      return -1;
+//      throw std::runtime_error("Not enough transfer function knots");
     }
 
     file.close();
-    success = true;
+//    success = true;
 
   } catch (std::ios_base::failure &e) {
     bd::Err() << "Problem reading OTF file: " << e.what();
@@ -73,7 +73,7 @@ OpacityTransferFunction::load(std::string const &filename)
     Err() << "Exception caught in " << __func__ << ": " << e.what();
   }
 
-  return success;
+  return numKnots;
 }
 
 
