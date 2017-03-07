@@ -76,4 +76,6 @@ TEST_CASE("interpolate returns interpolated values", "[otf][interpolate]")
   val = otf.interpolate(0.55);
   REQUIRE(val == 1.0);
 
+  val = otf.interpolate(0.05);
+
 }

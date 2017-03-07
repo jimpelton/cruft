@@ -78,35 +78,67 @@ OpacityTransferFunction::load(std::string const &filename)
 
 
 double
-OpacityTransferFunction::interpolate(double v) const
+OpacityTransferFunction::interpolate(double v_norm) const
 {
+  if (v_norm < 0 || v_norm > 1.0) {
+    throw std::runtime_error("v_norm out of range.");
+  }
+
   if(_knots.size() == 0) {
     return 0;
   }
 //  assert(v <= 1.0);
-  OpacityKnot prev{ _knots[0] };
+//  OpacityKnot prev{ _knots[0] };
+//
+//  if (v_norm == prev.s) {
+//    return prev.alpha;
+//  }
 
-  if (v == prev.s) {
-    return prev.alpha;
+
+  if (v_norm <= _knots[0].s) {
+    return _knots[0].alpha;
+  }
+  if (v_norm >= _knots.back().s) {
+    return _knots.back().alpha;
   }
 
-  OpacityKnot next{ _knots[1] };
-  size_t i = 1;
-  while (i < _knots.size() - 1) {
-    if (v > next.s) {
-      prev = next;
-      i += 1;
-      next = _knots[i];
-    } else {
-      break;
-    }
+  size_t const max_idx{ _knots.size() - 1 };
+  size_t idx{ static_cast<size_t>((v_norm * max_idx) + 0.5) };
+  if (idx > max_idx) {
+    idx = max_idx;
+  } else if (idx == 0) {
+    //TODO: This maybe is not correct (rewrite your tests, man!)
+    idx = 1;
   }
 
-  if (v == next.s) {
-    return next.alpha;
+  if (v_norm == _knots[idx].s) {
+    return _knots[idx].alpha;
   }
 
-  return prev.alpha * ( 1.0 - v ) + next.alpha * v;
+  return _knots[idx-1].alpha * (1.0 - v_norm) + _knots[idx].alpha * v_norm;
+
+
+
+//  OpacityKnot prev{ _knots[idx] };
+//  OpacityKnot next{ _knots[idx+1] };
+
+//  OpacityKnot next{ _knots[1] };
+//  size_t i = 1;
+//  while (i < _knots.size() - 1) {
+//    if (v > next.s) {
+//      prev = next;
+//      i += 1;
+//      next = _knots[i];
+//    } else {
+//      break;
+//    }
+//  }
+
+//  if (v == next.s) {
+//    return next.alpha;
+//  }
+
+//  return prev.alpha * ( 1.0 - v ) + next.alpha * v;
 
 }
 

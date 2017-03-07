@@ -84,37 +84,73 @@ ColorTransferFunction::load(std::string const &filename)
 
 
 Color
-ColorTransferFunction::interpolate(double v) const
+ColorTransferFunction::interpolate(double v_norm) const
 {
+
+  if (v_norm < 0 || v_norm > 1.0) {
+    throw std::runtime_error("v_norm out of range.");
+  }
+
   if (_knots.size() == 0){
     return {0, 0, 0};
   }
-//  assert(v <= 1.0);
-  ColorKnot prev{ _knots[0] };
 
-  if (v == prev.s) {
-    return prev.c;
+//  ColorKnot prev{ _knots[0] };
+
+//  if (v == prev.s) {
+//    return prev.c;
+//  }
+
+
+
+  if (v_norm <= _knots[0].s) {
+    return _knots[0].c;
+  }
+  if (v_norm >= _knots.back().s) {
+    return _knots.back().c;
   }
 
-  ColorKnot next{ _knots[1] };
-  size_t i = 1;
-  while (i < _knots.size() - 1) {
-    if (v > next.s) {
-      prev = next;
-      i += 1;
-      next = _knots[i];
-    } else {
-      break;
-    }
+
+  size_t const max_idx{ _knots.size() - 1 };
+  size_t idx{ static_cast<size_t>((v_norm * max_idx) + 0.5) };
+  if (idx > max_idx) {
+    idx = max_idx;
+  } else if (idx == 0) {
+    //TODO: This maybe is not correct (rewrite your tests, man!)
+    idx = 1;
   }
 
-  if (v == next.s) {
-    return next.c;
+  if (v_norm == _knots[idx].s) {
+    return _knots[idx].c;
   }
 
-  return { prev.c.r * ( 1.0 - v ) + next.c.r * v,
-           prev.c.g * ( 1.0 - v ) + prev.c.r * v,
-           prev.c.b * ( 1.0 - v ) + prev.c.b * v };
+  auto prev = _knots[idx-1];
+  auto next = _knots[idx];
+
+  return { prev.c.r * ( 1.0 - v_norm ) + next.c.r * v_norm,
+           prev.c.g * ( 1.0 - v_norm ) + next.c.r * v_norm,
+           prev.c.b * ( 1.0 - v_norm ) + next.c.b * v_norm };
+
+
+//  ColorKnot next{ _knots[1] };
+//  size_t i = 1;
+//  while (i < _knots.size() - 1) {
+//    if (v > next.s) {
+//      prev = next;
+//      i += 1;
+//      next = _knots[i];
+//    } else {
+//      break;
+//    }
+//  }
+//
+//  if (v == next.s) {
+//    return next.c;
+//  }
+
+//  return { prev.c.r * ( 1.0 - v ) + next.c.r * v,
+//           prev.c.g * ( 1.0 - v ) + prev.c.r * v,
+//           prev.c.b * ( 1.0 - v ) + prev.c.b * v };
 
 }
 
