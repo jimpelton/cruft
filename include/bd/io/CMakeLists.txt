@@ -13,7 +13,5 @@ set(io_HEADERS
         "${CMAKE_CURRENT_SOURCE_DIR}/indexfile.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/indexfileheader.h"
         "${CMAKE_CURRENT_SOURCE_DIR}/readerworker.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/reader.h"
-        "${CMAKE_CURRENT_SOURCE_DIR}/writer.h"
         PARENT_SCOPE
         )
