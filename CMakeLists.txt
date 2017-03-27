@@ -5,7 +5,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 #### P r o j e c t   D e f i n i t i o n  ##################################
-project(crufterly CXX)
+project(cruft CXX)
 
 #### T h i r d   P a r t y  ################################################
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake
@@ -21,18 +21,11 @@ set(INTELTBB_INCLUDE_DIR ${${INTELTBB_INCLUDE_DIR}} CACHE PATH
 	"Intel's thread building blocks includes path"
 )
 
-if(NOT DEFINED INTELTBB_DEBUG_LIBRARY)
-    set(INTELTBB_DEBUG_LIBRARY "")
+if(NOT DEFINED INTELTBB_LIBRARY)
+    set(INTELTBB_LIBRARY "")
 endif()
-set(INTELTBB_DEBUG_LIBRARY ${${INTELTBB_DEBUG_LIBRARY}} CACHE FILEPATH 
-	"Intel's thread building blocks library (debug version)"
-)
-
-if(NOT DEFINED INTELTBB_RELEASE_LIBRARY)
-    set(INTELTBB_RELEASE_LIBRARY "")
-endif()
-set(INTELTBB_RELEASE_LIBRARY ${${INTELTBB_RELEASE_LIBRARY}} CACHE FILEPATH 
-	"Intel's thread building blocks library"
+set(INTELTBB_LIBRARY ${${INTELTBB_DEBUG_LIBRARY}} CACHE FILEPATH 
+	"Intel's thread building blocks library."
 )
 
 #### Graphics & Math Libraries ################################################
@@ -43,9 +36,6 @@ find_package(GLM REQUIRED)
 
 #### Platform Specifics ################################################
 # Windows requires a few extra definitions.
-if (WIN32)
-    add_definitions(-DNOMINMAX)     #Disable the overrides of std::min/max in Windows.h
-endif (WIN32)
 
 if (UNIX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
@@ -56,17 +46,17 @@ if (UNIX)
               -fdiagnostics-color=auto"
     )
 
-    include_directories("${OPENGL_INCLUDE_DIR}")
 endif (UNIX)
+
+
+#Link statically to GLEW
 
 # Resource directory is for test code only.
 set(CRUFT_RESOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/res")
-#message("Cruft resource directory: ${CRUFT_RESOURCE_DIR}")
 
-# Enables gl_check() macros.
-add_definitions(-DBD_DEBUG)
-#Link statically to GLEW
-add_definitions(-DGLEW_STATIC)
+if (UNIX)
+    include_directories("${OPENGL_INCLUDE_DIR}")
+endif()
 
 include_directories(
         "${GLEW_INCLUDE_DIR}"
@@ -81,21 +71,33 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 add_subdirectory("include/bd")
 add_subdirectory("src/bd")
 
+
 # bd_SOURCES and bd_HEADERS are created in subdirectories and passed up
 # to this cmake scope--kinda dirty i think.
-add_library(crufterly STATIC "${bd_SOURCES}" "${bd_HEADERS}" )
-target_link_libraries(crufterly
+add_library(cruft STATIC "${bd_SOURCES}" "${bd_HEADERS}" )
+target_link_libraries(cruft
     "${GLEW_LIBRARIES}"
     "${OPENGL_LIBRARIES}"
     "${GLFW_LIBRARIES}"
-    debug "${INTELTBB_DEBUG_LIBRARY}"
-    optimized "${INTELTBB_RELEASE_LIBRARY}"
-)
+    "${INTELTBB_LIBRARY}"
+    )
+
+add_definitions(-DGLEW_STATIC)
+
+if (WIN32)
+    add_definitions(-DNOMINMAX)     #Disable the overrides of std::min/max in Windows.h
+endif (WIN32)
+
+if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    # Enables gl_check() macros.
+    add_definitions(-DBD_DEBUG)
+    set_target_properties(cruft PROPERTIES ARCHIVE_OUTPUT_NAME "cruftd")
+endif()
 
 
 # Install the static library.
-install(TARGETS crufterly ARCHIVE
-        DESTINATION "lib/bd/static/${CMAKE_BUILD_TYPE}/")
+install(TARGETS cruft ARCHIVE
+        DESTINATION "lib/bd/")
 
 # Install the headers.
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/bd/"

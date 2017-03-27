@@ -9,4 +9,4 @@ add_executable(test_io test_io_main.cpp
         )
 
 
-target_link_libraries(test_io crufterly)
+target_link_libraries(test_io cruft)

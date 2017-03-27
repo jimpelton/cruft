@@ -10,4 +10,4 @@ add_executable(test_volume test_volume_main.cpp
         test_Block.cpp)
 
 
-target_link_libraries(test_volume crufterly)
+target_link_libraries(test_volume cruft)
