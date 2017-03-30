@@ -35,7 +35,7 @@ public:
   /// \brief Create IndexFile from an existing binary index file.
   /// \returns A unique_ptr to the IndexFile created or nullptr on failure.
   static std::unique_ptr<IndexFile>
-  fromBinaryIndexFile(std::string const &path);
+  fromBinaryIndexFile(std::string const &path, bool &ok);
 
 
   /// \brief Create an empty IndexFile with empty header.

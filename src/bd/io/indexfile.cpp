@@ -17,20 +17,25 @@ namespace bd
 
 ///////////////////////////////////////////////////////////////////////////////
 std::unique_ptr<IndexFile>
-IndexFile::fromBinaryIndexFile(std::string const &path)
+IndexFile::fromBinaryIndexFile(std::string const &path, bool &ok)
 {
   std::unique_ptr<IndexFile> idxfile{ new IndexFile() };
   idxfile->m_fileName = path;
-  bool success = idxfile->readBinaryIndexFile();
-  if (!success) {
-    //delete idxfile;
-    return nullptr;
+
+  if (path.empty()) {
+    ok = false;
+    return idxfile;
   }
 
-  if (idxfile->getHeader().version != VERSION) {
+  ok = idxfile->readBinaryIndexFile();
+  if (! ok) {
+    return idxfile;
+  }
+
+  ok = idxfile->getHeader().version != VERSION;
+  if (! ok) {
     Err() << "The index file provided is the wrong version! You should regenerate the"
       "index file.";
-    return nullptr;
   }
 
   return idxfile;
