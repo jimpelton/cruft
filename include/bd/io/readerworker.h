@@ -1,10 +1,9 @@
+
 #ifndef bd_readerworker_h
 #define bd_readerworker_h
 
-//#include <bd/io/bufferedreader.h>
 #include <bd/io/bufferpool.h>
 #include <bd/io/buffer.h>
-
 #include <bd/log/logger.h>
 
 #include <fstream>

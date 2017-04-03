@@ -32,7 +32,7 @@ IndexFile::fromBinaryIndexFile(std::string const &path, bool &ok)
     return idxfile;
   }
 
-  ok = idxfile->getHeader().version != VERSION;
+  ok = (idxfile->getHeader().version == VERSION);
   if (! ok) {
     Err() << "The index file provided is the wrong version! You should regenerate the"
       "index file.";
