@@ -1,5 +1,5 @@
-#ifndef bbox_h__
-#define bbox_h__
+#ifndef bd_wireframebox_h__
+#define bd_wireframebox_h__
 
 
 #include <glm/glm.hpp>
@@ -23,4 +23,4 @@ public:
 
 } // namspace bd
 
-#endif
+#endif // ! bd_wireframebox_h__
