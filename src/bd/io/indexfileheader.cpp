@@ -92,6 +92,8 @@ operator<<(std::ostream &os, bd::IndexFileHeader const &h)
          "  \"version\": " << h.version << ",\n"
          "  \"header_length\": " << h.header_length << ",\n"
          "  \"data_type\": \"" << bd::to_string(IndexFileHeader::getType(h)) << "\",\n"
+         "  \"raw_file\": \"" << std::string(h.raw_file) << "\",\n"
+         "  \"tf_file:\": \"" << std::string(h.tf_file) << "\"\n"
          "}";
 
   return os;

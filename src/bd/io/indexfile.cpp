@@ -34,7 +34,7 @@ IndexFile::fromBinaryIndexFile(std::string const &path, bool &ok)
 
   ok = (idxfile->getHeader().version == VERSION);
   if (! ok) {
-    Err() << "The index file provided is the wrong version! You should regenerate the"
+    Err() << "The index file provided is the wrong version! You should regenerate the "
       "index file.";
   }
 
@@ -86,7 +86,7 @@ IndexFile::writeBinaryIndexFile(std::string const &outpath) const
   std::ofstream os;
   os.open(outpath, std::ios::binary);
   if (!os.is_open()) {
-    std::cerr << outpath << " could not be opened." << std::endl;
+    Err() << outpath << " could not be opened." << std::endl;
     return;
   }
 
@@ -169,10 +169,50 @@ IndexFile::getVolume()
 }
 
 
+///////////////////////////////////////////////////////////////////////////////
 std::string const &
 IndexFile::getPath()
 {
   return m_fileName;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+std::string
+IndexFile::getRawFileName()
+{
+  return m_header.raw_file;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+std::string
+IndexFile::getTFFileName()
+{
+  return m_header.tf_file;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+void
+IndexFile::setRawFileName(std::string const &f)
+{
+  size_t lenght = f.size() > 256 ? 256 : f.size();
+  for (int i = 0; i < lenght; ++i){
+    m_header.raw_file[i] = f[i];
+  }
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+void
+IndexFile::setTFFileName(std::string const &f)
+{
+  int flen{ static_cast<int>(f.size()) };
+  int lenght = flen > 256 ? 256 : flen;
+  for (int i = 0; i < lenght; ++i){
+    m_header.tf_file[i] = f[i];
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

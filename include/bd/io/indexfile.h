@@ -20,7 +20,7 @@ namespace
 ///< Magic number for the file (ascii 'SV')
 uint16_t const MAGIC{ 7376 };
 /// \brief The version of the IndexFile
-uint16_t const VERSION{ 12 };
+uint16_t const VERSION{ 13 };
 /// \brief Length of the IndexFileHeader in bytes.
 uint32_t const HEAD_LEN{ sizeof(IndexFileHeader) };
 } // namespace
@@ -101,6 +101,17 @@ public:
   std::string const &
   getPath();
 
+  std::string
+  getRawFileName();
+
+  std::string
+  getTFFileName();
+
+  void
+  setRawFileName(std::string const &);
+
+  void
+  setTFFileName(std::string const &);
 
   /// Initialize this indexfile with datatype t.
   /// \param t

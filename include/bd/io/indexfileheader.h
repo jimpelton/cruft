@@ -46,6 +46,11 @@ struct IndexFileHeader
   uint32_t header_length;
   /// \brief Int representing the data type of elements (char, short, etc).
   uint32_t dataType;
+  /// \brief The raw file associated with the index file this header is part of.
+  char raw_file[256];
+  /// \brief The transfer func associated with the index file this header is part of.
+  char tf_file[256];
+
 
 //  /// \brief Num blocks along each coordinate axis.
 //  uint64_t numblocks[3];
