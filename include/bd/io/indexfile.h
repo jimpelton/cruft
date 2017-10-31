@@ -95,6 +95,9 @@ public:
   bd::Volume&
   getVolume();
 
+  void
+  setVolume(bd::Volume const &);
+
 
   /// \brief Get the path to the file.
   /// \Note this is not guaranteed to be an absolute or relative path :( .

@@ -21,10 +21,10 @@ set(INTELTBB_INCLUDE_DIR ${${INTELTBB_INCLUDE_DIR}} CACHE PATH
 	"Intel's thread building blocks includes path"
 )
 
-if(NOT DEFINED INTELTBB_LIBRARY)
-    set(INTELTBB_LIBRARY "")
+if(NOT DEFINED INTELTBB_LIBRARY_DIRS)
+    set(INTELTBB_LIBRARY_DIRS "")
 endif()
-set(INTELTBB_LIBRARY ${${INTELTBB_DEBUG_LIBRARY}} CACHE FILEPATH 
+set(INTELTBB_LIBRARY_DIRS ${${INTELTBB_LIBRARY_DIRS}} CACHE PATH 
 	"Intel's thread building blocks library."
 )
 
@@ -66,7 +66,7 @@ include_directories(
         )
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
-
+link_directories("${INTELTBB_LIBRARY_DIRS}")
 
 add_subdirectory("include/bd")
 add_subdirectory("src/bd")
@@ -79,7 +79,8 @@ target_link_libraries(cruft
     "${GLEW_LIBRARIES}"
     "${OPENGL_LIBRARIES}"
     "${GLFW_LIBRARIES}"
-    "${INTELTBB_LIBRARY}"
+    debug tbb_debug
+    optimized tbb
     )
 
 add_definitions(-DGLEW_STATIC)
@@ -88,11 +89,15 @@ if (WIN32)
     add_definitions(-DNOMINMAX)     #Disable the overrides of std::min/max in Windows.h
 endif (WIN32)
 
-if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-    # Enables gl_check() macros.
-    add_definitions(-DBD_DEBUG)
-    set_target_properties(cruft PROPERTIES ARCHIVE_OUTPUT_NAME "cruftd")
-endif()
+# Enables gl_check() macros.
+
+add_compile_options(
+    "$<$<CONFIG:Debug>:BD_DEBUG>"
+    "$<$<CONFIG:Release>:>"
+    )
+set_target_properties(cruft PROPERTIES ARCHIVE_OUTPUT_NAME_DEBUG "cruftd")
+set_target_properties(cruft PROPERTIES ARCHIVE_OUTPUT_NAME_RELEASE "cruft")
+
 
 
 # Install the static library.

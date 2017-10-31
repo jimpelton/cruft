@@ -7,14 +7,14 @@
 namespace bd
 {
 const std::array<glm::vec4, 8> WireframeBox::vertices{
-  glm::vec4(-0.5, -0.5, -0.5, 0.5),
-  glm::vec4(0.5, -0.5, -0.5, 0.5),
-  glm::vec4(0.5, 0.5, -0.5, 0.5),
-  glm::vec4(-0.5, 0.5, -0.5, 0.5),
-  glm::vec4(-0.5, -0.5, 0.5, 0.5),
-  glm::vec4(0.5, -0.5, 0.5, 0.5),
-  glm::vec4(0.5, 0.5, 0.5, 0.5),
-  glm::vec4(-0.5, 0.5, 0.5, 0.5)
+  glm::vec4(-0.5, -0.5, -0.5, 1.0),
+  glm::vec4(0.5, -0.5, -0.5, 1.0),
+  glm::vec4(0.5, 0.5, -0.5, 1.0),
+  glm::vec4(-0.5, 0.5, -0.5, 1.0),
+  glm::vec4(-0.5, -0.5, 0.5, 1.0),
+  glm::vec4(0.5, -0.5, 0.5, 1.0),
+  glm::vec4(0.5, 0.5, 0.5, 1.0),
+  glm::vec4(-0.5, 0.5, 0.5, 1.0)
 };
 
 const std::array<unsigned short, 16> WireframeBox::elements{
