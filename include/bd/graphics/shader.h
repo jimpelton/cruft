@@ -170,10 +170,10 @@ public:
 
   void setUniform(const char* param, const glm::vec3& val);
 
-  void setUniform(const char* param, float val);
+  void setUniform(const char* param, glm::f32 val);
   //    void setUniform(const std::string &param, const Texture &tex);
 
-  void setUniform(const char* param, int val);
+  void setUniform(const char* param, glm::i32 val);
 
   ///////////////////////////////////////////////////////////////////////////////
   /// \brief Get the id of the spec'd param.

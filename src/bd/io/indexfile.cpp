@@ -277,7 +277,7 @@ IndexFile::init(bd::DataType type)
     " Vol dim: "
     << vd.x << ", " << vd.y << ", " << vd.z <<
     " Block dim: "
-    << ", " << wd.x << ", " << wd.y << ", " << wd.z;
+    << wd.x << ", " << wd.y << ", " << wd.z;
 
 
   // Loop through all our blocks (identified by <bxi,byj,bzk>) and populate block fields.
@@ -292,7 +292,8 @@ IndexFile::init(bd::DataType type)
         // block center in world coordinates
         glm::vec3 const blkOrigin{ (worldLoc + (worldLoc + wd)) * 0.5f };
 
-        // voxel start of block within volume
+        // voxel start of block within volume 
+        // (ijk index times the voxel dimensions of each block)
         glm::u64vec3 const startVoxel{ blkId * bd };
 
         FileBlock blk;
@@ -321,6 +322,8 @@ IndexFile::init(bd::DataType type)
       }
     }
   }
+  
+  m_fileBlocks.shrink_to_fit();
 
   initHeader(type);
 

@@ -51,8 +51,11 @@ VertexArrayObject::create()
 
 ///////////////////////////////////////////////////////////////////////////////
 unsigned int
-VertexArrayObject::addVbo(const float *verts, size_t length,
-                          unsigned elements_per_vertex, unsigned attr_idx, Usage usage)
+VertexArrayObject::addVbo(const float *verts, 
+                          size_t length,
+                          unsigned elements_per_vertex, 
+                          unsigned attr_idx, 
+                          Usage usage)
 {
   unsigned int vboId{0};
 
@@ -64,7 +67,9 @@ VertexArrayObject::addVbo(const float *verts, size_t length,
 ///////////////////////////////////////////////////////////////////////////////
 unsigned int
 VertexArrayObject::addVbo(const std::vector<float> &verts,
-                          unsigned int elements_per_vertex, unsigned int attr_idx, Usage usage)
+                          unsigned int elements_per_vertex, 
+                          unsigned int attr_idx, 
+                          Usage usage)
 {
   unsigned int vboId{0};
 
@@ -75,7 +80,8 @@ VertexArrayObject::addVbo(const std::vector<float> &verts,
 
 ///////////////////////////////////////////////////////////////////////////////
 unsigned int
-VertexArrayObject::addVbo(const std::vector<glm::vec3> &verts, unsigned int attr_idx,
+VertexArrayObject::addVbo(const std::vector<glm::vec3> &verts, 
+                          unsigned int attr_idx,
                           Usage usage)
 {
   const int elements_per_vertex{3};
@@ -91,7 +97,8 @@ VertexArrayObject::addVbo(const std::vector<glm::vec3> &verts, unsigned int attr
 ///////////////////////////////////////////////////////////////////////////////
 unsigned int
 VertexArrayObject::addVbo(const std::vector<glm::vec4> &verts,
-                          unsigned int attr_idx, Usage usage)
+                          unsigned int attr_idx, 
+                          Usage usage)
 {
   const int elements_per_vertex{4};
   unsigned int vboId{0};
@@ -105,7 +112,8 @@ VertexArrayObject::addVbo(const std::vector<glm::vec4> &verts,
 
 ///////////////////////////////////////////////////////////////////////////////
 unsigned int
-VertexArrayObject::setIndexBuffer(std::vector<unsigned short> const &indices, Usage u)
+VertexArrayObject::setIndexBuffer(std::vector<unsigned short> const &indices,
+                                  Usage u)
 {
   unsigned int iboId{0};
 
@@ -216,7 +224,7 @@ VertexArrayObject::gen_vbo(const float *verts,
 ///////////////////////////////////////////////////////////////////////////////
 unsigned int
 VertexArrayObject::gen_ibo(unsigned short const *indices,
-                           unsigned int length,
+                           size_t length,
                            Usage usage)
 {
   unsigned int ibo{0};

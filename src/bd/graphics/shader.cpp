@@ -305,7 +305,7 @@ ShaderProgram::setUniform(const char* param, const glm::vec3& val)
 
 ///////////////////////////////////////////////////////////////////////////////
 void
-ShaderProgram::setUniform(const char* param, float val)
+ShaderProgram::setUniform(const char* param, glm::f32 val)
 {
   unsigned int loc = getUniformLocation(param);
   //  gl_check(glUniform1f(m_programId, loc, val));
@@ -321,7 +321,7 @@ ShaderProgram::setUniform(const char* param, float val)
 //}
 
 void
-ShaderProgram::setUniform(const char* param, int val)
+ShaderProgram::setUniform(const char* param, glm::i32 val)
 {
   unsigned int loc = getUniformLocation(param);
   //  gl_check(glUniform1f(m_programId, loc, val));

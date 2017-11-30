@@ -92,7 +92,7 @@ endif (WIN32)
 # Enables gl_check() macros.
 
 add_compile_options(
-    "$<$<CONFIG:Debug>:BD_DEBUG>"
+    "$<$<CONFIG:Debug>:-DBD_DEBUG>"
     "$<$<CONFIG:Release>:>"
     )
 set_target_properties(cruft PROPERTIES ARCHIVE_OUTPUT_NAME_DEBUG "cruftd")

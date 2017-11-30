@@ -19,7 +19,8 @@
 namespace bd
 {
 
-/// \brief Counts the number of empty voxels in each block.
+/// \brief Sums the relevance values in each block.
+///
 /// Template parameter \c Function should be a callable type that
 /// takes a Ty as a parameter and returns a bool. The callable type
 /// should return true if the value it recieves is relevant, and

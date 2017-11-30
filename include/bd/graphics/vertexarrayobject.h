@@ -131,7 +131,7 @@ private:
                        unsigned int attr_idx, Usage usage);
 
   // index buffer object helper
-  unsigned int gen_ibo(unsigned short const *indices, unsigned int length, Usage usage);
+  unsigned int gen_ibo(unsigned short const *indices, size_t length, Usage usage);
 
 
   ///////////////////////////////////////////////////////////////////////////////

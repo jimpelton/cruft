@@ -21,8 +21,8 @@ namespace bd
 /// \return The ordinal value as a std::size_t
 ///////////////////////////////////////////////////////////////////////////////
 template <class T>
-BD_CONSTEXPR
-std::size_t
+constexpr
+unsigned int
 ordinal(T t)
 {
   return static_cast<unsigned int>(t);

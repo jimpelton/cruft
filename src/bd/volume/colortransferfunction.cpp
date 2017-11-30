@@ -34,7 +34,7 @@ ColorTransferFunction::load(std::string const &filename)
   _knots.clear();
 
   size_t lineNum{ 0 };
-  size_t numKnots{ 0 };
+  int numKnots{ 0 };
   try {
     std::ifstream file;
 //    file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
