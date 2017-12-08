@@ -171,7 +171,7 @@ public:
   }
 
 
-  ~TransferFunction()
+  virtual ~TransferFunction()
   {
   }
 //  TransferFunction(TransferFunction const &) = default;
@@ -239,12 +239,14 @@ class OpacityTransferFunction
 public:
 
   OpacityTransferFunction();
+  virtual ~OpacityTransferFunction();
 
 
   int
   load(std::string const &filename) override;
 
 
+  /// \throws std::runtime_error if v is not in [0.0..1.0]
   double
   interpolate(double v) const override;
 
@@ -265,6 +267,7 @@ class ColorTransferFunction
 {
 public:
   ColorTransferFunction();
+  virtual ~ColorTransferFunction();
 //  ColorTransferFunction(ColorTransferFunction const &o) = default;
 //  ColorTransferFunction(ColorTransferFunction &&o) = default;
 
@@ -272,6 +275,7 @@ public:
   load(std::string const &filename) override;
 
 
+  /// \throws std::runtime_error if v is not in [0.0..1.0]
   Color
   interpolate(double scalar) const override;
 

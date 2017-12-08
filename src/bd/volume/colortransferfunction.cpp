@@ -21,7 +21,11 @@ ColorTransferFunction::ColorTransferFunction()
 {
 }
 
-//ColorTransferFunction::ColorTransferFunction(std::string const &filePath)
+ColorTransferFunction::~ColorTransferFunction()
+{
+}
+
+  //ColorTransferFunction::ColorTransferFunction(std::string const &filePath)
 //{
 //  load(filePath);
 //}
@@ -87,21 +91,13 @@ Color
 ColorTransferFunction::interpolate(double v_norm) const
 {
 
-  if (v_norm < 0 || v_norm > 1.0) {
+  if (v_norm < 0.0 || v_norm > 1.0) {
     throw std::runtime_error("v_norm out of range.");
   }
 
   if (_knots.size() == 0){
     return {0, 0, 0};
   }
-
-//  ColorKnot prev{ _knots[0] };
-
-//  if (v == prev.s) {
-//    return prev.c;
-//  }
-
-
 
   if (v_norm <= _knots[0].s) {
     return _knots[0].c;
@@ -111,25 +107,30 @@ ColorTransferFunction::interpolate(double v_norm) const
   }
 
 
+  ColorKnot k0{ };
+  ColorKnot k1{ };
+
   size_t const max_idx{ _knots.size() - 1 };
   size_t idx{ static_cast<size_t>((v_norm * max_idx) + 0.5) };
+
   if (idx > max_idx) {
-    idx = max_idx;
-  } else if (idx == 0) {
-    //TODO: This maybe is not correct (rewrite your tests, man!)
-    idx = 1;
+    k0 = _knots[max_idx - 1];
+    k1 = _knots[max_idx];
+  }
+  else if (idx == 0) {
+    k0 = _knots[0];
+    k1 = _knots[1];
+  }
+  else {
+    k0 = _knots[idx - 1];
+    k1 = _knots[idx];
   }
 
-  if (v_norm == _knots[idx].s) {
-    return _knots[idx].c;
-  }
-
-  auto prev = _knots[idx-1];
-  auto next = _knots[idx];
-
-  return { prev.c.r * ( 1.0 - v_norm ) + next.c.r * v_norm,
-           prev.c.g * ( 1.0 - v_norm ) + next.c.r * v_norm,
-           prev.c.b * ( 1.0 - v_norm ) + next.c.b * v_norm };
+  
+  double d = (v_norm - k0.s) / (k1.s - k0.s);
+  return { k0.c.r * ( 1.0 - d ) + k1.c.r * d,
+           k0.c.g * ( 1.0 - d ) + k1.c.r * d,
+           k0.c.b * ( 1.0 - d ) + k1.c.b * d };
 
 
 //  ColorKnot next{ _knots[1] };
